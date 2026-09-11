@@ -1,0 +1,84 @@
+{
+  "id": "com.atelier.store",
+  "name": "ATELIER — Luxury Accessories & Bespoke EDC",
+  "short_name": "ATELIER",
+  "description": "Handcrafted luxury smart wallets, Tuscan leather cardholders, and aerospace-grade accessories in Egypt.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121214",
+  "theme_color": "#000000",
+  "lang": "ar",
+  "dir": "auto",
+  "categories": [
+    "shopping",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "All Products",
+      "short_name": "Catalog",
+      "description": "Browse the entire Atelier collection",
+      "url": "/collections/all?source=pwa_shortcut",
+      "icons": [{ "src": "/favicon.png", "sizes": "64x64" }]
+    },
+    {
+      "name": "Shopping Bag",
+      "short_name": "Cart",
+      "description": "View items in your bag",
+      "url": "/cart?source=pwa_shortcut",
+      "icons": [{ "src": "/favicon.png", "sizes": "64x64" }]
+    },
+    {
+      "name": "Track Order",
+      "short_name": "Track",
+      "description": "Real-time order tracker",
+      "url": "/track-order?source=pwa_shortcut",
+      "icons": [{ "src": "/favicon.png", "sizes": "64x64" }]
+    },
+    {
+      "name": "My Account",
+      "short_name": "Account",
+      "description": "Manage your profile and orders",
+      "url": "/account?source=pwa_shortcut",
+      "icons": [{ "src": "/favicon.png", "sizes": "64x64" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Atelier Luxury Store"
+    }
+  ]
+}

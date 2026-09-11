@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Title</title>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" type="text/css" href="org/nebulium/tabs/tabs.css" />
+	
+	<link rel="stylesheet" type="text/css" href="org/phobetor/editor.css" />
+	<link rel="stylesheet" type="text/css" href="org/phobetor/lang.css" />
+	
+	<script type="text/javascript" src="libs/jquery/jquery-2.1.3.min.js"></script>
+	
+	<script type="text/javascript" src="editor.js"></script> 
+
+
+</head>
+<body>
+        <!-- navigation -->
+        <nav id="tabs" class="n-tabs">
+                <ul>
+                        <li data-tab="tabFile">File</li>
+                        <li data-tab="tabScenarioScenario" class="n-hidden">Scenario</li>
+                        <li data-tab="tabScenarioPlayers" class="n-hidden">Players</li>
+                        <li data-tab="tabScenarioCampaign" class="n-hidden">Campaign</li>
+                        <li data-tab="tabScenarioUnits" class="n-hidden">Units</li>
+                        <li data-tab="tabScenarioOfficers" class="n-hidden">Officers</li>
+                        <li data-tab="tabScenarioEvents" class="n-hidden">Events</li>
+                        <li data-tab="tabScenarioMap" class="n-hidden">Map</li>
+                        <li data-tab="tabScenarioTexts" class="n-hidden">Texts</li>
+                        <li data-tab="tabCampaignCampaign" class="n-hidden">Campaign</li>
+                        <li data-tab="tabCampaignArmies" class="n-hidden">Armies</li>
+                        <li data-tab="tabCampaignScenarios" class="n-hidden">Scenarios</li>
+                        <li data-tab="tabCampaignTexts" class="n-hidden">Texts</li>
+                        <li data-tab="tabCredits">Credits</li>
+                </ul>
+        </nav>
+        <article id="tabFile">
+                <section>
+                        <fieldset id="fileLoad">
+                                <legend>File</legend>
+                                <div>
+                                        <label for="fileLoadFile">Load Scenario/Campaign File</label>
+                                        <input type="file" name="fileLoadFile" id="fileLoadFile" accept="text/xml" />
+                                        <button id="fileLoadFileXul" type="button" style="display: none">Load...</button>
+                                </div>
+                                <div id="fileLoadError" class="n-hidden"><span class="n-label">Error</span><span id="fileLoadErrorMessage"></span></div>
+                        </fieldset>
+                        <fieldset id="fileSaveScenario" class="n-hidden">
+                                <legend>File</legend>
+                                <div>
+                                        <label for="fileSaveAsScenario">Save Scenario File</label>
+                                        <button id="fileSaveAsScenario" type="button">Save As...</button>
+                                        <button id="fileSaveScenarioFile" type="button" style="display: none; margin-left: 1em;">Save</button>
+                                        <a href="" id="fileSaveAsScenarioFile" style="display: none">Save As...</a>
+                                        <span id="fileSaveAsScenarioName" style="margin-left: 2em"></span>
+                                </div>
+                                <div id="fileSaveScenarioError" class="n-hidden"><span class="n-label">Error</span><span id="fileSaveScenarioErrorMessage"></span></div>
+                                <div>
+                                        <label for="fileCloseScenario">Close File</label>
+                                        <button id="fileCloseScenario" type="button">Close</button>
+                                        <span id="fileCloseScenarioDiscard" style="margin-left: 2em">and discard any changes</span>
+                                </div>
+                        </fieldset>
+                        <fieldset id="fileSaveCampaign" class="n-hidden">
+                                <legend>File</legend>
+                                <div>
+                                        <label for="fileSaveAsCampaign">Save Campaign File</label>
+                                        <button id="fileSaveAsCampaign" type="button">Save As...</button>
+                                        <button id="fileSaveCampaignFile" type="button" style="display: none; margin-left: 1em;">Save</button>
+                                        <a href="" id="fileSaveAsCampaignFile" style="display: none">Save As...</a>
+                                        <span id="fileSaveAsCampaignName" style="margin-left: 2em"></span>
+                                </div>
+                                <div id="fileSaveCampaignError" class="n-hidden"><span class="n-label">Error</span><span id="fileSaveCampaignErrorMessage"></span></div>
+                                <div>
+                                        <label for="fileCloseCampaign">Close File</label>
+                                        <button id="fileCloseCampaign" type="button">Close</button>
+                                        <span id="fileCloseCampaignDiscard" style="margin-left: 2em">and discard any changes</span>
+                                </div>
+                        </fieldset>
+                        <fieldset id="fileNew">
+                                <legend>New</legend>
+                                <div>
+                                        <label for="fileCreateScenario">Create New Scenario</label>
+                                        <button id="fileCreateScenario" type="button">New Scenario</button>
+                                </div>
+                                <div>
+                                        <label for="fileCreateCampaign">Create New Campaign</label>
+                                        <button id="fileCreateCampaign" type="button">New Campaign</button>
+                                </div>
+                        </fieldset>
+                </section>
+        </article>
+        <article id="tabScenarioScenario">
+                <header class="n-nav"></header>
+                <section id="ScenarioScenarioProperties">
+                </section>
+        </article>
+        <article id="tabScenarioPlayers">
+                <header class="n-nav"></header>
+                <section id="ScenarioPlayersProperties">
+                </section>
+        </article>
+        <article id="tabScenarioCampaign">
+                <section id="ScenarioCampaignProperties">
+                </section>
+        </article>
+        <article id="tabScenarioUnits">
+                <header class="n-nav"></header>
+                <section id="ScenarioUnitsProperties">
+                </section>
+        </article>
+        <article id="tabScenarioOfficers">
+                <header class="n-nav"></header>
+                <section id="ScenarioOfficersProperties">
+                </section>
+        </article>
+        <article id="tabScenarioEvents">
+                <header class="n-nav"></header>
+                <section id="ScenarioEventsProperties">
+                </section>
+        </article>
+        <article id="tabScenarioMap">
+                <header class="n-nav"></header>
+                <section id="ScenarioMapProperties">
+                </section>
+        </article>
+        <article id="tabScenarioTexts" class="languages">
+                <header class="n-nav">
+                        <nav class="select-languages">
+                                <div>
+                                        <select id="ScenarioTextsPropertiesLangLeft"></select>
+                                </div>
+                                <div>
+                                        <select id="ScenarioTextsPropertiesLangRight"></select>
+                                </div>
+                        </nav>
+                </header>
+                <section id="ScenarioTextsProperties">
+                </section>
+        </article>
+        <article id="tabCampaignCampaign">
+                <header class="n-nav"></header>
+                <section id="CampaignCampaignProperties">
+                </section>
+        </article>
+        <article id="tabCampaignArmies">
+                <header class="n-nav"></header>
+                <section id="CampaignArmiesProperties">
+                </section>
+        </article>
+        <article id="tabCampaignScenarios">
+                <header class="n-nav"></header>
+                <section id="CampaignScenariosProperties">
+                </section>
+        </article>
+        <article id="tabCampaignTexts" class="languages">
+                <header class="n-nav">
+                        <nav class="select-languages">
+                                <div>
+                                        <select id="CampaignTextsPropertiesLangLeft"></select>
+                                </div>
+                                <div>
+                                        <select id="CampaignTextsPropertiesLangRight"></select>
+                                </div>
+                        </nav>
+                </header>
+                <section id="CampaignTextsProperties">
+                </section>
+        </article>
+        <article id="tabCredits">
+                <header>
+                        <h1>Credits</h1>
+                </header>
+                <section>
+                        <p>
+                                <a href="https://developer.mozilla.org/de/docs/XULRunner">XULRunner</a> - <a href="https://www.mozilla.org/MPL/">MPL 2.0</a>
+                        </p>
+                        <p>
+                                <a href="https://jquery.com/">jQuery</a> - <a href="https://github.com/jquery/jquery/blob/master/MIT-LICENSE.txt">MIT License</a>
+                        </p>
+                        <p>
+                                Programming: Thomas Gereke
+                        </p>
+                        <p>
+                                (c) 2013-2015 Ronald Wendt 
+                        </p>
+                </section>
+        </article>
+        <div id="butUndo" class="n-button">Undo</div>
+</body>
+</html>

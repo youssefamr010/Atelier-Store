@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /checkout
+Disallow: /cart
+Disallow: /account
+Disallow: /account/
+Disallow: /auth/
+
+# Public pages explicitly allowed
+Allow: /products/
+Allow: /collections/
+Allow: /pages/
+Allow: /sitemap.xml
+
+Sitemap: https://atelier404.store/sitemap.xml
