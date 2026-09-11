@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', ($isArabicStore ? 'إتمام الطلب' : 'Checkout') . ' — ' . ($settings['storeName'] ?? 'ATELIER'))
-@section('meta_description', $isArabicStore ? 'أتمم طلبك بأمان مع ATELIER.' : 'Complete your ATELIER order securely.')
+@section('title', ((($settings['storefront_lang'] ?? 'en') === 'ar') ? 'إتمام الطلب' : 'Checkout') . ' — ' . ($settings['storeName'] ?? 'ATELIER'))
+@section('meta_description', (($settings['storefront_lang'] ?? 'en') === 'ar') ? 'أتمم طلبك بأمان مع ATELIER.' : 'Complete your ATELIER order securely.')
 
 @section('content')
 
