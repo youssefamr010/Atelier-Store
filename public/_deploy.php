@@ -24,11 +24,23 @@ $start = microtime(true);
 
 // ── GIT PULL ────────────────────────────────────────────────────
 $projectDir = dirname(__DIR__);
-exec("cd " . escapeshellarg($projectDir) . " && git pull origin main 2>&1", $gitOutput, $gitCode);
-$log['git'] = [
-    'exit_code' => $gitCode,
-    'output'    => implode("\n", $gitOutput),
-];
+
+// Try multiple common git paths (PHP exec PATH is restricted on most servers)
+$gitPaths = ['/usr/bin/git', '/usr/local/bin/git', '/bin/git', 'git'];
+$gitBin   = null;
+foreach ($gitPaths as $path) {
+    exec("$path --version 2>&1", $checkOut, $checkCode);
+    if ($checkCode === 0) { $gitBin = $path; break; }
+}
+
+if ($gitBin) {
+    exec("cd " . escapeshellarg($projectDir) . " && $gitBin pull origin main 2>&1", $gitOutput, $gitCode);
+    $log['git'] = ['exit_code' => $gitCode, 'output' => implode("\n", $gitOutput)];
+} else {
+    // git not found in PATH — server likely uses its own cron/webhook deploy mechanism
+    // (e.g., scripts/poll-deploy.sh) — cache clearing still succeeds
+    $log['git'] = ['exit_code' => 127, 'output' => 'git binary not found in PHP PATH — using server cron deploy'];
+}
 
 // ── BOOTSTRAP LARAVEL ───────────────────────────────────────────
 try {
