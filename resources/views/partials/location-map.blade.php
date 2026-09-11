@@ -8,6 +8,10 @@
     'initialLng'   => 31.2357,
     'disabled'     => false,
 ])
+@php
+    // Calculate language locally — $mapIsAr lives in layout scope only
+    $mapIsAr = (($settings['storefront_lang'] ?? 'en') === 'ar');
+@endphp
 
 @once
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -107,7 +111,7 @@
         <div class="flex items-center gap-2">
             <div class="w-1 h-4 bg-black shrink-0"></div>
             <span class="text-[10px] font-bold uppercase tracking-[.18em] text-black">
-                @if($isArabicStore ?? false) تحديد موقع التوصيل @else Delivery Location @endif
+                @if($mapIsAr ?? false) تحديد موقع التوصيل @else Delivery Location @endif
             </span>
         </div>
         {{-- GPS button only --}}
@@ -130,7 +134,7 @@
             </span>
             <input
                 type="text" x-model="searchQ" @input="doSearch()"
-                placeholder="{{ ($isArabicStore ?? false) ? 'ابحث عن المنطقة أو الشارع...' : 'Search area or street...' }}"
+                placeholder="{{ ($mapIsAr ?? false) ? 'ابحث عن المنطقة أو الشارع...' : 'Search area or street...' }}"
                 class="flex-1 py-2.5 pr-1 text-xs bg-transparent focus:outline-none placeholder-gray-400"
                 autocomplete="off" @keydown.escape="results = []"
             >
@@ -145,7 +149,7 @@
                     <svg class="w-4 h-4 shrink-0 text-black/40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                     <p class="text-xs font-semibold text-black truncate" x-text="r.display_name.split(',')[0]"></p>
                     <span class="ml-auto text-[9px] font-bold uppercase bg-black text-white px-1.5 py-0.5 shrink-0">
-                        {{ ($isArabicStore ?? false) ? 'اختيار' : 'Pick' }}
+                        {{ ($mapIsAr ?? false) ? 'اختيار' : 'Pick' }}
                     </span>
                 </div>
             </template>
@@ -160,7 +164,7 @@
         {{-- Paste link button --}}
         <button type="button" @click="pasteOpen=!pasteOpen"
             class="absolute top-2 right-2 z-20 bg-white border-2 border-black text-[9px] font-bold uppercase tracking-wider px-2 py-1 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-colors"
-            title="{{ ($isArabicStore ?? false) ? 'لصق رابط Google Maps' : 'Paste Google Maps link' }}"
+            title="{{ ($mapIsAr ?? false) ? 'لصق رابط Google Maps' : 'Paste Google Maps link' }}"
         >
             <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
         </button>
@@ -177,11 +181,11 @@
     <div x-show="pasteOpen" x-cloak class="mt-1 bg-[#F5F5F0] border-2 border-black p-3">
         <div class="flex gap-2">
             <input type="text" x-model="pasteVal"
-                placeholder="{{ ($isArabicStore ?? false) ? 'https://maps.app.goo.gl/... أو 30.062, 31.222' : 'https://maps.app.goo.gl/... or 30.062, 31.222' }}"
+                placeholder="{{ ($mapIsAr ?? false) ? 'https://maps.app.goo.gl/... أو 30.062, 31.222' : 'https://maps.app.goo.gl/... or 30.062, 31.222' }}"
                 class="flex-1 border border-black p-2 text-xs bg-white focus:outline-none font-mono min-w-0">
             <button type="button" @click="parsePaste()"
                 class="bg-black text-white px-3 py-2 text-[10px] font-bold uppercase tracking-wider hover:bg-gray-800 shrink-0">
-                {{ ($isArabicStore ?? false) ? 'تثبيت' : 'Set' }}
+                {{ ($mapIsAr ?? false) ? 'تثبيت' : 'Set' }}
             </button>
         </div>
     </div>
@@ -191,7 +195,7 @@
         <div class="flex items-center gap-2 min-w-0">
             <span class="w-1.5 h-1.5 rounded-full bg-white/60 shrink-0" id="statusDot-{{ $mapId }}" style="border-radius:50%"></span>
             <span id="statusTxt-{{ $mapId }}" class="truncate">
-                {{ ($isArabicStore ?? false) ? 'اضغط على الخريطة لتثبيت موقع التوصيل' : 'Tap map to set delivery location' }}
+                {{ ($mapIsAr ?? false) ? 'اضغط على الخريطة لتثبيت موقع التوصيل' : 'Tap map to set delivery location' }}
             </span>
         </div>
         <span id="coordBadge-{{ $mapId }}" class="font-mono text-white/70 shrink-0 text-[9px]"></span>
@@ -221,7 +225,7 @@
     const STREET_EL = '{{ $streetInputId }}';
     const INIT_LAT  = {{ (float)($initialLat ?: 30.0444) }};
     const INIT_LNG  = {{ (float)($initialLng ?: 31.2357) }};
-    const IS_AR     = {{ ($isArabicStore ?? false) ? 'true' : 'false' }};
+    const IS_AR     = {{ ($mapIsAr ?? false) ? 'true' : 'false' }};
 
     let map, marker, gpsCircle;
 

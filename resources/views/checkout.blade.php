@@ -6,7 +6,8 @@
 @section('content')
 
 @php
-    $ar = $isArabicStore;
+    // Calculate locally from $settings (passed by controller) — $isArabicStore is only in the layout scope
+    $ar = (($settings['storefront_lang'] ?? 'en') === 'ar');
 @endphp
 
 <div class="bg-[#F5F5F0] min-h-screen"
