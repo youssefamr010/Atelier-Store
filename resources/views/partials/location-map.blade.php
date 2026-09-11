@@ -18,8 +18,8 @@
         font-family: 'Inter', system-ui, sans-serif;
     }
 
-    /* Clear vivid minimal map tiles — Positron theme */
-    .map-tile-satellite .leaflet-tile { filter: none !important; }
+    /* CartoDB Positron — already minimal. OSM Standard gets a subtle desaturate filter to match cream theme */
+    .map-tile-satellite .leaflet-tile { filter: grayscale(0.35) contrast(0.95) brightness(1.02) !important; }
     .map-tile-street .leaflet-tile { filter: contrast(1.02) brightness(0.99) !important; }
 
     /* Animated pulse ring for GPS accuracy */
@@ -291,7 +291,7 @@
     <!-- ── MAP CANVAS ─────────────────────────── -->
     <div class="relative border-2 border-black overflow-hidden shadow-[5px_5px_0_0_rgba(0,0,0,1)]">
         <div id="{{ $mapId }}" class="w-full {{ $disabled ? 'pointer-events-none opacity-60' : '' }}"
-             style="height: 320px; min-height: 280px; z-index: 10; background: #e8e8e3;"></div>
+             style="height: 220px; min-height: 180px; z-index: 10; background: #e8e8e3;"></div>
 
         <!-- Paste link floating button -->
         <button type="button" @click="pasteOpen=!pasteOpen"
@@ -311,11 +311,11 @@
     <!-- ── COORD STATUS BAR ────────────────────── -->
     <div class="atl-coord-bar">
         <div class="flex items-center gap-2 min-w-0">
-            <span class="w-2 h-2 rounded-full bg-green-400 shrink-0" style="border-radius:50% !important;"
+            <span class="w-2 h-2 rounded-full bg-white/70 shrink-0" style="border-radius:50% !important;"
                   id="statusDot-{{ $mapId }}"></span>
             <span id="statusTxt-{{ $mapId }}" class="truncate">اسحب الدبوس أو اضغط على الخريطة لتثبيت موقع التوصيل</span>
         </div>
-        <span id="coordBadge-{{ $mapId }}" class="font-mono text-amber-300 font-bold shrink-0"></span>
+        <span id="coordBadge-{{ $mapId }}" class="font-mono text-white/80 font-bold shrink-0 text-[9px]"></span>
     </div>
 
     <!-- ── REVERSE GEOCODE CHIPS ──────────────── -->
@@ -352,14 +352,16 @@
     let map, marker, gpsCircle, currentLayer;
 
     const layers = {
+        // CartoDB Positron — free, no API key, clean minimal style (default)
         street: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            attribution: '&copy; <a href="https://carto.com/" target="_blank">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
             subdomains: 'abcd',
             maxZoom: 20,
             className: 'map-tile-street'
         }),
-        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '© Esri, Maxar',
+        // OpenStreetMap Standard — free, no API key, darker style for contrast toggle
+        satellite: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
             maxZoom: 19,
             className: 'map-tile-satellite'
         })
@@ -387,7 +389,7 @@
         if (chipCoords) chipCoords.textContent = fmt;
 
         const dot = document.getElementById('statusDot-' + MAP_ID);
-        if (dot) { dot.style.background = '#4ade80'; }
+        if (dot) { dot.style.background = '#fff'; }
     }
 
     function setStatus(msg) {
@@ -430,9 +432,9 @@
             setStatus(`✓ ${city}${street ? ' — ' + street.split('،')[0] : ''}`);
             showChips(true);
 
-            // Popup on marker
+            // Single clean popup — just city name, no overlapping text
             if (marker) {
-                marker.bindPopup(`<strong>${city}</strong>${street ? '<br><span style="color:#555">' + street + '</span>' : ''}`).openPopup();
+                marker.bindPopup(`<span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">${city}</span>`, { maxWidth: 160, closeButton: false }).openPopup();
             }
         })
         .catch(() => setStatus('تم تثبيت الموقع ✓'));
@@ -524,13 +526,13 @@
             map.removeLayer(layers.street);
             layers.satellite.addTo(map);
             currentLayer = 'satellite';
-            if (lbl) lbl.textContent = 'أبيض وأسود';
+            if (lbl) lbl.textContent = 'الخريطة الكلاسيكية';
             if (ico) ico.textContent = '<svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m0-8.25a1.5 1.5 0 010 3m0-3a1.5 1.5 0 000 3m0 9.75V15m0 0l3-3m-3 3l-3-3"/></svg>';
         } else {
             map.removeLayer(layers.satellite);
             layers.street.addTo(map);
             currentLayer = 'street';
-            if (lbl) lbl.textContent = 'قمر صناعي';
+            if (lbl) lbl.textContent = 'خريطة الطرق';
             if (ico) ico.textContent = '<svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>';
         }
     };

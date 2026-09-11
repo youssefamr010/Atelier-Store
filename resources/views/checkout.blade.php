@@ -3,6 +3,91 @@
 @section('title', 'Checkout — ' . ($settings['storeName'] ?? 'ATELIER'))
 @section('meta_description', 'Complete your ATELIER luxury order. Secure checkout with saved addresses and GPS delivery pin.')
 
+@push('styles')
+<style>
+    /* ── CHECKOUT PAGE — Atelier Premium Redesign ────────────────────────────── */
+
+    /* Step headers — Cinzel serif brand identity */
+    .atl-step-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid #000;
+        background: #000;
+    }
+    .atl-step-num {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        color: #fff;
+        opacity: .55;
+        white-space: nowrap;
+    }
+    .atl-step-title {
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: #fff;
+    }
+    .atl-step-badge {
+        font-family: 'Cinzel', Georgia, serif;
+        font-weight: 900;
+        font-size: 11px;
+        background: #fff;
+        color: #000;
+        padding: 2px 8px;
+        letter-spacing: .1em;
+        border: 1.5px solid #fff;
+        margin-left: .75rem;
+    }
+
+    /* Primary CTA button — consistent across page */
+    .atl-btn-primary {
+        display: block;
+        width: 100%;
+        background: #000;
+        color: #fff;
+        font-family: 'Cinzel', Georgia, serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        padding: 1rem 1.5rem;
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0 0 rgba(0,0,0,1);
+        cursor: pointer;
+        transition: box-shadow .15s, transform .15s;
+        text-align: center;
+    }
+    .atl-btn-primary:hover {
+        background: #111;
+        box-shadow: 2px 2px 0 0 rgba(0,0,0,1);
+        transform: translate(1px, 1px);
+    }
+    .atl-btn-primary:active {
+        box-shadow: none;
+        transform: translate(2px, 2px);
+    }
+
+    /* Error banner — black/white only */
+    .atl-error-banner {
+        background: #fff;
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0 0 rgba(0,0,0,1);
+        padding: 1rem 1.25rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: .75rem;
+    }
+</style>
+@endpush
+
 @section('content')
 
 {{-- ── ORDER SUMMARY RIBBON ─────────────────────────────────────────────── --}}
@@ -52,9 +137,11 @@
 
         {{-- ── ERROR BANNER ─────────────────────────────────── --}}
         @if($errors->any())
-        <div class="bg-red-50 border-2 border-red-800 p-4 mb-8 flex items-start gap-3">
-            <span class="text-red-800 text-base shrink-0"><svg class="w-4 h-4 inline-block text-amber-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></span>
-            <ul class="text-red-800 text-xs font-sans space-y-0.5">
+        <div class="atl-error-banner">
+            <span class="text-black shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+            </span>
+            <ul class="text-black text-xs font-sans space-y-0.5">
                 @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
                 @endforeach
@@ -76,15 +163,13 @@
                 {{-- ── STEP 1: DELIVERY DESTINATION ──────────── --}}
                 <div class="bg-white border-2 border-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
 
-                    {{-- Step header --}}
-                    <div class="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-black">
-                        <div class="flex items-center gap-3">
-                            <span class="font-editorial font-black text-xs bg-white text-black px-2.5 py-0.5 border border-white">01</span>
-                            <span class="font-editorial font-bold text-[11px] uppercase tracking-[0.2em] text-white">
-                                عنوان وتفاصيل التوصيل
-                            </span>
+                {{-- Step header — Cinzel serif, Atelier brand voice --}}
+                    <div class="atl-step-hdr">
+                        <div class="flex items-center">
+                            <span class="atl-step-badge">01</span>
+                            <span class="atl-step-title">عنوان وتفاصيل التوصيل</span>
                         </div>
-                        <span class="text-[9px] font-mono text-white/70 uppercase tracking-widest">Step 01 — Delivery</span>
+                        <span class="atl-step-num">Delivery</span>
                     </div>
 
                     <div class="p-6 space-y-6">
@@ -287,14 +372,12 @@
                 {{-- ── STEP 2: PAYMENT ────────────────────────── --}}
                 <div class="bg-white border-2 border-black shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
 
-                    <div class="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-black">
-                        <div class="flex items-center gap-3">
-                            <span class="font-editorial font-black text-xs bg-white text-black px-2.5 py-0.5 border border-white">02</span>
-                            <span class="font-editorial font-bold text-[11px] uppercase tracking-[0.2em] text-white">
-                                طريقة الدفع
-                            </span>
+                    <div class="atl-step-hdr">
+                        <div class="flex items-center">
+                            <span class="atl-step-badge">02</span>
+                            <span class="atl-step-title">طريقة الدفع</span>
                         </div>
-                        <span class="text-[9px] font-mono text-white/70 uppercase tracking-widest">Step 02 — Payment</span>
+                        <span class="atl-step-num">Payment</span>
                     </div>
 
                     <div class="p-6">
@@ -451,10 +534,8 @@
                             </div>
                         </div>
 
-                        {{-- Submit CTA --}}
-                        <button type="submit"
-                            class="w-full mt-6 bg-black text-white font-editorial font-black text-xs uppercase tracking-[0.22em] py-4 hover:bg-neutral-800 transition-all border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:translate-y-1 focus:outline-none cursor-pointer"
-                        >
+                        {{-- Submit CTA — uses unified .atl-btn-primary style --}}
+                        <button type="submit" class="atl-btn-primary mt-6">
                             تأكيد وإرسال الطلب ←
                         </button>
 
