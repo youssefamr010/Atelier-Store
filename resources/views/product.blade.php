@@ -43,6 +43,7 @@
 
 @section('content')
 @php
+    $isArProd = ($settings['storefront_lang'] ?? 'en') === 'ar';
     $mainImg = $product->image_url ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url)) : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85';
     $basePriceEgp = $product->retail_price_minor ? number_format($product->retail_price_minor / 100, 0) . ' EGP' : '780 EGP';
     $variants = $product->variants ?? collect();
@@ -171,25 +172,6 @@
     class="bg-[#F5F5F0] min-h-screen py-5 sm:py-8 lg:py-20"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        
-        {{-- Breadcrumb Navigation (Part 5 UX) --}}
-        @php
-            $isArProd = ($settings['storefront_lang'] ?? 'en') === 'ar';
-            $firstCol = $product->collections->first();
-        @endphp
-        <nav class="flex items-center gap-1.5 text-[10px] font-editorial uppercase tracking-wider text-black/50 mb-5 sm:mb-7 flex-wrap" aria-label="{{ $isArProd ? 'مسار التنقل' : 'Breadcrumb' }}">
-            <a href="{{ route('home') }}" class="hover:text-black transition-colors">{{ $isArProd ? 'الرئيسية' : 'Home' }}</a>
-            <span aria-hidden="true">/</span>
-            @if($firstCol)
-                <a href="{{ route('collections.show', ['slug' => $firstCol->slug]) }}" class="hover:text-black transition-colors">{{ $firstCol->title }}</a>
-                <span aria-hidden="true">/</span>
-            @else
-                <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="hover:text-black transition-colors">{{ $isArProd ? 'جميع المنتجات' : 'Products' }}</a>
-                <span aria-hidden="true">/</span>
-            @endif
-            <span class="text-black font-bold truncate max-w-[200px] sm:max-w-xs">{{ $product->title }}</span>
-        </nav>
-
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
             <!-- Product Gallery Column -->

@@ -89,7 +89,7 @@
                     </button>
                 @else
                     <a 
-                        href="{{ route('login') }}?redirect={{ urlencode(url()->current()) }}"
+                        href="{{ route('account') }}?redirect={{ urlencode(url()->current()) }}"
                         class="btn-luxury-outline px-6 py-3.5 text-xs font-editorial font-bold uppercase tracking-wider block text-center"
                     >
                         {{ $isAr ? 'تسجيل الدخول لكتابة تقييم' : 'Sign in to write a review' }}

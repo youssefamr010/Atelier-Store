@@ -659,6 +659,9 @@ Route::get('/account', function () {
     return view('account', compact('settings', 'addresses', 'orders', 'wishlistItems', 'loyaltyLedgers', 'loyaltyBalance'));
 })->name('account');
 
+Route::get('/login', fn () => redirect()->route('account'))->name('login');
+Route::get('/register', fn () => redirect()->route('account'))->name('register');
+
 Route::post('/account/login', [AuthController::class, 'login'])->name('client.login');
 Route::post('/account/register', [AuthController::class, 'register'])->name('client.register');
 Route::post('/account/logout', [AuthController::class, 'logout'])->name('client.logout');
