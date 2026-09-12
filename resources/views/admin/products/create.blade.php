@@ -74,8 +74,16 @@
                     </label>
                     
                     <div 
-                        @click="$refs.coverInput.click()" @dragover.prevent="draggingCover = true" @dragleave.prevent="draggingCover = false" @drop.prevent="setCoverFromDrop($event)"
-                        :class="draggingCover ? 'border-amber-500 bg-amber-50' : 'border-black bg-gray-50'" class="border-2 border-dashed p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center relative aspect-square flex flex-col items-center justify-center group overflow-hidden shadow-sm"
+                        tabindex="0"
+                        @click="$refs.coverInput.click()" 
+                        @mouseenter="activeZone = 'cover'"
+                        @focus="activeZone = 'cover'"
+                        @dragover.prevent="draggingCover = true; activeZone = 'cover'" 
+                        @dragleave.prevent="draggingCover = false" 
+                        @drop.prevent="setCoverFromDrop($event)"
+                        @paste.prevent="handleCoverPaste($event)"
+                        :class="draggingCover ? 'border-amber-500 bg-amber-50' : 'border-black bg-gray-50'" 
+                        class="border-2 border-dashed p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center relative aspect-square flex flex-col items-center justify-center group overflow-hidden shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
                     >
                         <template x-if="coverPreview">
                             <img :src="coverPreview" alt="Cover Preview" class="w-full h-full object-cover absolute inset-0">
@@ -83,12 +91,12 @@
 
                         <div x-show="!coverPreview" class="space-y-2">
                             <span class="text-3xl block group-hover:scale-110 transition-transform"><svg class="w-8 h-8 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg></span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-black block">Click to Upload Cover</span>
-                            <span class="text-[10px] text-gray-500 block">Required for catalog display</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-black block">Click to Upload, Drop, or Paste (Ctrl+V)</span>
+                            <span class="text-[10px] text-gray-500 block">Paste clipboard screenshot directly</span>
                         </div>
 
                         <div x-show="coverPreview" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold uppercase tracking-wider">
-                            Change Cover Image <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                            Change / Paste New Cover (Ctrl+V)
                         </div>
                     </div>
 
@@ -109,12 +117,20 @@
                     </label>
 
                     <div 
-                        @click="$refs.galleryInput.click()" @dragover.prevent="draggingGallery = true" @dragleave.prevent="draggingGallery = false" @drop.prevent="setGalleryFromDrop($event)"
-                        :class="draggingGallery ? 'border-amber-500 bg-amber-50' : 'border-gray-400 bg-gray-50'" class="border-2 border-dashed hover:border-black p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px]"
+                        tabindex="0"
+                        @click="$refs.galleryInput.click()" 
+                        @mouseenter="activeZone = 'gallery'"
+                        @focus="activeZone = 'gallery'"
+                        @dragover.prevent="draggingGallery = true; activeZone = 'gallery'" 
+                        @dragleave.prevent="draggingGallery = false" 
+                        @drop.prevent="setGalleryFromDrop($event)"
+                        @paste.prevent="handleGalleryPaste($event)"
+                        :class="draggingGallery ? 'border-amber-500 bg-amber-50' : 'border-gray-400 bg-gray-50'" 
+                        class="border-2 border-dashed hover:border-black p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center flex flex-col items-center justify-center min-h-[120px] focus:outline-none focus:ring-2 focus:ring-black"
                     >
                         <span class="text-2xl mb-1"><svg class="w-5 h-5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/></svg></span>
-                        <span class="text-xs font-bold uppercase tracking-wider text-black">Click to Select Multiple Gallery Photos</span>
-                        <span class="text-[10px] text-gray-500 mt-0.5">Select several photos at once from your computer</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-black">Click to Select, Drag & Drop, or Paste (Ctrl+V)</span>
+                        <span class="text-[10px] text-gray-500 mt-0.5">Select or paste multiple photos from your clipboard</span>
                     </div>
 
                     <input 
@@ -261,18 +277,29 @@
                                 <!-- Variant Photo Upload -->
                                 <div class="sm:col-span-2">
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Color Photo</label>
-                                    <div class="flex items-center gap-2">
-                                        <label class="border-2 border-black px-2 py-1.5 text-[10px] font-bold uppercase bg-white hover:bg-gray-100 cursor-pointer text-center block w-full truncate">
-                                            <span x-text="variant.imageName || 'Upload Photo'"></span>
+                                    <div class="space-y-1.5"
+                                        @mouseenter="activeZone = 'variant_' + index"
+                                        @focusin="activeZone = 'variant_' + index"
+                                        @paste.prevent="handleVariantPaste($event, index)"
+                                    >
+                                        <label 
+                                            tabindex="0"
+                                            @dragover.prevent="activeZone = 'variant_' + index"
+                                            @drop.prevent="setVariantFromDrop($event, index)"
+                                            class="border-2 border-black px-2 py-1.5 text-[10px] font-bold uppercase bg-white hover:bg-gray-100 cursor-pointer text-center block w-full truncate focus:outline-none focus:ring-2 focus:ring-black">
+                                            <span x-text="variant.imageName || 'Upload / Paste (Ctrl+V)'"></span>
                                             <input 
                                                 type="file" 
                                                 :name="'variants[' + index + '][image]'" 
+                                                :id="'var-file-' + index"
                                                 @change="onVariantImageSelected($event, index)" 
                                                 accept="image/jpeg,image/png,image/webp,image/jpg" 
                                                 class="hidden"
                                             >
                                         </label>
-                                        <template x-if="variant.preview"><img :src="variant.preview" @click="pickColorFromImage($event, index)" title="Click a pixel to choose its color" class="mt-2 w-full aspect-square object-cover border border-black cursor-crosshair"></template>
+                                        <template x-if="variant.preview">
+                                            <img :src="variant.preview" @click="pickColorFromImage($event, index)" title="Click a pixel to choose its color" class="w-full aspect-square object-cover border border-black cursor-crosshair">
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -413,6 +440,22 @@
             </button>
         </div>
 
+        <!-- Floating Toast Notification for Image Actions -->
+        <div 
+            x-show="toastMessage" 
+            x-transition:enter="transition ease-out duration-200" 
+            x-transition:enter-start="opacity-0 translate-y-2" 
+            x-transition:enter-end="opacity-100 translate-y-0" 
+            x-transition:leave="transition ease-in duration-150" 
+            x-transition:leave-start="opacity-100 translate-y-0" 
+            x-transition:leave-end="opacity-0 translate-y-2" 
+            class="fixed bottom-6 right-6 z-50 bg-black text-white px-5 py-3 border-2 border-white shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-xs font-bold font-mono uppercase flex items-center gap-2" 
+            style="display: none;"
+        >
+            <span class="text-emerald-400 font-black">✓</span>
+            <span x-text="toastMessage"></span>
+        </div>
+
     </form>
 </div>
 
@@ -449,12 +492,108 @@ function createProductForm() {
         galleryFiles: [],
         draggingCover: false,
         draggingGallery: false,
+        activeZone: null,
+        toastMessage: '',
+        toastTimeout: null,
         quickColors: '',
         hasVariants: false,
         variants: [
             { title: 'Classic Black', color_hex: '#000000', price_override: '', inventory: 15, imageName: '', preview: '' },
             { title: 'Cognac Brown', color_hex: '#8B4513', price_override: '', inventory: 15, imageName: '', preview: '' }
         ],
+        init() {
+            window.addEventListener('paste', (e) => {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+                const imageFiles = [];
+                for (const item of items) {
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const f = item.getAsFile();
+                        if (f) imageFiles.push(f);
+                    }
+                }
+                if (imageFiles.length === 0) return; // Allow default text paste
+
+                e.preventDefault();
+
+                if (this.activeZone === 'cover' || (!this.coverPreview && this.activeZone !== 'gallery' && !this.activeZone?.startsWith('variant_'))) {
+                    this.setCoverFile(imageFiles[0]);
+                    this.showToast('✓ Primary cover image pasted from clipboard');
+                } else if (this.activeZone?.startsWith('variant_')) {
+                    const idx = parseInt(this.activeZone.replace('variant_', ''), 10);
+                    if (!isNaN(idx) && this.variants[idx]) {
+                        this.setVariantFile(imageFiles[0], idx);
+                        this.showToast('✓ Photo pasted for finish #' + (idx + 1));
+                    }
+                } else {
+                    this.setGalleryFiles(imageFiles);
+                    this.showToast('✓ ' + imageFiles.length + ' photo(s) pasted to gallery');
+                }
+            });
+        },
+        showToast(msg) {
+            this.toastMessage = msg;
+            if (this.toastTimeout) clearTimeout(this.toastTimeout);
+            this.toastTimeout = setTimeout(() => {
+                this.toastMessage = '';
+            }, 3500);
+        },
+        extractImages(event) {
+            const items = event.clipboardData?.items || [];
+            const files = [];
+            for (const item of items) {
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const f = item.getAsFile();
+                    if (f) files.push(f);
+                }
+            }
+            return files;
+        },
+        setCoverFile(file) {
+            if (!file) return;
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            this.$refs.coverInput.files = transfer.files;
+            this.coverPreview = URL.createObjectURL(file);
+        },
+        handleCoverPaste(event) {
+            const files = this.extractImages(event);
+            if (files.length > 0) {
+                this.setCoverFile(files[0]);
+                this.showToast('✓ Primary cover image pasted from clipboard');
+            }
+        },
+        handleGalleryPaste(event) {
+            const files = this.extractImages(event);
+            if (files.length > 0) {
+                this.setGalleryFiles(files);
+                this.showToast('✓ ' + files.length + ' photo(s) pasted to gallery');
+            }
+        },
+        handleVariantPaste(event, index) {
+            const files = this.extractImages(event);
+            if (files.length > 0 && this.variants[index]) {
+                this.setVariantFile(files[0], index);
+                this.showToast('✓ Photo pasted for finish #' + (index + 1));
+            }
+        },
+        setVariantFromDrop(event, index) {
+            const file = [...event.dataTransfer.files].find(f => f.type.startsWith('image/'));
+            if (file && this.variants[index]) {
+                this.setVariantFile(file, index);
+            }
+        },
+        setVariantFile(file, index) {
+            if (!file || !this.variants[index]) return;
+            const inputEl = document.getElementById('var-file-' + index);
+            if (inputEl) {
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                inputEl.files = transfer.files;
+            }
+            this.variants[index].imageName = file.name || ('pasted-image-' + (index + 1) + '.png');
+            this.variants[index].preview = URL.createObjectURL(file);
+        },
         previewCoverImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -465,10 +604,7 @@ function createProductForm() {
             this.draggingCover = false;
             const file = [...event.dataTransfer.files].find(file => file.type.startsWith('image/'));
             if (!file) return;
-            const transfer = new DataTransfer();
-            transfer.items.add(file);
-            this.$refs.coverInput.files = transfer.files;
-            this.previewCoverImage({ target: this.$refs.coverInput });
+            this.setCoverFile(file);
         },
         setGalleryFromDrop(event) {
             this.draggingGallery = false;
@@ -519,8 +655,7 @@ function createProductForm() {
         onVariantImageSelected(event, index) {
             const file = event.target.files[0];
             if (file) {
-                this.variants[index].imageName = file.name;
-                this.variants[index].preview = URL.createObjectURL(file);
+                this.setVariantFile(file, index);
             }
         },
         pickColorFromImage(event, index) {
@@ -537,3 +672,4 @@ function createProductForm() {
 </script>
 @endpush
 @endsection
+
