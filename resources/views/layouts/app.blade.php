@@ -508,7 +508,7 @@
     @include('partials.header')
 
     <!-- Main Content Injection -->
-    <main class="flex-grow pb-24 lg:pb-0">
+    <main class="flex-grow pb-32 sm:pb-28 lg:pb-0">
         @yield('content')
     </main>
 
@@ -520,7 +520,15 @@
         $isCatalogPage = request()->is('collections') || request()->is('collections/*');
     @endphp
     <!-- Fast mobile navigation: keeps the key actions within thumb reach. -->
-    <nav class="mobile-dock lg:hidden fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 gap-1 px-2 py-2" aria-label="Mobile navigation">
+    <nav 
+        x-data="{ hiddenByModal: false }" 
+        @open-sidebar-menu.window="hiddenByModal = true" 
+        @close-sidebar-menu.window="hiddenByModal = false"
+        x-show="!hiddenByModal" 
+        x-transition
+        class="mobile-dock lg:hidden fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 px-2 py-2" 
+        aria-label="Mobile navigation"
+    >
         <a href="{{ route('home') }}" class="mobile-dock-link {{ request()->routeIs('home') ? 'is-active' : '' }}" aria-label="{{ $isArabicStore ? 'الرئيسية' : 'Home' }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" stroke-width="1.8"/></svg>
             <span>{{ $isArabicStore ? 'الرئيسية' : 'Home' }}</span>

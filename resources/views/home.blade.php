@@ -5,8 +5,11 @@
 @section('meta_description', $settings['homeHeroSubtitle'] ?? 'Handcrafted full-grain Italian leather, aerospace titanium hardware, and minimalist RFID architecture.')
 
 @section('content')
-    <!-- 0. Top Admin-Controlled Promotional Banner -->
+    <!-- 0. Top Admin-Controlled Promotional Banner (Smart Adaptive) -->
     @include('partials.promo-banner')
+
+    <!-- 0.5 Instant Quick Category Navigation Strip -->
+    @include('partials.categories')
 
     <!-- 1. Product Scroll Showcase -->
     @include('partials.showcase')
