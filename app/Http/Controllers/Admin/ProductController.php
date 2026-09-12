@@ -920,5 +920,50 @@ class ProductController extends Controller
 
         return back()->with(empty($blockedErrors) ? 'success' : 'warning', $msg);
     }
+
+    // Cross-catalog pHash Duplicate Detection
+    public function imageHashCheck(Request $request)
+    {
+        $hash = trim((string) $request->query('hash', ''));
+        if (empty($hash)) {
+            return response()->json(['match' => false]);
+        }
+
+        try {
+            $asset = MediaAsset::where('phash', $hash)
+                ->orWhere('metadata->phash', $hash)
+                ->first();
+
+            if (! $asset) {
+                return response()->json(['match' => false]);
+            }
+
+            // Find linked product/variant
+            $mediable = DB::table('mediables')->where('media_asset_id', $asset->id)->first();
+            $productTitle = null;
+            $variantTitle = null;
+
+            if ($mediable) {
+                if ($mediable->mediable_type === Product::class || str_ends_with($mediable->mediable_type, 'Product')) {
+                    $p = Product::find($mediable->mediable_id);
+                    $productTitle = $p?->title;
+                } elseif ($mediable->mediable_type === ProductVariant::class || str_ends_with($mediable->mediable_type, 'ProductVariant')) {
+                    $v = ProductVariant::with('product')->find($mediable->mediable_id);
+                    $variantTitle = $v?->title;
+                    $productTitle = $v?->product?->title;
+                }
+            }
+
+            return response()->json([
+                'match' => true,
+                'product_title' => $productTitle ?? 'Existing Catalog Product',
+                'variant_title' => $variantTitle,
+                'asset_url' => $asset->url,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['match' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
+
 

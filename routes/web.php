@@ -863,6 +863,9 @@ Route::middleware(['admin'])->group(function () {
         ->name('admin.products.bulk-variants-status');
     Route::delete('/admin/variants/{variantId}/media/{assetId}', [ProductController::class, 'deleteVariantMedia'])
         ->name('admin.variants.delete-media');
+    Route::get('/admin/api/image-hash-check', [ProductController::class, 'imageHashCheck'])
+        ->name('admin.api.image-hash-check');
+
 
     // Collections
     Route::get('/admin/collections', [CollectionController::class, 'index'])

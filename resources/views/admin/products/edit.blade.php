@@ -61,6 +61,11 @@
     object-fit: cover !important;
 }
 </style>
+<style>
+/* ── Pipeline badge ── */
+#pipeline-crop-badge { display: inline-flex; }
+.atl-pipeline-active { border-color: #000 !important; background: #f9f9f6 !important; }
+</style>
 @endpush
 @push('head-scripts')
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
@@ -1085,6 +1090,55 @@
         </div>
     </div>
 
+    {{-- ════ PART 7: BATCH MULTI-COLOR QUICK-ADD ════ --}}
+    <div id="atl-batch-section" class="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
+        <div class="flex items-center justify-between px-5 py-3.5 border-b-2 border-black bg-black">
+            <div>
+                <h2 class="text-sm font-black uppercase tracking-widest text-white">⊕ Batch Add Variants</h2>
+                <p class="text-[10px] text-white/60 font-mono mt-0.5">Drop / paste multiple color images at once — auto-crop, whiten &amp; extract colors automatically</p>
+            </div>
+        </div>
+
+        <div class="p-5 space-y-4">
+            {{-- Batch drop zone --}}
+            <div
+                id="atl-batch-dropzone"
+                tabindex="0"
+                class="smart-dropzone border-2 border-dashed border-gray-400 hover:border-black bg-white p-6 text-center cursor-pointer focus:outline-none focus:border-black"
+                onclick="document.getElementById('atl-batch-file-input').click()"
+                title="Paste (Ctrl+V), drag, or click to add multiple images"
+            >
+                <input type="file" id="atl-batch-file-input" multiple accept="image/*"
+                    class="hidden" onchange="AtelierImagePipeline.captureBatch(Array.from(this.files))">
+                <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                <p class="text-xs font-bold text-black uppercase tracking-wider">Drag &amp; Drop, Paste (Ctrl+V), or <span class="underline">Browse</span> — Multiple Images</p>
+                <p class="text-[10px] text-gray-500 font-mono mt-1">Each image → auto-crop + background whiten + color detect → review table → Create All as Drafts</p>
+            </div>
+
+            {{-- Review rows (hidden until images dropped) --}}
+            <div id="atl-batch-review" class="hidden space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-black">Review &amp; Confirm Variants</h3>
+                    <p id="atl-batch-progress" class="text-[10px] font-mono text-gray-500"></p>
+                </div>
+
+                {{-- Column headers --}}
+                <div class="grid grid-cols-[80px_1fr_200px_100px_80px] gap-3 text-[9px] font-bold uppercase tracking-wider text-gray-500 pb-1 border-b border-gray-200">
+                    <span>Preview</span><span>Color Name &amp; Hex</span><span>Alt Text</span><span>Price / Stock</span><span>Remove</span>
+                </div>
+
+                <div id="atl-batch-review-rows" class="space-y-2"></div>
+
+                <button type="button" id="atl-batch-create-btn"
+                    onclick="AtelierImagePipeline.batchCreateAll('{{ $product->id }}', '{{ csrf_token() }}')"
+                    class="w-full bg-black text-white py-3 text-xs font-black uppercase tracking-widest hover:bg-neutral-800 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    Create All Variants as Drafts
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Sticky Mini Save Bar (Visible when unsaved changes and scrolled down) -->
@@ -1127,10 +1181,96 @@
     </div>
 </div>
 
+{{-- ═══ PIPELINE REVIEW MODAL ═══════════════════════════════════════════════ --}}
+<div id="atl-pipeline-review-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    onclick="if(event.target===this) AtelierImagePipeline.cancel()">
+    <div class="bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-5 py-3.5 border-b-2 border-black bg-black sticky top-0">
+            <div>
+                <h3 class="text-sm font-black uppercase tracking-widest text-white">🖼 Image Pipeline — Review Before Saving</h3>
+                <p class="text-[10px] text-white/60 font-mono">Auto-crop • Background whitened • Color extracted — confirm or adjust below</p>
+            </div>
+            <button type="button" onclick="AtelierImagePipeline.cancel()"
+                class="text-white/60 hover:text-white text-xl font-bold leading-none cursor-pointer">✕</button>
+        </div>
+
+        <div class="p-5 space-y-5">
+
+            {{-- Before / After preview --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-gray-500">Original</p>
+                    <div class="border-2 border-gray-200 bg-gray-50 flex items-center justify-center" style="height:200px">
+                        <img id="pipeline-preview-original" class="max-w-full max-h-full object-contain" alt="Original" src="" style="max-height:196px">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <p class="text-[9px] font-bold uppercase tracking-wider text-gray-500">Processed</p>
+                        <span id="pipeline-crop-badge" class="text-[8px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-400 px-1.5 py-0.5">✓ Auto-cropped</span>
+                    </div>
+                    <div class="border-2 border-black bg-gray-50 flex items-center justify-center" style="height:200px">
+                        <img id="pipeline-preview-final" class="max-w-full max-h-full object-contain" alt="Processed" src="" style="max-height:196px">
+                    </div>
+                </div>
+            </div>
+
+            {{-- Warnings --}}
+            <div id="pipeline-warnings" class="space-y-1"></div>
+
+            {{-- Cross-catalog duplicate warning --}}
+            <div id="pipeline-catalog-dup" class="hidden text-[10px] font-bold text-amber-900 bg-amber-50 border-2 border-amber-400 px-3 py-2"></div>
+
+            {{-- Edit fields --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-600 mb-1">Suggested Color Hex</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" id="pipeline-hex-color" class="w-8 h-8 border border-gray-300 cursor-pointer shrink-0"
+                            oninput="document.getElementById('pipeline-hex-input').value=this.value">
+                        <input type="text" id="pipeline-hex-input" class="flex-1 border border-gray-300 p-2 text-xs font-mono uppercase"
+                            placeholder="Auto-detected" oninput="document.getElementById('pipeline-hex-color').value=this.value">
+                    </div>
+                    <p class="text-[9px] text-gray-500 mt-1">Will auto-fill the Color &amp; Eyedropper field</p>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-600 mb-1">Alt Text</label>
+                    <input type="text" id="pipeline-alt-input" class="w-full border border-gray-300 p-2 text-xs" placeholder="Product — Color">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-bold uppercase tracking-wider text-gray-600 mb-1">Filename</label>
+                    <input type="text" id="pipeline-filename-input" class="w-full border border-gray-300 p-2 text-[10px] font-mono" placeholder="product-color.jpg">
+                </div>
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex items-center gap-3 pt-2 border-t border-gray-200">
+                <button type="button" onclick="AtelierImagePipeline.confirm()"
+                    class="flex-1 bg-black text-white py-2.5 text-xs font-black uppercase tracking-widest hover:bg-neutral-800 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+                    ✓ Use This Image
+                </button>
+                <button type="button" onclick="AtelierImagePipeline.cancel()"
+                    class="border-2 border-black text-black py-2.5 px-5 text-xs font-black uppercase tracking-widest hover:bg-gray-100 cursor-pointer">
+                    Cancel
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 @push('scripts')
+<script src="{{ asset('js/admin/image-pipeline.js') }}"></script>
 <script>
 let quill;
 document.addEventListener('DOMContentLoaded', function () {
+    if (window.AtelierImagePipeline) {
+        AtelierImagePipeline.init('{{ $product->slug }}', {{ $product->retail_price_minor ? $product->retail_price_minor / 100 : 0 }});
+    }
+
     const editorContainer = document.getElementById('quill-editor');
     if (editorContainer) {
         quill = new Quill('#quill-editor', {
