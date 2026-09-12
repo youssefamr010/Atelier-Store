@@ -92,7 +92,7 @@
         {{-- ── 2. BIG COLLECTION CARDS (Requested by User for Mobile & Desktop) ── --}}
         @if($isAllOverview)
             <div x-show="viewMode === 'collections'" class="space-y-6 sm:space-y-8 mb-12">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger-children">
                     @forelse($collections as $col)
                         @php
                             $colImg = $col->image_url 
@@ -101,7 +101,7 @@
                         @endphp
                         <a 
                             href="{{ route('collections.show', ['slug' => $col->slug]) }}"
-                            class="group block relative overflow-hidden border-2 border-black bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300"
+                            class="group block relative overflow-hidden border-2 border-black bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300 reveal-on-scroll"
                         >
                             {{-- Image Container with Aspect Ratio (Mobile friendly large frame) --}}
                             <div class="relative w-full aspect-[16/10] sm:aspect-[4/3] overflow-hidden bg-neutral-900">

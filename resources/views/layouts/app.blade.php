@@ -52,10 +52,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ATELIER">
 
-    <!-- High-End Editorial Typography: Abril Fatface + Cinzel + Inter -->
+    <!-- Premium Sharp Typography: Space Grotesk (primary) + Inter (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS (Monochrome Luxury Theme) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -72,12 +72,12 @@
                         'muted-border': '#E0E0DB'
                     },
                     fontFamily: {
-                        /* display: ONLY for large hero/banner/section headlines — Abril Fatface (Didone/Bodoni) */
-                        display: ['"Abril Fatface"', 'Georgia', 'serif'],
-                        /* editorial: sub-labels, prices, badges — Cinzel */
-                        editorial: ['Cinzel', 'Georgia', 'serif'],
-                        /* sans: body, buttons, nav, UI — Inter */
-                        sans: ['Inter', 'system-ui', 'sans-serif']
+                        /* display: hero, section titles — Space Grotesk bold */
+                        display: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
+                        /* editorial: labels, prices, badges, nav — Space Grotesk */
+                        editorial: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
+                        /* sans: body text, descriptions — Inter */
+                        sans: ['Inter', '"Space Grotesk"', 'system-ui', 'sans-serif']
                     },
                     borderRadius: {
                         none: '0px',
@@ -116,20 +116,26 @@
         body {
             background-color: #F8F7F3;
             color: #000000;
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
             margin: 0;
             padding: 0;
+            letter-spacing: -0.01em;
         }
 
         [dir="rtl"] body { font-family: Tahoma, Arial, sans-serif; }
         [dir="rtl"] .font-editorial, [dir="rtl"] .font-display { font-family: Tahoma, Arial, sans-serif !important; letter-spacing: 0 !important; }
 
-        /* ── DISPLAY FONT — Abril Fatface (Bodoni/Didot aesthetic) ─── */
-        /* Apply ONLY to: hero headline, banner headline, section titles */
+        /* ── DISPLAY FONT — Space Grotesk bold for hero/section headlines ── */
         .font-display {
-            font-family: 'Abril Fatface', Georgia, serif !important;
-            font-weight: 400; /* single-weight font — no bold needed */
-            letter-spacing: -0.01em; /* slight negative tracking suits Didone at large sizes */
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        /* ── EDITORIAL FONT — Space Grotesk for labels, prices, badges ── */
+        .font-editorial {
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+            letter-spacing: -0.01em;
         }
 
         /* ── FLUID FONT SIZES (clamp — smooth scaling between screens) ─ */
@@ -234,6 +240,22 @@
             opacity: 1;
             transform: translateY(0);
         }
+        /* Stagger support: data-stagger sets a cascade delay */
+        .reveal-on-scroll[data-stagger="1"] { transition-delay: 0.06s; }
+        .reveal-on-scroll[data-stagger="2"] { transition-delay: 0.12s; }
+        .reveal-on-scroll[data-stagger="3"] { transition-delay: 0.18s; }
+        .reveal-on-scroll[data-stagger="4"] { transition-delay: 0.24s; }
+        .reveal-on-scroll[data-stagger="5"] { transition-delay: 0.30s; }
+        .reveal-on-scroll[data-stagger="6"] { transition-delay: 0.36s; }
+        .reveal-on-scroll[data-stagger="7"] { transition-delay: 0.42s; }
+        .reveal-on-scroll[data-stagger="8"] { transition-delay: 0.48s; }
+
+        /* ── PAGE ENTRANCE ──────────────────────────────────────────── */
+        @keyframes page-enter {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        main > * { animation: page-enter 0.45s cubic-bezier(0.16,1,0.3,1) both; }
 
         /* ── LUXURY BUTTON — Filled Black ───────────────────────────── */
         .btn-luxury {
@@ -615,20 +637,30 @@
         document.addEventListener('DOMContentLoaded', () => {
             const observerOptions = {
                 root: null,
-                rootMargin: '0px',
-                threshold: 0.15
+                rootMargin: '0px 0px -5% 0px',
+                threshold: 0.08
             };
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-revealed');
+                        // Once revealed, no need to observe again
+                        observer.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
 
             document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
                 observer.observe(el);
+            });
+
+            // Auto-stagger children inside grid parents with class 'stagger-children'
+            document.querySelectorAll('.stagger-children').forEach((parent) => {
+                const children = parent.querySelectorAll('.reveal-on-scroll');
+                children.forEach((child, i) => {
+                    child.setAttribute('data-stagger', Math.min(i + 1, 8));
+                });
             });
         });
     </script>

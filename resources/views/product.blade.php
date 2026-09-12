@@ -214,6 +214,127 @@ function productDetailComponent() {
 }
 </script>
 
+<style>
+    /* ── PRODUCT PAGE ANIMATIONS ──────────────────────────────────── */
+    @keyframes prod-slide-up {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes prod-fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    @keyframes prod-scale-in {
+        from { opacity: 0; transform: scale(0.97) translateY(10px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .prod-anim-gallery   { animation: prod-scale-in 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+    .prod-anim-title     { animation: prod-slide-up 0.55s cubic-bezier(0.16,1,0.3,1) 0.12s both; }
+    .prod-anim-price     { animation: prod-slide-up 0.55s cubic-bezier(0.16,1,0.3,1) 0.20s both; }
+    .prod-anim-desc      { animation: prod-slide-up 0.55s cubic-bezier(0.16,1,0.3,1) 0.28s both; }
+    .prod-anim-variants  { animation: prod-slide-up 0.55s cubic-bezier(0.16,1,0.3,1) 0.34s both; }
+    .prod-anim-actions   { animation: prod-slide-up 0.65s cubic-bezier(0.16,1,0.3,1) 0.40s both; }
+    .prod-anim-trust     { animation: prod-fade-in 0.6s ease 0.5s both; }
+
+    /* ── ACTION BUTTON PREMIUM STYLE ─────────────────────────────── */
+    .btn-add-cart {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 56px;
+        background: #000;
+        color: #fff;
+        border: 2px solid #000;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.3s ease, color 0.3s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+    }
+    .btn-add-cart::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .btn-add-cart:hover {
+        background: #1a1a1a;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+        transform: translateY(-2px);
+    }
+    .btn-add-cart:active { transform: scale(0.97); box-shadow: none; }
+
+    .btn-buy-now {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 50px;
+        background: transparent;
+        color: #000;
+        border: 1.5px solid #000;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.3s ease, color 0.3s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
+    .btn-buy-now:hover {
+        background: #000;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+    .btn-buy-now:active { transform: scale(0.98); }
+
+    /* Qty stepper */
+    .qty-stepper {
+        display: inline-flex;
+        align-items: stretch;
+        border: 2px solid #000;
+        overflow: hidden;
+        background: #fff;
+    }
+    .qty-btn {
+        width: 40px;
+        min-height: 40px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.18s ease;
+        color: #000;
+    }
+    .qty-btn:hover { background: #000; color: #fff; }
+    .qty-input {
+        width: 44px;
+        text-align: center;
+        font-family: 'ui-monospace', monospace;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border: none;
+        border-left: 1.5px solid #000;
+        border-right: 1.5px solid #000;
+        background: #f5f5f0;
+        outline: none;
+        color: #000;
+    }
+</style>
+
 <div 
     x-data="productDetailComponent()"
     class="bg-[#F5F5F0] min-h-screen py-5 sm:py-8 lg:py-20"
@@ -222,7 +343,7 @@ function productDetailComponent() {
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
             <!-- Product Gallery Column -->
-            <div class="lg:col-span-7 space-y-4">
+            <div class="lg:col-span-7 space-y-4 prod-anim-gallery">
                 <div class="relative w-full overflow-hidden border-2 border-black bg-white p-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
                     <div class="product-media-frame relative">
                         <img 
@@ -269,7 +390,7 @@ function productDetailComponent() {
             </div>
 
             <!-- Product Specs & Action Column -->
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-5 space-y-5">
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <template x-if="activeStock > 0">
@@ -320,7 +441,7 @@ function productDetailComponent() {
                     </template>
                     @endif
 
-                    <h1 class="font-sans font-extrabold text-[clamp(1.75rem,4vw,3.25rem)] tracking-[-0.04em] text-black leading-[1.06]"
+                    <h1 class="prod-anim-title font-sans font-extrabold text-[clamp(1.75rem,4vw,3.25rem)] tracking-[-0.04em] text-black leading-[1.06]"
                         style="word-break: break-word; overflow-wrap: break-word;">
                         {{ $product->title }}
                     </h1>
@@ -343,38 +464,39 @@ function productDetailComponent() {
                         </a>
                     </div>
 
-                    <div class="pt-2">
+                    <div class="prod-anim-price pt-2 flex items-baseline gap-3 flex-wrap">
                         @php
                             $isArProd = ($settings['storefront_lang'] ?? 'en') === 'ar';
                         @endphp
-                        <span class="font-editorial font-black text-3xl text-black" x-text="activePrice"></span>
+                        <span class="font-editorial font-black text-[2rem] text-black leading-none" x-text="activePrice"></span>
                         @if($product->compare_at_price_minor)
-                            <span class="text-sm text-gray-400 line-through font-editorial ml-2">
+                            <span class="text-sm text-gray-400 line-through font-editorial">
                                 {{ number_format($product->compare_at_price_minor / 100, 0) }} {{ $isArProd ? 'ج.م' : 'EGP' }}
                             </span>
+                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold bg-black text-white uppercase tracking-wider">
+                                @php $discountPct = round((1 - ($product->retail_price_minor / $product->compare_at_price_minor)) * 100); @endphp
+                                {{ $discountPct }}% OFF
+                            </span>
                         @endif
-                        <span class="text-[10px] text-black/60 font-editorial font-bold uppercase tracking-widest block mt-0.5">
-                            {{ $isArProd ? 'الضريبة والتوصيل يُحسبان عند إتمام الطلب' : 'Taxes and delivery are calculated at checkout' }}
+                        <span class="text-[10px] text-black/55 font-editorial font-bold uppercase tracking-widest block w-full mt-0.5">
+                            {{ $isArProd ? 'الضريبة والتوصيل يُحسبان عند إتمام الطلب' : 'Taxes and delivery calculated at checkout' }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Rich Description -->
-                <div class="border-t border-b border-black/10 py-4 font-sans text-xs sm:text-sm text-black/80 leading-relaxed prose prose-sm max-w-none">
+                <div class="prod-anim-desc border-t border-b border-black/10 py-4 font-sans text-xs sm:text-sm text-black/80 leading-relaxed prose prose-sm max-w-none">
                     {!! $product->description !!}
                 </div>
 
                 <!-- Color & Option Selection -->
                 @if(count($variantsJson) > 0)
-                    <div class="space-y-3 pt-2">
+                    <div class="prod-anim-variants space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="font-editorial font-bold text-xs uppercase tracking-wider text-black">
-                                {{ $isArProd ? 'اللون / الخيار المختار:' : 'Select Color / Finish:' }}
-                                <span x-text="selectedOptionTitle" class="font-sans font-bold text-black ml-1"></span>
+                            <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.18em] text-black/60">
+                                {{ $isArProd ? 'الخيار المختار:' : 'Select Finish:' }}
                             </span>
-                            <span class="text-[10px] font-mono text-black/50">
-                                {{ count($variantsJson) }} {{ $isArProd ? 'خيارات' : 'Options' }}
-                            </span>
+                            <span class="text-xs font-sans font-semibold text-black" x-text="selectedOptionTitle"></span>
                         </div>
                         <div class="flex items-center gap-2.5 flex-wrap">
                             @foreach($variantsJson as $vItem)
@@ -383,10 +505,10 @@ function productDetailComponent() {
                                     @click="selectVariantById('{{ $vItem['id'] }}')"
                                     @mouseenter="previewVariantById('{{ $vItem['id'] }}')"
                                     @mouseleave="restoreSelectedImage()"
-                                    class="flex items-center gap-2.5 border-2 px-3.5 py-2.5 text-xs font-editorial font-bold uppercase tracking-wider transition-all min-h-[44px] cursor-pointer"
-                                    :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'border-black bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5' : 'border-black/20 bg-white text-black hover:border-black'"
+                                    class="group flex items-center gap-2 border-2 px-3 py-2 text-[11px] font-sans font-semibold uppercase tracking-wider transition-all duration-200 min-h-[40px] cursor-pointer"
+                                    :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,0.7)]' : 'border-black/15 bg-white text-black hover:border-black/60 hover:shadow-sm'"
                                 >
-                                    <span class="w-3.5 h-3.5 rounded-full border border-black/30 shrink-0 inline-block shadow-xs" style="background-color: {{ $vItem['color_hex'] }};"></span>
+                                    <span class="w-3 h-3 rounded-full border border-black/20 shrink-0 shadow-xs" style="background-color: {{ $vItem['color_hex'] }};"></span>
                                     <span>{{ $vItem['title'] }}</span>
                                 </button>
                             @endforeach
@@ -427,38 +549,56 @@ function productDetailComponent() {
                 @endif
 
                 <!-- Quantity & Purchase Actions -->
-                <form method="POST" action="{{ route('cart.add') }}" class="space-y-4 pt-2">
+                <form method="POST" action="{{ route('cart.add') }}" class="prod-anim-actions space-y-4">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="variant_id" :value="selectedVariantId">
 
-                    <!-- Quantity Control -->
-                    <div class="flex items-center justify-between border-2 border-black bg-white p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        <span class="font-editorial font-bold text-xs uppercase tracking-wider text-black">{{ $isArProd ? 'الكمية المطلوبة' : 'Quantity' }}</span>
-                        <div class="flex items-center border-2 border-black bg-[#F5F5F0]">
-                            <button type="button" @click="qty = Math.max(1, qty - 1)" class="w-9 h-9 flex items-center justify-center font-bold text-base hover:bg-black hover:text-white transition-colors">−</button>
-                            <input type="number" name="qty" x-model="qty" min="1" max="20" class="w-12 h-9 text-center font-mono font-bold text-xs border-x-2 border-black bg-white focus:outline-none" readonly>
-                            <button type="button" @click="qty = Math.min(20, qty + 1)" class="w-9 h-9 flex items-center justify-center font-bold text-base hover:bg-black hover:text-white transition-colors">+</button>
+                    <!-- Qty + Add to Cart row -->
+                    <div class="flex items-stretch gap-3">
+                        <!-- Quantity Stepper -->
+                        <div class="flex flex-col justify-center">
+                            <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-black/45 mb-1.5 text-center">{{ $isArProd ? 'الكمية' : 'QTY' }}</span>
+                            <div class="qty-stepper">
+                                <button type="button" @click="qty = Math.max(1, qty - 1)" class="qty-btn">−</button>
+                                <input type="number" name="qty" x-model="qty" min="1" max="20" class="qty-input" readonly>
+                                <button type="button" @click="qty = Math.min(20, qty + 1)" class="qty-btn">+</button>
+                            </div>
                         </div>
+
+                        <!-- Primary CTA: Add to Cart -->
+                        <button type="submit" class="btn-add-cart flex-1" id="product-add-cart-btn">
+                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M5 8h14l-1 12H6L5 8Zm4 1V6a3 3 0 0 1 6 0v3" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>{{ $isArProd ? 'إضافة إلى السلة' : 'Add to Cart' }}</span>
+                        </button>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="space-y-2.5">
-                        <button type="submit" class="btn-luxury w-full py-4 text-center text-xs tracking-[0.2em] flex items-center justify-center gap-2 cursor-pointer">
-                            <span>{{ $isArProd ? 'إضافة إلى السلة' : 'Add to Cart' }}</span>
-                            <span class="text-sm font-bold">+</span>
-                        </button>
-                        
-                        <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId ? '&variant_id=' + selectedVariantId : '')" 
-                           class="btn-luxury-outline w-full py-3.5 text-center text-xs tracking-[0.2em] block">
-                            {{ $isArProd ? 'شراء فوري مباشر ←' : 'Buy Now →' }}
-                        </a>
-                    </div>
+                    <!-- Secondary CTA: Buy Now -->
+                    <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId ? '&variant_id=' + selectedVariantId : '')"
+                       class="btn-buy-now"
+                       id="product-buy-now-btn"
+                    >
+                        <span>{{ $isArProd ? 'شراء فوري' : 'Buy Now' }}</span>
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
                 </form>
 
-                <div class="text-center pt-1">
-                    <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/50 hover:text-black transition-colors">
-                        {{ $isArProd ? '← العودة لتصفح جميع المنتجات' : '← Continue Shopping' }}
+                <!-- Trust strip -->
+                <div class="prod-anim-trust flex items-center justify-between pt-1 border-t border-black/8">
+                    <div class="flex items-center gap-1.5 text-[10px] text-black/50 font-sans">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round"/></svg>
+                        {{ $isArProd ? 'دفع آمن' : 'Secure Checkout' }}
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] text-black/50 font-sans">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 5h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        {{ $isArProd ? 'توصيل سريع' : 'Fast Delivery' }}
+                    </div>
+                    <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/45 hover:text-black transition-colors">
+                        {{ $isArProd ? '← تسوق المزيد' : '← Shop More' }}
                     </a>
                 </div>
 

@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — Atelier Administrative Console</title>
     
+    <!-- Sharp Admin Typography: Space Grotesk + Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS CDN for Full Mobile & Desktop Responsive Support -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -15,9 +20,11 @@
                     colors: {
                         black: '#000000',
                         white: '#FFFFFF',
+                        'admin-bg': '#F2F1ED',
                     },
                     fontFamily: {
-                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
                         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
                     }
                 }
@@ -34,7 +41,37 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f0; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #F2F1ED; margin: 0; padding: 0; letter-spacing: -0.01em; }
+
+        /* ── SHARP HEADINGS using Space Grotesk ─────────────────────── */
+        h1, h2, h3, h4, h5, h6,
+        .font-black, .font-bold,
+        [class*="tracking-tight"], [class*="tracking-wide"] {
+            font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+        }
+        /* Mono labels stay monospace */
+        .font-mono, [class*="font-mono"] {
+            font-family: ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+        }
+
+        /* ── ANIMATION: admin panel entrance ─────────────────────── */
+        @keyframes admin-fade-up {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes admin-card-in {
+            from { opacity: 0; transform: translateY(8px) scale(0.99); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .widget-animated {
+            animation: admin-card-in 0.45s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .widget-animated:nth-child(1) { animation-delay: 0.05s; }
+        .widget-animated:nth-child(2) { animation-delay: 0.10s; }
+        .widget-animated:nth-child(3) { animation-delay: 0.15s; }
+        .widget-animated:nth-child(4) { animation-delay: 0.20s; }
+        .widget-animated:nth-child(5) { animation-delay: 0.25s; }
+        .widget-animated:nth-child(6) { animation-delay: 0.30s; }
         
         .spinner {
             border: 3px solid rgba(255,255,255,0.3);

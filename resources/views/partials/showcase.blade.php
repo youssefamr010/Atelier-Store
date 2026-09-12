@@ -39,7 +39,7 @@
         </div>
 
         {{-- ── Actual Product Grid ── --}}
-        <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4 hidden">
+        <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4 hidden stagger-children">
             @foreach($products as $index => $product)
                 @php
                     $img = $product->image_url ?: ($product->mediaAssets->first()?->url ?: '');
