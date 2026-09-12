@@ -43,11 +43,17 @@
 
             async toggle(id) {
                 const numId = Number(id);
-                if (this.has(numId)) {
+                const isAdding = !this.has(numId);
+                if (!isAdding) {
                     this.items = this.items.filter(i => i !== numId);
                 } else {
                     this.items.push(numId);
                 }
+
+                const msg = isAdding 
+                    ? '{{ ($settings['storefront_lang'] ?? 'en') === 'ar' ? 'تم حفظ القطعة في المفضلة' : 'Saved to Wishlist' }}'
+                    : '{{ ($settings['storefront_lang'] ?? 'en') === 'ar' ? 'تمت الإزالة من المفضلة' : 'Removed from Wishlist' }}';
+                window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: msg } }));
 
                 if (!this.isAuth) {
                     localStorage.setItem('atelier_wishlist_ids', JSON.stringify(this.items));

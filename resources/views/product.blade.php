@@ -223,7 +223,7 @@ function productDetailComponent() {
                 navigator.share({ title: currentProdTitle, url: window.location.href }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: '{{ ($settings['storefront_lang'] ?? 'en') === 'ar' ? 'تم نسخ رابط القطعة للحافظة' : 'Product link copied to clipboard' }}' } }));
             }
         }
     };

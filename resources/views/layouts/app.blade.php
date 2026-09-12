@@ -486,32 +486,39 @@
         #back-to-top {
             position: fixed;
             bottom: 5.5rem;
-            right: 1rem;
+            right: 1.25rem;
             z-index: 40;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             background: #000;
             color: #fff;
-            border: none;
+            border: 1px solid rgba(255,255,255,0.2);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transform: translateY(12px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            border-radius: 4px !important;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            transform: translateY(12px) scale(0.9);
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+        }
+        [dir="rtl"] #back-to-top {
+            right: auto;
+            left: 1.25rem;
         }
         #back-to-top.visible {
             opacity: 1;
             pointer-events: auto;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
-        #back-to-top:hover { background: #333; transform: translateY(-2px); }
+        #back-to-top:hover { 
+            background: #222; 
+            transform: translateY(-2px) scale(1.05); 
+        }
         @media (min-width: 1024px) {
             #back-to-top { bottom: 2rem; right: 1.5rem; }
+            [dir="rtl"] #back-to-top { right: auto; left: 1.5rem; }
         }
 
         /* ── FILTER RAIL STICKY (mobile) ────────────────────────────── */
@@ -536,6 +543,38 @@
 
     <!-- Master Footer Partials -->
     @include('partials.footer')
+
+    {{-- Global Luxury Toast Notification Container --}}
+    <div 
+        x-data="{ 
+            toasts: [],
+            add(msg, type = 'info') {
+                const id = Date.now() + Math.random();
+                this.toasts.push({ id, msg, type });
+                setTimeout(() => { this.remove(id); }, 3000);
+            },
+            remove(id) {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }
+        }"
+        @show-toast.window="add($event.detail.message || $event.detail, $event.detail.type || 'info')"
+        class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none px-4 w-full max-w-sm"
+    >
+        <template x-for="toast in toasts" :key="toast.id">
+            <div 
+                x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="-translate-y-4 opacity-0 scale-95"
+                x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="-translate-y-2 opacity-0 scale-95"
+                class="pointer-events-auto bg-black text-white text-[11px] font-editorial font-bold uppercase tracking-wider px-4 py-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.4)] border border-white/20 flex items-center gap-2.5"
+            >
+                <span class="w-1.5 h-1.5 bg-emerald-400 shrink-0"></span>
+                <span x-text="toast.msg"></span>
+            </div>
+        </template>
+    </div>
 
     @php
         $bottomCartCount = \App\Http\Controllers\CartController::cartCount();

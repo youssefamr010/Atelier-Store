@@ -29,20 +29,19 @@
                 <img 
                     src="{{ $bannerImgUrl }}" 
                     alt="{{ $bannerTitle ?: 'Promotional Banner' }}"
-                    class="w-full h-auto max-h-[85vh] object-cover sm:object-contain transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                    class="w-full h-auto max-h-[85vh] object-contain sm:object-cover transition-transform duration-700 ease-out group-hover:scale-[1.005]"
                     loading="eager"
                     fetchpriority="high"
                 >
             @endif
 
-            {{-- Floating Content / CTA Pill --}}
+            {{-- Floating Content Overlay only if Title/Subtitle are set --}}
             @if($hasText)
-                {{-- Rich Text Overlay --}}
                 <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-8 lg:p-12 space-y-2">
                     @if(!empty($bannerSubtitle))
-                        <div class="inline-flex items-center gap-2 border border-white/40 px-2.5 py-0.5 bg-black/70 w-fit backdrop-blur-sm">
+                        <div class="inline-flex items-center gap-2 border border-white/40 px-2 py-0.5 bg-black/70 w-fit backdrop-blur-sm">
                             <span class="w-1.5 h-1.5 bg-white"></span>
-                            <span class="font-editorial font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white">
+                            <span class="font-editorial font-bold text-[9px] uppercase tracking-[0.2em] text-white">
                                 {{ $bannerSubtitle }}
                             </span>
                         </div>
@@ -53,24 +52,23 @@
                             {{ $bannerTitle }}
                         </h2>
                     @endif
-
-                    @if(!empty($bannerLink))
-                        <div class="pt-1 sm:pt-2">
-                            <span class="inline-flex items-center gap-2 font-editorial font-bold text-[11px] sm:text-xs uppercase tracking-[0.15em] text-white group-hover:underline underline-offset-4 drop-shadow">
-                                <span>{{ $isArabicStore ? 'تسوق التشكيلة الآن ←' : 'Explore Collection Now →' }}</span>
-                            </span>
-                        </div>
-                    @endif
-                </div>
-            @elseif(!empty($bannerLink))
-                {{-- Minimalist Floating Luxury Badge (Zero image obstruction) --}}
-                <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 z-10">
-                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/85 text-white font-editorial font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] backdrop-blur-sm border border-white/20 shadow-lg group-hover:bg-black group-hover:scale-105 transition-all duration-200">
-                        <span>{{ $isArabicStore ? 'تسوق التشكيلة الآن ←' : 'Explore Collection Now →' }}</span>
-                    </span>
                 </div>
             @endif
         </div>
+
+        {{-- Minimalist Corner Sub-Strip: smaller, positioned cleanly below image with zero artwork overlap --}}
+        @if(!empty($bannerLink))
+            <div class="w-full bg-[#161616] border-t border-black/20 px-4 sm:px-6 py-1.5 flex items-center justify-between text-white group-hover:bg-black transition-colors duration-200">
+                <span class="inline-flex items-center gap-2 text-white/50 text-[9px] font-mono tracking-widest uppercase">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 inline-block"></span>
+                    <span>{{ $settings['storeName'] ?? 'ATELIER' }}</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-editorial font-bold uppercase tracking-[0.2em] text-white group-hover:text-amber-300 transition-colors">
+                    <span>{{ $isArabicStore ? 'تصفح التشكيلة الآن' : 'Explore Collection' }}</span>
+                    <span class="font-mono text-xs">→</span>
+                </span>
+            </div>
+        @endif
 
     @if(!empty($bannerLink))
         </a>
