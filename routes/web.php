@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ProductBulkController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\ShippingController;
+use App\Http\Controllers\Admin\StorefrontFeaturesController;
 use App\Http\Controllers\Admin\SurveyController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\TelegramController;
@@ -27,11 +28,15 @@ use App\Http\Controllers\AdminImageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PresenceController;
+use App\Http\Controllers\StorefrontReviewController;
 use App\Http\Controllers\SurveyApiController;
 use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Controllers\WebCheckoutController;
+use App\Http\Controllers\WishlistController;
+
 use App\Models\Collection;
 use App\Models\MediaAsset;
 use App\Models\Order;
@@ -330,6 +335,31 @@ Route::post('/cart/update', [CartController::class, 'update'])->name('cart.updat
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+/*
+|--------------------------------------------------------------------------
+| Wishlist & Favorites (Account Sync + Local Storage Guest Fallback)
+|--------------------------------------------------------------------------
+*/
+Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+Route::get('/wishlist/ids', [WishlistController::class, 'getIds'])->name('wishlist.ids');
+Route::post('/wishlist/sync', [WishlistController::class, 'syncLocal'])->name('wishlist.sync');
+Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+
+/*
+|--------------------------------------------------------------------------
+| Verified Product Reviews & Ratings
+|--------------------------------------------------------------------------
+*/
+Route::post('/products/{id}/reviews', [StorefrontReviewController::class, 'store'])->name('products.reviews.store');
+
+/*
+|--------------------------------------------------------------------------
+| Newsletter Subscription & Welcome Offers
+|--------------------------------------------------------------------------
+*/
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+
+
 // Public Track Order (Phone, Email or Order Number)
 Route::get('/track-order', function () {
     try {
@@ -622,8 +652,11 @@ Route::get('/account', function () {
     $user = Auth::user();
     $addresses = $user ? $user->addresses()->latest()->get() : collect();
     $orders = $user ? $user->orders()->with(['items'])->latest()->take(20)->get() : collect();
+    $wishlistItems = $user ? $user->wishlists()->with(['product' => fn($q) => $q->with('variants', 'mediaAssets')])->latest()->get() : collect();
+    $loyaltyLedgers = $user ? $user->loyaltyLedgers()->latest()->take(30)->get() : collect();
+    $loyaltyBalance = $user ? $user->loyaltyPointsBalance() : 0;
 
-    return view('account', compact('settings', 'addresses', 'orders'));
+    return view('account', compact('settings', 'addresses', 'orders', 'wishlistItems', 'loyaltyLedgers', 'loyaltyBalance'));
 })->name('account');
 
 Route::post('/account/login', [AuthController::class, 'login'])->name('client.login');
@@ -1038,6 +1071,14 @@ Route::middleware(['admin'])->group(function () {
     // Audit Log
     Route::get('/admin/audit-log', [AuditLogController::class, 'index'])
         ->name('admin.audit-log.index');
+
+    // Storefront Features & Customer Experience Hub
+    Route::get('/admin/storefront-features', [StorefrontFeaturesController::class, 'index'])
+        ->name('admin.storefront-features.index');
+    Route::post('/admin/storefront-features', [StorefrontFeaturesController::class, 'update'])
+        ->name('admin.storefront-features.update');
+    Route::post('/admin/customers/{id}/points', [StorefrontFeaturesController::class, 'adjustCustomerPoints'])
+        ->name('admin.customers.points.adjust');
 
 });
 

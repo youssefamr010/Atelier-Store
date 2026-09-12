@@ -424,6 +424,13 @@
                             <span>Content, Social & WhatsApp</span>
                         </a>
                         <a 
+                            href="{{ route('admin.storefront-features.index') }}" 
+                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider border {{ request()->routeIs('admin.storefront-features.*') ? 'bg-black text-white border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'text-gray-800 border-transparent hover:border-black hover:bg-gray-50' }} transition-all"
+                        >
+                            <span class="text-sm"><x-icon name="shield" class="w-4 h-4 inline-block" /></span>
+                            <span>Storefront Features & Loyalty</span>
+                        </a>
+                        <a 
                             href="{{ route('admin.shipping.index') }}" 
                             class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider border {{ request()->routeIs('admin.shipping.*') ? 'bg-black text-white border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'text-gray-800 border-transparent hover:border-black hover:bg-gray-50' }} transition-all"
                         >

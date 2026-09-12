@@ -592,6 +592,12 @@
             setInterval(ping, 45000);
         })();
     </script>
+    <!-- Wishlist Global Alpine Store & State Synchronization -->
+    @include('partials.wishlist-helper')
+
+    <!-- Newsletter Privilege Popup -->
+    @include('partials.newsletter-modal')
+
     <!-- Offline Pixel Jellyfish Screen & Connection Guardian -->
     @include('partials.offline-modal')
 

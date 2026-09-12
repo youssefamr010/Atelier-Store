@@ -14,6 +14,9 @@
     <!-- 1.5 Recently Viewed Strip -->
     @include('partials.recently-viewed')
 
+    <!-- 1.75 Brand Heritage & Editorial Story -->
+    @include('partials.our-story')
+
     <!-- 2. Craftsmanship & Heritage Guarantee Banner -->
     @include('partials.banner')
 @endsection

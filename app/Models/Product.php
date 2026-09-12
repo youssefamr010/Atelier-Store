@@ -38,6 +38,7 @@ class Product extends Model
         'catalog_display_mode',
         'is_new',
         'is_bestseller',
+        'pinned_related_ids',
         'supplier_id',
     ];
 
@@ -50,10 +51,27 @@ class Product extends Model
             'inventory'               => 'integer',
             'low_stock_threshold'     => 'integer',
             'attributes_json'         => 'array',
+            'pinned_related_ids'      => 'array',
             'is_new'                  => 'boolean',
             'is_bestseller'           => 'boolean',
         ];
     }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->reviews()->where('is_approved', true);
+    }
+
+    public function averageRating(): float
+    {
+        return round((float) ($this->approvedReviews()->avg('rating') ?? 5.0), 1);
+    }
+
+    public function reviewsCount(): int
+    {
+        return (int) $this->approvedReviews()->count();
+    }
+
 
     public function getEffectiveLowStockThreshold(): int
     {

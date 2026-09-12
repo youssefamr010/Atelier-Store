@@ -99,7 +99,30 @@ class WebCheckoutController extends Controller
         $shippingCost = $subtotal >= (float) Setting::get('free_shipping_threshold', 999999) ? 0 : $defaultRate;
         $total = $subtotal + $shippingCost;
 
-        return view('checkout', compact('settings', 'savedAddresses', 'defaultAddress', 'shippingZones', 'cartItems', 'subtotal', 'shippingCost', 'total'));
+        // Loyalty Points Calculation
+        $userPoints = $user ? $user->loyaltyPointsBalance() : 0;
+        $loyaltyEnabled = Setting::get('loyalty_enabled', '1') === '1';
+        $ptsUnit = (int) Setting::get('loyalty_redeem_pts_unit', 100);
+        $ptsDiscountEgp = (float) Setting::get('loyalty_redeem_discount_egp', 50);
+        $maxPointsDiscountEgp = ($loyaltyEnabled && $ptsUnit > 0 && $userPoints >= $ptsUnit)
+            ? min(floor($userPoints / $ptsUnit) * $ptsDiscountEgp, $subtotal)
+            : 0;
+
+        return view('checkout', compact(
+            'settings',
+            'savedAddresses',
+            'defaultAddress',
+            'shippingZones',
+            'cartItems',
+            'subtotal',
+            'shippingCost',
+            'total',
+            'userPoints',
+            'loyaltyEnabled',
+            'ptsUnit',
+            'ptsDiscountEgp',
+            'maxPointsDiscountEgp'
+        ));
     }
 
     /**
@@ -287,7 +310,39 @@ class WebCheckoutController extends Controller
                 ? (int) config('commerce.cod.surcharge_minor', 2000)
                 : 0;
 
-            $totalMinor = $subtotalMinor + $shippingMinor + $taxMinor + $codSurchargeMinor;
+            // 6. Points Redemption & Coupon Discount
+            $pointsDiscountMinor = 0;
+            $pointsRedeemed = 0;
+            if ($user && $request->boolean('redeem_points') && Setting::get('loyalty_enabled', '1') === '1') {
+                $userBalance = $user->loyaltyPointsBalance();
+                $ptsUnit = (int) Setting::get('loyalty_redeem_pts_unit', 100);
+                $ptsDiscountEgp = (float) Setting::get('loyalty_redeem_discount_egp', 50);
+                if ($ptsUnit > 0 && $userBalance >= $ptsUnit) {
+                    $maxUnits = floor($userBalance / $ptsUnit);
+                    $pointsRedeemed = (int) ($maxUnits * $ptsUnit);
+                    $pointsDiscountMinor = (int) round(($maxUnits * $ptsDiscountEgp) * 100);
+                    $pointsDiscountMinor = min($pointsDiscountMinor, $subtotalMinor);
+                }
+            }
+
+            $couponDiscountMinor = 0;
+            $appliedCouponCode = null;
+            if ($request->filled('coupon_code')) {
+                $couponInput = strtoupper(trim((string)$request->input('coupon_code')));
+                if ($couponInput === strtoupper((string)Setting::get('newsletter_discount_code', 'WELCOME10'))) {
+                    $couponDiscountMinor = (int) round($subtotalMinor * 0.10);
+                    $appliedCouponCode = $couponInput;
+                } else {
+                    $coupon = \App\Models\Coupon::where('code', $couponInput)->where('is_active', true)->first();
+                    if ($coupon) {
+                        $couponDiscountMinor = $coupon->calculateDiscountMinor($subtotalMinor);
+                        $appliedCouponCode = $coupon->code;
+                    }
+                }
+            }
+
+            $discountMinor = min($subtotalMinor, $pointsDiscountMinor + $couponDiscountMinor);
+            $totalMinor = max(0, $subtotalMinor - $discountMinor) + $shippingMinor + $taxMinor + $codSurchargeMinor;
 
             $order = Order::create([
                 'order_number'        => 'AT-' . date('Ymd') . '-' . strtoupper(Str::random(5)),
@@ -299,7 +354,7 @@ class WebCheckoutController extends Controller
                 'subtotal_minor'      => $subtotalMinor,
                 'shipping_minor'      => $shippingMinor,
                 'tax_minor'           => $taxMinor,
-                'discount_minor'      => 0,
+                'discount_minor'      => $discountMinor,
                 'cod_surcharge_minor' => $codSurchargeMinor,
                 'total_amount_minor'  => $totalMinor,
                 'payment_status'      => $validated['payment_method'] === 'cod' ? 'cod_pending' : 'pending',
@@ -310,6 +365,8 @@ class WebCheckoutController extends Controller
                 'metadata_json'       => [
                     'shipping_zone'     => $zone ? $zone->name : 'Standard Default',
                     'delivery_estimate' => 'Usually delivers from 3 to 5 business days (Maximum 4 days from order date)',
+                    'points_redeemed'   => $pointsRedeemed,
+                    'coupon_code'       => $appliedCouponCode,
                     'shipping_address'  => [
                         'name'      => $fullName,
                         'phone'     => $phone,
@@ -323,6 +380,16 @@ class WebCheckoutController extends Controller
                     ],
                 ],
             ]);
+
+            if ($pointsRedeemed > 0 && $user) {
+                \App\Models\LoyaltyPointLedger::create([
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'points' => -$pointsRedeemed,
+                    'type' => 'redeem',
+                    'notes' => "Redeemed {$pointsRedeemed} pts for discount on Order #{$order->order_number}",
+                ]);
+            }
 
             foreach ($itemsToProcess as $it) {
                 OrderItem::create([

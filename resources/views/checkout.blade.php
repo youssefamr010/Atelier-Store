@@ -335,7 +335,33 @@
                         @endif
 
                         {{-- Totals --}}
-                        <div class="border-t-2 border-black/10 pt-4 space-y-2">
+                        <div class="border-t-2 border-black/10 pt-4 space-y-2" 
+                             x-data="{ redeemPoints: false, ptsDiscount: {{ (float)($maxPointsDiscountEgp ?? 0) }}, baseTotal: {{ (float)($total ?? $subtotal ?? 0) }} }">
+                            
+                            {{-- Loyalty Points Redemption Block --}}
+                            @auth
+                            @if(($loyaltyEnabled ?? true) && ($userPoints ?? 0) >= ($ptsUnit ?? 100) && ($maxPointsDiscountEgp ?? 0) > 0)
+                            <div class="border-2 border-black bg-[#FFFBEB] p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] my-3">
+                                <label class="flex items-start justify-between gap-2 cursor-pointer">
+                                    <div class="flex items-start gap-2.5">
+                                        <input type="checkbox" name="redeem_loyalty_points" value="1" x-model="redeemPoints" class="w-4 h-4 mt-0.5 accent-black">
+                                        <div>
+                                            <span class="font-editorial font-bold text-xs uppercase tracking-wider text-black block">
+                                                {{ $ar ? 'استبدال نقاط المكافآت كخصم' : 'Redeem Privilege Points' }}
+                                            </span>
+                                            <span class="text-[10px] text-black/60 block">
+                                                {{ $ar ? 'لديك ' . number_format($userPoints) . ' نقطة متاحة' : 'You have ' . number_format($userPoints) . ' pts available' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="font-mono font-black text-xs text-emerald-700 shrink-0">
+                                        -{{ number_format($maxPointsDiscountEgp) }} EGP
+                                    </span>
+                                </label>
+                            </div>
+                            @endif
+                            @endauth
+
                             @if(isset($subtotal))
                             <div class="flex justify-between text-xs text-black/60">
                                 <span>{{ $ar ? 'المجموع الفرعي' : 'Subtotal' }}</span>
@@ -348,10 +374,18 @@
                                 <span class="font-mono font-bold">{{ $shippingCost == 0 ? ($ar ? 'مجاني' : 'Free') : number_format($shippingCost) . ' EGP' }}</span>
                             </div>
                             @endif
+
+                            <template x-if="redeemPoints && ptsDiscount > 0">
+                                <div class="flex justify-between text-xs text-emerald-700 font-bold">
+                                    <span>{{ $ar ? 'خصم نقاط الولاء' : 'Privilege Points Discount' }}</span>
+                                    <span class="font-mono" x-text="'-' + Number(ptsDiscount).toLocaleString() + ' EGP'"></span>
+                                </div>
+                            </template>
+
                             <div class="flex justify-between items-center border-t-2 border-black pt-3 mt-1">
                                 <span class="font-bold text-sm uppercase tracking-wider">{{ $ar ? 'الإجمالي' : 'Total' }}</span>
                                 <span class="font-display text-2xl">
-                                    {{ number_format(($total ?? $subtotal ?? 0)) }}
+                                    <span x-text="redeemPoints ? Math.max(0, baseTotal - ptsDiscount).toLocaleString() : baseTotal.toLocaleString()">{{ number_format(($total ?? $subtotal ?? 0)) }}</span>
                                     <span class="font-bold text-xs">EGP</span>
                                 </span>
                             </div>

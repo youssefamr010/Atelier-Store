@@ -245,8 +245,9 @@ class ProductController extends Controller
     {
         $product = Product::with(['collections', 'mediaAssets', 'variants.mediaAssets'])->findOrFail($id);
         $collections = Collection::orderBy('sort_order')->get();
+        $allOtherProducts = Product::where('id', '!=', $id)->orderBy('title')->get();
 
-        return view('admin.products.edit', compact('product', 'collections'));
+        return view('admin.products.edit', compact('product', 'collections', 'allOtherProducts'));
     }
 
     public function update(Request $request, int $id)
@@ -271,6 +272,8 @@ class ProductController extends Controller
             'supplier_product_url' => 'nullable|url|max:2000',
             'collection_ids' => 'nullable|array',
             'collection_ids.*' => 'exists:collections,id',
+            'pinned_related_ids' => 'nullable|array',
+            'pinned_related_ids.*' => 'integer|exists:products,id',
         ]);
 
         $productAttributes = $product->attributes_json ?? [];
@@ -302,6 +305,7 @@ class ProductController extends Controller
             'catalog_display_mode' => $request->input('catalog_display_mode', $product->catalog_display_mode ?? 'separate_cards'),
             'is_new'         => $request->boolean('is_new'),
             'is_bestseller'  => $request->boolean('is_bestseller'),
+            'pinned_related_ids' => $request->input('pinned_related_ids', []),
             'attributes_json' => $productAttributes,
         ]);
 

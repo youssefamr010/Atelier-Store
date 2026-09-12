@@ -252,15 +252,66 @@
                                 CURRENTLY OUT OF STOCK
                             </span>
                         </template>
-                        <button @click="shareProduct()" type="button" class="text-xs font-editorial font-bold uppercase tracking-wider text-black hover:underline cursor-pointer">
-                            ↗ Share
-                        </button>
+                        
+                        <div class="flex items-center gap-3">
+                            <!-- Wishlist Toggle -->
+                            <button 
+                                type="button" 
+                                @click="$store.wishlist.toggle({{ $product->id }})"
+                                class="flex items-center gap-1 text-xs font-editorial font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                                :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600' : 'text-black hover:opacity-70'"
+                                title="Add to Wishlist"
+                            >
+                                <x-icon name="heart" class="w-4 h-4" />
+                                <span x-text="$store.wishlist.has({{ $product->id }}) ? 'Saved' : 'Wishlist'"></span>
+                            </button>
+
+                            <button @click="shareProduct()" type="button" class="text-xs font-editorial font-bold uppercase tracking-wider text-black hover:underline cursor-pointer">
+                                ↗ Share
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Low Stock Urgency Indicator -->
+                    @php
+                        $urgencyEnabled = ($settings['urgency_indicator_enabled'] ?? '1') === '1';
+                        $threshold = (int)($settings['urgency_stock_threshold'] ?? 5);
+                    @endphp
+                    @if($urgencyEnabled)
+                    <template x-if="activeStock > 0 && activeStock <= {{ $threshold }}">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-300 text-amber-900 rounded text-xs font-bold animate-pulse">
+                            <x-icon name="flame" class="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>
+                                {{ $isArProd ? 'عاجل: متبقي ' : 'Only ' }}
+                                <span x-text="activeStock" class="font-mono font-black"></span>
+                                {{ $isArProd ? ' قطع فقط في المخزون — اطلب الآن!' : ' left in stock — order soon!' }}
+                            </span>
+                        </div>
+                    </template>
+                    @endif
 
                     <h1 class="font-sans font-extrabold text-[clamp(1.75rem,4vw,3.25rem)] tracking-[-0.04em] text-black leading-[1.06]"
                         style="word-break: break-word; overflow-wrap: break-word;">
                         {{ $product->title }}
                     </h1>
+
+                    <!-- Star Rating summary under title -->
+                    @php
+                        $avgRating = $product->averageRating();
+                        $reviewsCount = $product->reviewsCount();
+                    @endphp
+                    <div class="flex items-center gap-2 pt-1">
+                        <div class="flex items-center text-amber-500">
+                            @for($i = 1; $i <= 5; $i++)
+                                <svg class="w-4 h-4 {{ $i <= round($avgRating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            @endfor
+                        </div>
+                        <a href="#reviews-section" class="text-xs font-mono font-bold text-gray-600 hover:text-black hover:underline">
+                            {{ $avgRating > 0 ? number_format($avgRating, 1) : '5.0' }} ({{ $reviewsCount }} {{ $isArProd ? 'تقييم موثق' : 'reviews' }})
+                        </a>
+                    </div>
 
                     <div class="pt-2">
                         @php
@@ -436,17 +487,8 @@
                     </div>
                 @endif
 
-                <!-- Warranty Highlights -->
-                <div class="grid grid-cols-2 gap-3 pt-4 border-t border-black/10 text-xs">
-                    <div class="border border-black p-3 bg-white">
-                        <span class="font-editorial font-bold uppercase block text-black">{{ $isArProd ? 'ضمان عامين' : '2-Year Warranty' }}</span>
-                        <span class="text-[10px] text-black/60">{{ $isArProd ? 'صيانة أو استبدال فوري' : 'Full repair or replacement' }}</span>
-                    </div>
-                    <div class="border border-black p-3 bg-white">
-                        <span class="font-editorial font-bold uppercase block text-black">{{ $isArProd ? 'استبدال سريع' : 'Fast Exchange' }}</span>
-                        <span class="text-[10px] text-black/60">{{ $isArProd ? 'خدمة استبدال لباب البيت' : 'Free door-to-door swaps' }}</span>
-                    </div>
-                </div>
+                <!-- Trust Badges & Guarantee Strip -->
+                @include('partials.trust-badges')
 
             </div>
 
@@ -454,6 +496,9 @@
 
     </div>
 </div>
+
+{{-- Verified Customer Reviews Section --}}
+@include('partials.product-reviews')
 
 {{-- Related Products Section --}}
 @if(isset($relatedProducts) && $relatedProducts->count() > 0)

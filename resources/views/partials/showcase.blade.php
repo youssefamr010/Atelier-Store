@@ -108,6 +108,17 @@
                             @endif
                         </div>
                         @endif
+
+                        {{-- Floating Wishlist Button --}}
+                        <button 
+                            type="button" 
+                            @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
+                            class="absolute bottom-1.5 right-1.5 w-6 h-6 bg-white/90 hover:bg-white border border-black flex items-center justify-center shadow-xs transition-transform active:scale-90 z-10 cursor-pointer"
+                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 fill-red-600' : 'text-black'"
+                            title="Save to Wishlist"
+                        >
+                            <x-icon name="heart" class="w-3.5 h-3.5" />
+                        </button>
                     </div>
 
                     {{-- Details --}}

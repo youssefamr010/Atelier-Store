@@ -64,27 +64,50 @@
                 </div>
 
                 <!-- Navigation Tabs -->
-                <div class="grid grid-cols-3 gap-1 p-1.5 bg-black/[.04] border border-black/10 rounded-xl mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-black/[.04] border border-black/10 rounded-xl mb-6">
                     <button 
                         @click="activeTab = 'orders'" 
-                        :class="activeTab === 'orders' ? 'bg-white shadow-sm text-black' : 'text-black/55 hover:text-black'"
-                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors"
+                        :class="activeTab === 'orders' ? 'bg-white shadow-sm text-black font-black' : 'text-black/55 hover:text-black'"
+                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors flex items-center justify-center gap-1.5"
                     >
-                        {{ $isArAccount ? 'الطلبات' : 'Orders' }} ({{ $orders->count() }})
+                        <x-icon name="cart" class="w-3.5 h-3.5" />
+                        <span>{{ $isArAccount ? 'الطلبات' : 'Orders' }} ({{ $orders->count() }})</span>
                     </button>
+
+                    <button 
+                        @click="activeTab = 'wishlist'" 
+                        :class="activeTab === 'wishlist' ? 'bg-white shadow-sm text-black font-black' : 'text-black/55 hover:text-black'"
+                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                    >
+                        <x-icon name="heart" class="w-3.5 h-3.5 text-red-600" />
+                        <span>{{ $isArAccount ? 'المفضلة' : 'Wishlist' }} ({{ $wishlistItems->count() }})</span>
+                    </button>
+
+                    <button 
+                        @click="activeTab = 'loyalty'" 
+                        :class="activeTab === 'loyalty' ? 'bg-white shadow-sm text-black font-black' : 'text-black/55 hover:text-black'"
+                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                    >
+                        <x-icon name="gift" class="w-3.5 h-3.5 text-amber-600" />
+                        <span>{{ $isArAccount ? 'نقاط الولاء' : 'Rewards' }} ({{ $loyaltyBalance }})</span>
+                    </button>
+
                     <button 
                         @click="activeTab = 'addresses'" 
-                        :class="activeTab === 'addresses' ? 'bg-white shadow-sm text-black' : 'text-black/55 hover:text-black'"
-                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors"
+                        :class="activeTab === 'addresses' ? 'bg-white shadow-sm text-black font-black' : 'text-black/55 hover:text-black'"
+                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors flex items-center justify-center gap-1.5"
                     >
-                        {{ $isArAccount ? 'العناوين' : 'Addresses' }} ({{ $addresses->count() }})
+                        <x-icon name="truck" class="w-3.5 h-3.5" />
+                        <span>{{ $isArAccount ? 'العناوين' : 'Addresses' }} ({{ $addresses->count() }})</span>
                     </button>
+
                     <button 
                         @click="activeTab = 'details'" 
-                        :class="activeTab === 'details' ? 'bg-white shadow-sm text-black' : 'text-black/55 hover:text-black'"
-                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors"
+                        :class="activeTab === 'details' ? 'bg-white shadow-sm text-black font-black' : 'text-black/55 hover:text-black'"
+                        class="min-h-[46px] px-2 text-[10px] sm:text-xs font-editorial font-bold uppercase tracking-wide rounded-lg transition-colors flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
                     >
-                        {{ $isArAccount ? 'الملف الشخصي' : 'Profile' }}
+                        <x-icon name="account" class="w-3.5 h-3.5" />
+                        <span>{{ $isArAccount ? 'الملف' : 'Profile' }}</span>
                     </button>
                 </div>
 
@@ -151,6 +174,144 @@
                             </a>
                         </div>
                     @endif
+                </div>
+
+                <!-- Tab: Wishlist (Saved Favorites) -->
+                <div x-cloak x-show="activeTab === 'wishlist'" class="space-y-6">
+                    <div class="flex justify-between items-center border-b border-black/10 pb-4">
+                        <div>
+                            <h2 class="font-editorial font-bold text-base uppercase">{{ $isArAccount ? 'قائمة المفضلة والقطع المحفوظة' : 'My Curated Wishlist' }}</h2>
+                            <p class="text-xs text-black/60">{{ $isArAccount ? 'القطع التي قمت بحفظها للرجوع إليها أو شرائها لاحقاً.' : 'Pieces you have saved to your private curation for future acquisition.' }}</p>
+                        </div>
+                    </div>
+
+                    @if($wishlistItems->isNotEmpty())
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($wishlistItems as $wItem)
+                                @php
+                                    $wProd = $wItem->product;
+                                    if(!$wProd) continue;
+                                    $wImg = $wProd->image_url 
+                                        ? (str_starts_with($wProd->image_url, 'http') ? $wProd->image_url : url($wProd->image_url))
+                                        : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&q=80';
+                                    $wPrice = $wProd->retail_price_minor ? number_format($wProd->retail_price_minor / 100, 0) . ' EGP' : '—';
+                                @endphp
+                                <div class="border-2 border-black bg-white p-3.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between space-y-3">
+                                    <div class="space-y-2">
+                                        <div class="aspect-4/3 w-full bg-[#F5F5F0] border border-black/10 relative overflow-hidden">
+                                            <img src="{{ $wImg }}" alt="{{ $wProd->title }}" class="w-full h-full object-contain">
+                                            <button 
+                                                type="button" 
+                                                @click="$store.wishlist.toggle({{ $wProd->id }}); window.location.reload();"
+                                                class="absolute top-2 right-2 bg-white/90 hover:bg-black hover:text-white p-1.5 border border-black transition-colors"
+                                                title="Remove from Wishlist"
+                                            >
+                                                <x-icon name="trash" class="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+
+                                        <h3 class="font-editorial font-bold text-xs uppercase tracking-tight text-black line-clamp-1">{{ $wProd->title }}</h3>
+                                        <div class="flex items-baseline justify-between">
+                                            <span class="font-editorial font-black text-sm text-black">{{ $wPrice }}</span>
+                                            <span class="text-[9px] font-mono {{ $wProd->inventory > 0 ? 'text-emerald-700 font-bold' : 'text-red-600' }}">
+                                                {{ $wProd->inventory > 0 ? '● In Stock' : 'Out of Stock' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-black/10">
+                                        <a href="{{ route('products.show', ['slug' => $wProd->slug]) }}" class="btn-luxury w-full py-2.5 text-center text-[10px] font-editorial font-bold uppercase tracking-wider block">
+                                            {{ $isArAccount ? 'عرض القطعة ←' : 'View Piece →' }}
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-12 bg-neutral-50 border border-dashed border-black/20 space-y-3">
+                            <x-icon name="heart" class="w-8 h-8 text-black/30 mx-auto" />
+                            <p class="font-editorial text-xs uppercase tracking-wider text-black/60">{{ $isArAccount ? 'قائمة المفضلة فارغة حالياً.' : 'Your wishlist is currently empty.' }}</p>
+                            <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="btn-luxury inline-block px-6 py-2.5 text-xs tracking-wider">
+                                {{ $isArAccount ? 'تصفح التشكيلات' : 'Explore Collections' }}
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Tab: Loyalty Points & Rewards -->
+                <div x-cloak x-show="activeTab === 'loyalty'" class="space-y-6">
+                    <div class="border-b border-black/10 pb-4">
+                        <h2 class="font-editorial font-bold text-base uppercase">{{ $isArAccount ? 'برنامج مكافآت ونقاط الولاء' : 'Atelier Private Privilege & Rewards' }}</h2>
+                        <p class="text-xs text-black/60">{{ $isArAccount ? 'اكسب نقاطاً مع كل طلب مكتمل واستبدلها بخصومات حصرية عند إتمام الطلب.' : 'Earn rewards with every delivered commission and redeem instant discounts at checkout.' }}</p>
+                    </div>
+
+                    @php
+                        $redeemUnit = (int)($settings['loyalty_redeem_pts_unit'] ?? 100);
+                        $discountEgp = (int)($settings['loyalty_redeem_discount_egp'] ?? 50);
+                        $discountEquiv = floor($loyaltyBalance / max(1, $redeemUnit)) * $discountEgp;
+                        $earnRate = (int)($settings['loyalty_earn_rate_egp'] ?? 10);
+                    @endphp
+
+                    <!-- Points Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'رصيد النقاط المتاح' : 'Available Points Balance' }}</span>
+                            <span class="text-3xl font-black font-mono text-amber-600 block mt-1">{{ number_format($loyaltyBalance) }} <small class="text-xs font-editorial">PTS</small></span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">جاهزة للاستبدال كخصم</span>
+                        </div>
+
+                        <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'قيمة الخصم المعادلة' : 'Redeemable Value' }}</span>
+                            <span class="text-3xl font-black font-mono text-emerald-600 block mt-1">{{ number_format($discountEquiv) }} <small class="text-xs font-editorial">EGP</small></span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">كل {{ $redeemUnit }} نقطة = {{ $discountEgp }} ج.م خصم</span>
+                        </div>
+
+                        <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'معدل الكسب' : 'Earning Privilege' }}</span>
+                            <span class="text-xl font-bold font-mono text-black block mt-2">1 pt / {{ $earnRate }} EGP</span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">تضاف تلقائياً عند استلام الطلب</span>
+                        </div>
+                    </div>
+
+                    <!-- Points History Ledger -->
+                    <div class="space-y-3">
+                        <h3 class="font-editorial font-bold text-xs uppercase tracking-wider text-black">{{ $isArAccount ? 'سجل المعاملات والنقاط' : 'Privilege Activity Ledger' }}</h3>
+                        
+                        <div class="border-2 border-black bg-white overflow-x-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <table class="w-full text-right text-xs">
+                                <thead class="bg-black text-white text-[10px] uppercase font-editorial tracking-wider">
+                                    <tr>
+                                        <th class="p-3">التاريخ</th>
+                                        <th class="p-3">نوع العملية</th>
+                                        <th class="p-3">التفاصيل</th>
+                                        <th class="p-3 text-left">النقاط</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 font-sans">
+                                    @forelse($loyaltyLedgers as $ledger)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="p-3 font-mono text-gray-500 text-[11px]">{{ $ledger->created_at->format('Y-m-d H:i') }}</td>
+                                            <td class="p-3">
+                                                <span class="px-2 py-0.5 text-[9px] font-bold uppercase {{ $ledger->points > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ str_replace('_', ' ', $ledger->type) }}
+                                                </span>
+                                            </td>
+                                            <td class="p-3 text-gray-700 text-xs">{{ $ledger->notes ?: '—' }}</td>
+                                            <td class="p-3 font-mono font-black text-sm text-left {{ $ledger->points > 0 ? 'text-emerald-600' : 'text-red-600' }}">
+                                                {{ $ledger->points > 0 ? '+' . $ledger->points : $ledger->points }} pts
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="p-6 text-center text-gray-400 font-editorial uppercase tracking-wider text-xs">
+                                                {{ $isArAccount ? 'لا توجد حركات نقاط مسجلة حتى الآن.' : 'No reward points transactions recorded yet.' }}
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tab 2: My Addresses (Address Book) -->

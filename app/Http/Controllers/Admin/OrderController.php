@@ -86,6 +86,29 @@ class OrderController extends Controller
 
         AuditLog::log('order.status_update', 'order', $order->id, "Changed order #{$order->order_number} status from {$oldStatus} to {$newStatus}");
 
+        // Award Loyalty points if order is delivered
+        if ($newStatus === 'delivered' && $oldStatus !== 'delivered') {
+            if (\App\Models\Setting::get('loyalty_enabled', '1') === '1') {
+                $user = \App\Models\User::where('email', strtolower((string)$order->customer_email))->first();
+                if ($user && !\App\Models\LoyaltyPointLedger::where('order_id', $order->id)->where('type', 'earn')->exists()) {
+                    $earnRate = (int) \App\Models\Setting::get('loyalty_earn_rate_egp', 10);
+                    if ($earnRate > 0) {
+                        $totalEgp = ($order->total_price_minor ?? $order->subtotal_minor ?? 0) / 100;
+                        $pointsEarned = (int) floor($totalEgp / $earnRate);
+                        if ($pointsEarned > 0) {
+                            \App\Models\LoyaltyPointLedger::create([
+                                'user_id' => $user->id,
+                                'order_id' => $order->id,
+                                'points' => $pointsEarned,
+                                'type' => 'earn',
+                                'notes' => "Earned {$pointsEarned} pts for delivered Order #{$order->order_number}",
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
         // Notify client on WhatsApp if status changed
         if ($oldStatus !== $newStatus) {
             try {

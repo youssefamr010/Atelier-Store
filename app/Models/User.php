@@ -60,6 +60,27 @@ class User extends Authenticatable
         return $this->hasMany(Order::class, 'customer_email', 'email');
     }
 
+    public function wishlists(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function loyaltyLedgers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LoyaltyPointLedger::class);
+    }
+
+    public function loyaltyPointsBalance(): int
+    {
+        return (int) $this->loyaltyLedgers()->sum('points');
+    }
+
+
     public function defaultAddress(): ?Address
     {
         return $this->addresses()->where('is_default', true)->first()

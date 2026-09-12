@@ -289,6 +289,40 @@
             @endif
         </div>
 
+        <!-- 5. Curated Related Products (Pinned Cross-Sell) -->
+        <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-4">
+            <div class="border-b pb-2 flex items-center justify-between">
+                <h2 class="text-sm font-mono font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                    <x-icon name="star" class="w-4 h-4 text-black" />
+                    <span>5. Curated Related Products (Pinned Cross-Sell)</span>
+                </h2>
+            </div>
+            <p class="text-xs text-gray-600">
+                اختر منتجات محددة لتظهر أولاً في قسم "قد يعجبك أيضاً" بصفحة هذا المنتج (يملأ المتجر الباقي تلقائياً):
+            </p>
+
+            @if(isset($allOtherProducts) && $allOtherProducts->count() > 0)
+                @php $pinnedIds = (array)($product->pinned_related_ids ?? []); @endphp
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-60 overflow-y-auto p-1 border border-gray-200 bg-gray-50">
+                    @foreach($allOtherProducts as $otherP)
+                        <label class="flex items-center gap-2.5 p-2 bg-white border border-gray-300 hover:border-black cursor-pointer text-xs font-bold transition-colors">
+                            <input 
+                                type="checkbox" 
+                                name="pinned_related_ids[]" 
+                                value="{{ $otherP->id }}"
+                                {{ in_array($otherP->id, $pinnedIds) ? 'checked' : '' }}
+                                class="w-4 h-4 accent-black cursor-pointer shrink-0"
+                            >
+                            <span class="truncate">{{ $otherP->title }}</span>
+                            <span class="text-[10px] font-mono text-gray-400 shrink-0 ml-auto">{{ number_format($otherP->retail_price_minor / 100) }} EGP</span>
+                        </label>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-xs text-gray-400 italic">No other products available in catalog.</p>
+            @endif
+        </div>
+
         <!-- 5. Search Engine Optimization (SEO) -->
         <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-4">
             <h2 class="text-sm font-mono font-bold uppercase tracking-widest text-gray-500 border-b pb-2">5. Search Engine Optimization (SEO)</h2>
