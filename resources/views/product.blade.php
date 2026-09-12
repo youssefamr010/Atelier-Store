@@ -202,6 +202,22 @@ function productDetailComponent() {
         restoreSelectedImage() { 
             this.activeImage = this.selectedImage || fallbackMainImg; 
         },
+        handleMainImgError() {
+            const failedUrl = this.activeImage;
+            const fallback = (this.currentGallery || []).find(u => u && u !== failedUrl);
+            if (fallback) {
+                this.activeImage = fallback;
+                this.selectedImage = fallback;
+                if (this.$refs.mainProductImg) {
+                    this.$refs.mainProductImg.src = fallback;
+                    this.$refs.mainProductImg.style.opacity = '1';
+                }
+            } else if (this.$refs.mainProductImg) {
+                this.$refs.mainProductImg.style.opacity = '0';
+            }
+            const shimmer = document.getElementById('prod-img-shimmer');
+            if (shimmer) shimmer.style.display = 'none';
+        },
         shareProduct() {
             if (navigator.share) {
                 navigator.share({ title: currentProdTitle, url: window.location.href }).catch(() => {});
@@ -381,9 +397,7 @@ function productDetailComponent() {
                             class="w-full h-full object-contain object-center transition-opacity duration-400 ease-out"
                             fetchpriority="high"
                             onerror="
-                                this.style.opacity='0';
-                                var shimmer=document.getElementById('prod-img-shimmer');
-                                if(shimmer) shimmer.style.display='none';
+                                handleMainImgError();
                                 this.onerror=null;
                             "
                             onload="

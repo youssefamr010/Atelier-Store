@@ -62,13 +62,20 @@ class Product extends Model
         if (empty($value)) {
             return null;
         }
-        if (preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?/(.*)$#i', $value, $m)) {
-            return asset($m[3]);
+        // Already an absolute URL
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            // Normalize localhost/127.0.0.1 to live domain
+            if (preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?/(.*)$#i', $value, $m)) {
+                return url($m[3]);
+            }
+            return $value;
         }
+        // Relative storage path
         if (str_starts_with($value, '/storage/') || str_starts_with($value, 'storage/')) {
-            return asset(ltrim($value, '/'));
+            return url(ltrim($value, '/'));
         }
-        return $value;
+        // Bare filename or path — assume media storage
+        return url('storage/media/' . ltrim($value, '/'));
     }
 
     public function approvedReviews(): HasMany
