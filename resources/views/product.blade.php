@@ -121,8 +121,8 @@ function productDetailComponent() {
     const currentProdUrl = @json(route('products.show', ['slug' => $product->slug]));
 
     return {
-        activeImage: fallbackMainImg,
-        selectedImage: fallbackMainImg,
+        activeImage: (fallbackMainImg && fallbackMainImg.startsWith('http')) ? fallbackMainImg : (defaultGallery[0] || fallbackMainImg || ''),
+        selectedImage: (fallbackMainImg && fallbackMainImg.startsWith('http')) ? fallbackMainImg : (defaultGallery[0] || fallbackMainImg || ''),
         activePrice: initialPrice,
         activeStock: initialStock,
         selectedVariantId: initialVarId,
@@ -345,28 +345,92 @@ function productDetailComponent() {
             <!-- Product Gallery Column -->
             <div class="lg:col-span-7 space-y-4 prod-anim-gallery">
                 <div class="relative w-full overflow-hidden border-2 border-black bg-white p-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-                    <div class="product-media-frame relative">
+                    <!-- Main Product Image — iOS-safe render via x-effect -->
+                    <div class="product-media-frame relative" id="prod-main-frame">
+                        <!-- Placeholder shown when no image URL exists -->
+                        <div 
+                            x-show="!activeImage"
+                            class="absolute inset-0 flex flex-col items-center justify-center bg-[#F5F5F0] text-black/20 gap-3"
+                            style="display:none;"
+                        >
+                            <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
+                            </svg>
+                            <span class="text-xs font-bold uppercase tracking-widest">No image</span>
+                        </div>
+
+                        <!-- Image loading shimmer -->
+                        <div 
+                            id="prod-img-shimmer"
+                            class="absolute inset-0 bg-gradient-to-r from-[#eeede9] via-[#f5f4f0] to-[#eeede9] bg-[length:600px_100%] animate-pulse"
+                            style="display:none;"
+                        ></div>
+
+                        <!-- Main Image: x-ref + x-effect avoids iOS Safari :src hydration bug -->
                         <img 
+                            x-ref="mainProductImg"
+                            x-effect="
+                                if (activeImage && $refs.mainProductImg) {
+                                    if ($refs.mainProductImg.src !== activeImage) {
+                                        $refs.mainProductImg.src = activeImage;
+                                    }
+                                }
+                            "
                             src="{{ $mainImg }}"
-                            :src="activeImage" 
                             alt="{{ $product->title }}" 
-                            class="w-full h-full object-contain object-center transition-all duration-500 ease-out"
-                            fetchpriority="high" decoding="async"
+                            class="w-full h-full object-contain object-center transition-opacity duration-400 ease-out"
+                            fetchpriority="high"
+                            onerror="
+                                this.style.opacity='0';
+                                var shimmer=document.getElementById('prod-img-shimmer');
+                                if(shimmer) shimmer.style.display='none';
+                                this.onerror=null;
+                            "
+                            onload="
+                                this.style.opacity='1';
+                                var shimmer=document.getElementById('prod-img-shimmer');
+                                if(shimmer) shimmer.style.display='none';
+                            "
+                            style="opacity:{{ $mainImg ? '1' : '0' }};"
                         >
                     </div>
                 </div>
 
-                <!-- Thumbnails Rail -->
-                <div x-show="currentGallery.length > 0" style="display: none;" class="flex items-center gap-3 overflow-x-auto pb-2">
-                    <template x-for="thumb in currentGallery" :key="thumb">
+                <!-- Thumbnails Rail — iOS-safe with direct DOM update -->
+                <div x-show="currentGallery.length > 1" style="display: none;" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    <template x-for="(thumb, idx) in currentGallery" :key="thumb">
                         <button 
                             type="button" 
-                            @click="activeImage = thumb; selectedImage = thumb"
-                            @mouseenter="activeImage = thumb" @mouseleave="restoreSelectedImage()"
-                            class="w-16 h-16 border p-0.5 bg-white shrink-0 cursor-pointer transition-all duration-200"
-                            :class="activeImage === thumb ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-black/30 opacity-70 hover:opacity-100'"
+                            @click="
+                                activeImage = thumb;
+                                selectedImage = thumb;
+                                if ($refs.mainProductImg && thumb) $refs.mainProductImg.src = thumb;
+                            "
+                            @mouseenter="
+                                activeImage = thumb;
+                                if ($refs.mainProductImg && thumb) $refs.mainProductImg.src = thumb;
+                            "
+                            @mouseleave="
+                                restoreSelectedImage();
+                                if ($refs.mainProductImg && selectedImage) $refs.mainProductImg.src = selectedImage;
+                            "
+                            class="relative w-[68px] h-[68px] sm:w-20 sm:h-20 border bg-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden"
+                            :class="(activeImage === thumb || selectedImage === thumb) 
+                                ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] scale-105' 
+                                : 'border-black/20 opacity-60 hover:opacity-100 hover:border-black/60'"
                         >
-                            <img :src="thumb" alt="" class="w-full h-full object-contain bg-white" loading="lazy" decoding="async">
+                            <img 
+                                :src="thumb" 
+                                :alt="'View ' + (idx + 1)" 
+                                class="w-full h-full object-contain"
+                                loading="lazy"
+                                onerror="this.style.display='none'"
+                            >
+                            <!-- Active indicator dot -->
+                            <span 
+                                x-show="activeImage === thumb"
+                                class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-black"
+                            ></span>
                         </button>
                     </template>
                 </div>

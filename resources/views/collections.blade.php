@@ -262,11 +262,10 @@
                             @if(!empty($img))
                             <img
                                 src="{{ $img }}"
-                                :src="current"
                                 alt="{{ $product->title }}"
                                 class="w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105"
                                 loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
-                                decoding="async"
+                                onerror="this.style.opacity='0.1'; this.onerror=null;"
                             >
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-[#F5F5F0]">

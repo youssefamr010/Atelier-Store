@@ -64,11 +64,10 @@
                         @if(!empty($img))
                         <img
                             src="{{ $img }}"
-                            :src="current"
                             alt="{{ $product->title }}"
                             class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300 ease-out"
                             loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
-                            decoding="async"
+                            onerror="this.style.opacity='0.15'; this.onerror=null;"
                         >
                         @else
                         <div class="w-full h-full flex items-center justify-center bg-[#F5F5F0]">
