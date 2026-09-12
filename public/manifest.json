@@ -1,8 +1,8 @@
 {
   "id": "com.atelier.store",
-  "name": "ATELIER — Luxury Accessories & Bespoke EDC",
+  "name": "ATELIER Studio Egypt",
   "short_name": "ATELIER",
-  "description": "Handcrafted luxury smart wallets, Tuscan leather cardholders, and aerospace-grade accessories in Egypt.",
+  "description": "Handcrafted luxury home decor, bespoke interior pieces, and modern curated lifestyle items in Egypt.",
   "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",

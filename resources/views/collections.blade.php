@@ -2,22 +2,19 @@
 
 @php
     $isArCol = ($settings['storefront_lang'] ?? 'en') === 'ar';
+    $isAllOverview = ($currentSlug ?? 'all') === 'all';
 @endphp
 
-@section('title', ($isArCol ? 'جميع المنتجات — ' : ($collectionTitle ?? 'All Products') . ' — ') . ($settings['storeName'] ?? 'ATELIER'))
-@section('meta_description', $isArCol
-    ? 'تصفح تشكيلتنا الكاملة من المنتجات والديكورات الفاخرة وإكسسوارات الاستخدام اليومي.'
-    : ($collectionDescription ?? 'Precision engineered RFID wallets, magnetic cardholders, and handcrafted luxury EDC accessories.')
-)
+@section('title', ($isArCol ? ($collectionTitle ?? 'التصنيفات') . ' — ' : ($collectionTitle ?? 'Collections') . ' — ') . ($settings['storeName'] ?? 'ATELIER'))
+@section('meta_description', $collectionDescription ?? ($isArCol ? 'تصفح تشكيلاتنا الحصرية من القطع والديكورات الفاخرة.' : 'Discover our curated selection of bespoke interior decorations and handcrafted lifestyle accessories.'))
 
 @section('content')
 <div 
     class="bg-[#F5F5F0] min-h-screen py-6 sm:py-8 lg:py-12"
     x-data="{
+        viewMode: '{{ $isAllOverview ? 'collections' : 'products' }}', // 'collections' (Big Cards) or 'products' (Grid)
         searchQuery: '',
-        sortBy: 'featured',
-        gridCols: 'standard', // 'compact', 'standard', 'spacious'
-        totalItems: {{ $products->count() }},
+        gridCols: 'standard',
         filterMatch(title) {
             if (!this.searchQuery) return true;
             return title.toLowerCase().includes(this.searchQuery.toLowerCase().trim());
@@ -26,45 +23,139 @@
 >
     <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-10">
 
-        {{-- ── 1. Collection Editorial Hero ── --}}
-        <div class="border-b-2 border-black pb-6 sm:pb-8 mb-6 sm:mb-8 reveal-on-scroll">
+        {{-- ── 1. Clean Editorial Hero (No cluttered breadcrumbs, No wallet text) ── --}}
+        <div class="border-b-2 border-black pb-5 sm:pb-6 mb-6 sm:mb-8 reveal-on-scroll">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div class="space-y-2 max-w-3xl">
+                <div class="space-y-1.5 max-w-3xl">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 bg-black inline-block"></span>
                         <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.25em] text-black/70">
-                            {{ $isArCol ? ($currentSlug === 'all' ? 'الأرشيف الكامل' : 'تصنيف خاص') : ($currentSlug === 'all' ? 'FULL ARCHIVE' : 'COLLECTION SPOTLIGHT') }}
+                            {{ $isArCol ? ($isAllOverview ? 'المجموعات والتصنيفات' : 'تصنيف خاص') : ($isAllOverview ? 'CURATED COLLECTIONS' : 'COLLECTION') }}
                         </span>
-                        <span class="text-[9px] font-mono font-bold bg-black text-white px-2 py-0.5 rounded-full">
-                            {{ $products->count() }} {{ $isArCol ? 'قطعة' : 'pieces' }}
-                        </span>
+                        @if(!$isAllOverview)
+                            <span class="text-[9px] font-mono font-bold bg-black text-white px-2 py-0.5 rounded-full">
+                                {{ $products->count() }} {{ $isArCol ? 'قطعة' : 'pieces' }}
+                            </span>
+                        @else
+                            <span class="text-[9px] font-mono font-bold bg-black text-white px-2 py-0.5 rounded-full">
+                                {{ $collections->count() }} {{ $isArCol ? 'مجموعات' : 'collections' }}
+                            </span>
+                        @endif
                     </div>
                     <h1 class="font-editorial font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-black leading-tight">
-                        {{ $isArCol ? ($currentSlug === 'all' ? 'جميع القطع المختارة' : ($collectionTitle ?? 'المنتجات')) : ($collectionTitle ?? 'All Products') }}
+                        {{ $isArCol ? ($isAllOverview ? 'تشكيلات أتيليه الفاخرة' : ($collectionTitle ?? 'المنتجات')) : ($collectionTitle ?? 'Collections') }}
                     </h1>
-                    <p class="font-sans text-xs sm:text-sm text-black/75 max-w-2xl leading-relaxed">
-                        {{ $isArCol 
-                            ? ($collectionDescription ?? 'تصفح تشكيلتنا الحصرية من القطع المصنوعة بأعلى معايير الجودة والاهتمام بأدق التفاصيل.') 
-                            : ($collectionDescription ?? 'Curated premium accessories and bespoke home decoration engineered for timeless aesthetics and enduring utility.') }}
+                    <p class="font-sans text-xs sm:text-sm text-black/70 max-w-2xl leading-relaxed">
+                        {{ $collectionDescription }}
                     </p>
                 </div>
 
-                {{-- Quick Stats / Breadcrumb --}}
-                <div class="text-right flex items-center md:flex-col md:items-end justify-between gap-1 text-[10px] font-editorial uppercase tracking-wider text-black/50">
-                    <div class="flex items-center gap-1.5">
-                        <a href="{{ route('home') }}" class="hover:text-black transition-colors">{{ $isArCol ? 'الرئيسية' : 'Home' }}</a>
-                        <span>/</span>
-                        <span class="text-black font-bold">{{ $isArCol ? ($collectionTitle ?? 'المجموعة') : ($collectionTitle ?? 'Collection') }}</span>
+                {{-- Quick Action / Back link --}}
+                @if(!$isAllOverview)
+                    <div class="shrink-0">
+                        <a 
+                            href="{{ route('collections.show', ['slug' => 'all']) }}" 
+                            class="inline-flex items-center gap-2 border-2 border-black bg-white px-4 py-2 text-xs font-editorial font-bold uppercase tracking-wider text-black hover:bg-black hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                            <span>{{ $isArCol ? '← عرض جميع المجموعات' : '← All Collections' }}</span>
+                        </a>
                     </div>
-                    <span class="font-mono text-[10px] text-black/40">
-                        {{ $isArCol ? 'توصيل فوري متاح' : 'Express Delivery Available' }}
-                    </span>
-                </div>
+                @endif
             </div>
+
+            {{-- Tab Switcher on Overview: Big Collection Cards vs Product Grid --}}
+            @if($isAllOverview)
+                <div class="flex items-center gap-2 mt-6 pt-4 border-t border-black/10">
+                    <button 
+                        type="button" 
+                        @click="viewMode = 'collections'" 
+                        :class="viewMode === 'collections' ? 'bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'bg-white text-black hover:bg-gray-100'"
+                        class="px-4 py-2 border-2 border-black text-xs font-editorial font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="7" height="7" stroke-width="2"/><rect x="14" y="3" width="7" height="7" stroke-width="2"/><rect x="14" y="14" width="7" height="7" stroke-width="2"/><rect x="3" y="14" width="7" height="7" stroke-width="2"/></svg>
+                        <span>{{ $isArCol ? 'بطاقات المجموعات (Big Cards)' : 'Browse Collections' }}</span>
+                    </button>
+
+                    <button 
+                        type="button" 
+                        @click="viewMode = 'products'" 
+                        :class="viewMode === 'products' ? 'bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'bg-white text-black hover:bg-gray-100'"
+                        class="px-4 py-2 border-2 border-black text-xs font-editorial font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <span>{{ $isArCol ? 'جميع المنتجات' : 'All Products Grid' }}</span>
+                    </button>
+                </div>
+            @endif
         </div>
 
-        {{-- ── 2. Sticky Filter & Category Rail with Live Counts ── --}}
-        <div class="sticky top-14 z-30 bg-[#F5F5F0]/95 backdrop-blur-md py-3 -mx-3 px-3 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10 border-b border-black/10 mb-6 sm:mb-8 transition-all">
+        {{-- ── 2. BIG COLLECTION CARDS (Requested by User for Mobile & Desktop) ── --}}
+        @if($isAllOverview)
+            <div x-show="viewMode === 'collections'" class="space-y-6 sm:space-y-8 mb-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    @forelse($collections as $col)
+                        @php
+                            $colImg = $col->image_url 
+                                ? (str_starts_with($col->image_url, 'http') ? $col->image_url : url($col->image_url))
+                                : 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1000&q=80';
+                        @endphp
+                        <a 
+                            href="{{ route('collections.show', ['slug' => $col->slug]) }}"
+                            class="group block relative overflow-hidden border-2 border-black bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-300"
+                        >
+                            {{-- Image Container with Aspect Ratio (Mobile friendly large frame) --}}
+                            <div class="relative w-full aspect-[16/10] sm:aspect-[4/3] overflow-hidden bg-neutral-900">
+                                <img 
+                                    src="{{ $colImg }}" 
+                                    alt="{{ $col->title }}" 
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                    loading="lazy"
+                                >
+                                {{-- Ambient Dark Gradient --}}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85 group-hover:opacity-90 transition-opacity"></div>
+                                
+                                {{-- Piece Count Badge --}}
+                                <div class="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
+                                    <span class="bg-white text-black text-[10px] font-mono font-black uppercase px-2.5 py-1 border border-black shadow-xs">
+                                        {{ $col->products_count ?? 0 }} {{ $isArCol ? 'قطعة' : 'Pieces' }}
+                                    </span>
+                                </div>
+
+                                {{-- Card Content --}}
+                                <div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 z-10 text-white flex flex-col justify-end space-y-2">
+                                    <span class="text-[9px] font-editorial font-bold uppercase tracking-[0.2em] text-amber-300">
+                                        {{ $isArCol ? 'تشكيلة مختارة' : 'Collection' }}
+                                    </span>
+                                    <h2 class="font-editorial font-black text-xl sm:text-2xl uppercase tracking-tight text-white leading-tight">
+                                        {{ $col->title }}
+                                    </h2>
+                                    @if(!empty($col->description))
+                                        <p class="font-sans text-xs text-white/80 line-clamp-2 leading-relaxed">
+                                            {{ $col->description }}
+                                        </p>
+                                    @endif
+                                    <div class="pt-2 flex items-center gap-1.5 text-xs font-editorial font-bold uppercase tracking-wider text-white group-hover:text-amber-300 transition-colors">
+                                        <span>{{ $isArCol ? 'تصفح المجموعة ←' : 'Explore Collection →' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="col-span-full py-16 text-center border-2 border-dashed border-black/30 p-8 bg-white">
+                            <h3 class="font-editorial font-bold text-lg uppercase tracking-wider text-black">
+                                {{ $isArCol ? 'لا توجد مجموعات بعد' : 'No collections available' }}
+                            </h3>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        @endif
+
+        {{-- ── 3. Sticky Filter & Category Rail (When in Products Mode or Single Collection) ── --}}
+        <div 
+            x-show="viewMode === 'products' || !{{ $isAllOverview ? 'true' : 'false' }}"
+            class="sticky top-14 z-30 bg-[#F5F5F0]/95 backdrop-blur-md py-3 -mx-3 px-3 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10 border-b border-black/10 mb-6 sm:mb-8 transition-all"
+        >
             <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
                 
                 {{-- Categories Pill Bar --}}
@@ -131,22 +222,11 @@
             </div>
         </div>
 
-        {{-- ── 3. Skeleton Placeholders ── --}}
-        <div id="col-skeletons" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4" aria-hidden="true">
-            @for ($s = 0; $s < 10; $s++)
-            <div class="atelier-skeleton bg-white border border-black/10 p-2.5">
-                <div class="skeleton-img bg-black/8 mb-2" style="aspect-ratio:4/3;"></div>
-                <div class="skeleton-line bg-black/8 h-2 w-3/4 mb-1.5"></div>
-                <div class="skeleton-line bg-black/8 h-2 w-1/2 mb-2"></div>
-                <div class="skeleton-line bg-black/8 h-2 w-full"></div>
-            </div>
-            @endfor
-        </div>
-
-        {{-- ── 4. Actual Modern Product Grid ── --}}
+        {{-- ── 4. Actual Product Grid ── --}}
         <div 
+            x-show="viewMode === 'products' || !{{ $isAllOverview ? 'true' : 'false' }}"
             id="col-product-grid" 
-            class="grid gap-3 lg:gap-4 hidden"
+            class="grid gap-3 lg:gap-4"
             :class="{
                 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5': gridCols === 'standard',
                 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6': gridCols === 'compact'
@@ -306,34 +386,17 @@
                         </svg>
                     </div>
                     <h3 class="font-editorial font-bold text-lg uppercase tracking-wider text-black">
-                        {{ $isArCol ? 'لم يتم العثور على قطع في هذا التصنيف' : 'No pieces found in this specific collection' }}
+                        {{ $isArCol ? 'لا توجد منتجات في هذه المجموعة حالياً' : 'No pieces found in this collection' }}
                     </h3>
                     <p class="text-xs text-black/60 max-w-md mx-auto mt-1 mb-6">
-                        {{ $isArCol ? 'تصفح تشكيلتنا الكاملة لاكتشاف جميع القطع المتوفرة.' : 'Browse our full archive to explore all handcrafted luxury pieces.' }}
+                        {{ $isArCol ? 'يمكنك إضافة منتجات جديدة بسهولة من لوحة التحكم.' : 'You can easily add new products to this collection from the admin panel.' }}
                     </p>
                     <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="btn-luxury inline-block px-8 py-3 text-xs tracking-wider">
-                        {{ $isArCol ? 'تصفح جميع المنتجات (' . \App\Models\Product::active()->count() . ') ←' : 'Shop All Products (' . \App\Models\Product::active()->count() . ') →' }}
+                        {{ $isArCol ? 'تصفح جميع التشكيلات ←' : 'Browse All Collections →' }}
                     </a>
                 </div>
             @endforelse
         </div>
-
-        {{-- Reveal grid + hide skeletons --}}
-        <script>
-            (function () {
-                var skeletons = document.getElementById('col-skeletons');
-                var grid = document.getElementById('col-product-grid');
-                if (skeletons && grid) {
-                    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                        skeletons.remove(); grid.classList.remove('hidden');
-                    } else {
-                        document.addEventListener('DOMContentLoaded', function () {
-                            skeletons.remove(); grid.classList.remove('hidden');
-                        });
-                    }
-                }
-            })();
-        </script>
 
     </div>
 </div>

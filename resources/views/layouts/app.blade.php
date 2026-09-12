@@ -11,19 +11,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'ATELIER — Luxury Accessories & Bespoke EDC')</title>
-    <meta name="description" content="@yield('meta_description', 'Precision crafted luxury smart wallets, cardholders, and minimalist everyday carry in full-grain leather and titanium.')">
+    <meta name="description" content="@yield('meta_description', 'Discover handcrafted luxury pieces, modern home decor, and bespoke lifestyle accessories at Atelier.')">
     <link rel="canonical" href="@yield('canonical', url()->current())">
 
     <!-- Open Graph & Social Cards -->
     <meta property="og:site_name" content="{{ $settings['storeName'] ?? 'ATELIER' }}">
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:title" content="@yield('title', 'ATELIER — Luxury Accessories & Bespoke EDC')">
-    <meta property="og:description" content="@yield('meta_description', 'Precision crafted luxury smart wallets, cardholders, and minimalist everyday carry in full-grain leather and titanium.')">
+    <meta property="og:description" content="@yield('meta_description', 'Discover handcrafted luxury pieces, modern home decor, and bespoke lifestyle accessories at Atelier.')">
     <meta property="og:url" content="@yield('canonical', url()->current())">
     <meta property="og:image" content="@yield('og_image', asset('favicon.png'))">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', 'ATELIER — Luxury Accessories & Bespoke EDC')">
-    <meta name="twitter:description" content="@yield('meta_description', 'Precision crafted luxury smart wallets, cardholders, and minimalist everyday carry in full-grain leather and titanium.')">
+    <meta name="twitter:description" content="@yield('meta_description', 'Discover handcrafted luxury pieces, modern home decor, and bespoke lifestyle accessories at Atelier.')">
     <meta name="twitter:image" content="@yield('og_image', asset('favicon.png'))">
 
     <!-- Google Search Console Verification -->

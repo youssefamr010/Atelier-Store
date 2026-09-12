@@ -154,7 +154,7 @@
                             @input.debounce.250ms="performLiveSearch()"
                             @focus="searchFocused = true"
                             @click.away="searchFocused = false"
-                            placeholder="{{ $isAr ? 'ابحث عن محافظ، حوامل بطاقات، وإكسسوارات...' : 'Search wallets, cardholders, and accessories...' }}" 
+                            placeholder="{{ $isAr ? 'ابحث في التشكيلات والمنتجات الفاخرة...' : 'Search collections, products, and decor...' }}" 
                             class="w-full py-2.5 px-2 text-xs font-sans text-black placeholder:text-black/40 focus:outline-none bg-transparent"
                             autocomplete="off"
                         >
@@ -195,7 +195,8 @@
                 <nav class="hidden xl:flex items-center gap-5">
                     @php
                         $isHome = request()->routeIs('home');
-                        $isAllCatalog = request()->is('collections/all') || request()->is('collections');
+                        $isCollectionsPage = request()->is('collections') || (request()->is('collections/*') && !request()->is('collections/all'));
+                        $isAllCatalog = request()->is('collections/all');
                         $isTrack = request()->routeIs('track.order');
                         $navLinkClass = 'relative font-editorial font-bold text-[11px] uppercase tracking-[0.14em] transition-colors py-1 whitespace-nowrap group';
                     @endphp
@@ -205,8 +206,13 @@
                         <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isHome ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
                     </a>
 
+                    <a href="{{ url('/collections') }}" class="{{ $navLinkClass }} {{ $isCollectionsPage ? 'text-black' : 'text-black/60 hover:text-black' }}">
+                        <span>{{ $isAr ? 'التشكيلات' : 'Collections' }}</span>
+                        <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isCollectionsPage ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
+                    </a>
+
                     <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="{{ $navLinkClass }} {{ $isAllCatalog ? 'text-black' : 'text-black/60 hover:text-black' }}">
-                        <span>{{ $isAr ? 'المنتجات' : 'Catalog' }}</span>
+                        <span>{{ $isAr ? 'كل المنتجات' : 'All Products' }}</span>
                         <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isAllCatalog ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
                     </a>
 
@@ -215,6 +221,18 @@
                         <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isTrack ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
                     </a>
                 </nav>
+
+                <!-- Desktop Collections Action Button -->
+                <a 
+                    href="{{ url('/collections') }}" 
+                    class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/15 hover:border-black bg-[#F8F7F4] hover:bg-black hover:text-white transition-all duration-200 text-[11px] font-editorial font-bold uppercase tracking-wider text-black shrink-0 group shadow-sm"
+                    title="{{ $isAr ? 'تصفح التشكيلات' : 'Explore Collections' }}"
+                >
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    <span>{{ $isAr ? 'التشكيلات' : 'Collections' }}</span>
+                </a>
 
                 <!-- Client Account -->
                 <a 

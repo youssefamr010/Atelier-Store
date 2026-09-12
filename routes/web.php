@@ -191,8 +191,8 @@ Route::get('/collections/{slug?}', function (Request $request, string $slug = 'a
     $displayCards = ProductCardService::toDisplayCards($products, $isArCol);
     $categoryCounts = ProductCardService::getCategoryCardCounts();
 
-    $collectionTitle = $collection ? $collection->title : ($slug === 'all' ? 'All Archive Pieces' : ucwords(str_replace('-', ' ', $slug)));
-    $collectionDescription = $collection ? $collection->description : 'Bespoke RFID wallets, smart magnetic cardholders, and luxury leather EDC accessories.';
+    $collectionTitle = $collection ? $collection->title : ($isArCol ? 'جميع التشكيلات' : ($slug === 'all' ? 'All Collections' : ucwords(str_replace('-', ' ', $slug))));
+    $collectionDescription = $collection ? $collection->description : ($isArCol ? 'تصفح تشكيلاتنا الحصرية من القطع والديكورات الفاخرة.' : 'Discover our curated selection of bespoke interior decorations and handcrafted lifestyle accessories.');
     $currentSlug = $slug;
 
     PageView::track('collection', $collection?->id);
