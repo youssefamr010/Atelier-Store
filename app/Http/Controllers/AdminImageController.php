@@ -229,4 +229,69 @@ class AdminImageController extends Controller
 
         return back()->with('success', 'Client Access Portal background wallpaper updated successfully.');
     }
+
+    /**
+     * Fetch external image from URL (Amazon, Pinterest, CDN) to allow seamless drag-and-drop.
+     */
+    public function fetchImageUrl(Request $request): JsonResponse
+    {
+        $request->validate([
+            'url' => 'required|string',
+        ]);
+
+        $url = trim((string) $request->input('url'));
+
+        // Handle schemeless URLs (e.g. //m.media-amazon.com/...)
+        if (str_starts_with($url, '//')) {
+            $url = 'https:' . $url;
+        }
+
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid image URL provided.',
+            ], 422);
+        }
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept' => 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Referer' => 'https://www.amazon.eg/',
+            ])->timeout(12)->get($url);
+
+            if (! $response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch image from external website (Status: '.$response->status().').',
+                ], 422);
+            }
+
+            $body = $response->body();
+            $contentType = $response->header('Content-Type') ?: 'image/jpeg';
+            if (! str_starts_with($contentType, 'image/')) {
+                $contentType = 'image/jpeg';
+            }
+
+            $base64 = base64_encode($body);
+            $dataUrl = "data:{$contentType};base64,{$base64}";
+            $parsedPath = parse_url($url, PHP_URL_PATH);
+            $filename = $parsedPath ? basename($parsedPath) : 'imported-image.jpg';
+            if (! str_contains($filename, '.')) {
+                $filename .= '.jpg';
+            }
+
+            return response()->json([
+                'success' => true,
+                'data_url' => $dataUrl,
+                'filename' => $filename,
+                'mime' => $contentType,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error downloading image: '.$e->getMessage(),
+            ], 500);
+        }
+    }
 }

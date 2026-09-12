@@ -746,6 +746,7 @@ Route::middleware(['admin'])->group(function () {
     Route::post('/admin/settings/replace-banner', [AdminImageController::class, 'replacePromoBanner'])->name('admin.settings.replace-banner');
     Route::post('/admin/collections/{id}/replace-image', [AdminImageController::class, 'replaceCollectionImage'])->name('admin.collections.replace-image');
     Route::post('/admin/settings/replace-portal-bg', [AdminImageController::class, 'replacePortalBackground'])->name('admin.settings.replace-portal-bg');
+    Route::post('/admin/images/fetch-url', [AdminImageController::class, 'fetchImageUrl'])->name('admin.images.fetch-url');
     Route::post('/admin/settings/reset-portal-bg', function () {
         Setting::set('account_portal_background_url', '');
 

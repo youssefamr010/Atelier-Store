@@ -1962,6 +1962,53 @@ async function compressImageFile(file, maxWidth = 1600, maxHeight = 1600, qualit
     });
 }
 
+async function resolveSmartDropFiles(e) {
+    // 1. Direct files from local disk
+    const directFiles = Array.from(e.dataTransfer?.files || e.clipboardData?.files || []).filter(f => f.type && f.type.startsWith('image/'));
+    if (directFiles.length > 0) return directFiles;
+
+    // 2. External URL drag-and-drop or HTML (from Amazon, Google, etc.)
+    let url = null;
+    const uriList = e.dataTransfer?.getData('text/uri-list') || '';
+    const htmlData = e.dataTransfer?.getData('text/html') || e.clipboardData?.getData('text/html') || '';
+    const plainText = e.dataTransfer?.getData('text/plain') || e.clipboardData?.getData('text/plain') || '';
+
+    if (uriList && uriList.startsWith('http')) {
+        url = uriList.trim().split('\n')[0];
+    } else if (htmlData) {
+        const match = htmlData.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
+        if (match) url = match[1];
+    }
+    if (!url && plainText && (plainText.match(/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif)(\?.*)?$/i) || (plainText.startsWith('http') && plainText.includes('images')))) {
+        url = plainText.trim();
+    }
+
+    if (url) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            const resp = await fetch('{{ route('admin.images.fetch-url') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            });
+            const data = await resp.json();
+            if (data.success && data.data_url) {
+                const blobResp = await fetch(data.data_url);
+                const blob = await blobResp.blob();
+                const file = new File([blob], data.filename || 'imported-variant.jpg', { type: data.mime || 'image/jpeg' });
+                return [file];
+            }
+        } catch(err) {
+            console.warn('Failed to fetch external dropped image via proxy:', err);
+        }
+    }
+    return [];
+}
+
 // 2. Initialize Drag-and-Drop Zones
 function initSmartDropzones() {
     document.querySelectorAll('.smart-dropzone').forEach(dropzone => {
@@ -1982,8 +2029,7 @@ function initSmartDropzones() {
         });
 
         dropzone.addEventListener('drop', async (e) => {
-            const dt = e.dataTransfer;
-            const files = dt?.files;
+            const files = await resolveSmartDropFiles(e);
             if (!files || files.length === 0) return;
 
             const idMatch = dropzone.id.match(/^var-dropzone-(.+)$/) || dropzone.id.match(/^new-var-dropzone$/);

@@ -525,7 +525,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10Z" stroke-linejoin="round" stroke-width="1.8"/></svg>
             <span>{{ $isArabicStore ? 'الرئيسية' : 'Home' }}</span>
         </a>
-        <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="mobile-dock-link {{ $isCatalogPage ? 'is-active' : '' }}" aria-label="{{ $isArabicStore ? 'التصنيفات' : 'Collections' }}">
+        <a href="{{ url('/collections') }}" class="mobile-dock-link {{ $isCatalogPage ? 'is-active' : '' }}" aria-label="{{ $isArabicStore ? 'التصنيفات' : 'Collections' }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke-width="1.8"/><path d="M4 10h16M9 5v14" stroke-width="1.8"/></svg>
             <span>{{ $isArabicStore ? 'التصنيفات' : 'Collections' }}</span>
         </a>
@@ -559,9 +559,9 @@
             </form>
             <p class="text-[11px] text-black/50 mb-4">{{ $isArabicStore ? 'يفهم الكلمات الناقصة وأخطاء الكتابة البسيطة.' : 'Handles missing spaces and small spelling mistakes.' }}</p>
             <div class="flex flex-wrap gap-2 mb-4">
-                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'جراب' : 'case' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'جرابات' : 'Cases' }}</button>
-                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'محفظة' : 'wallet' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'محافظ' : 'Wallets' }}</button>
-                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'اسود' : 'black' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'الأسود' : 'Black' }}</button>
+                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'فازات' : 'vases' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'فازات' : 'Vases' }}</button>
+                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'إضاءة' : 'lighting' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'إضاءة' : 'Lighting' }}</button>
+                <button type="button" @click="useSuggestion('{{ $isArabicStore ? 'ديكور' : 'decor' }}')" class="min-h-0 rounded-full border border-black/10 bg-white px-3 py-1.5 text-[10px] text-black/60">{{ $isArabicStore ? 'ديكور' : 'Decor' }}</button>
             </div>
             <div class="flex-1 overflow-y-auto -mx-1 px-1">
                 <template x-if="loading"><p class="py-8 text-center text-xs text-black/45">{{ $isArabicStore ? 'نبحث لك…' : 'Looking for it…' }}</p></template>

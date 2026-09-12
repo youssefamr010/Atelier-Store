@@ -16,16 +16,16 @@
 
     $bannerHeightSetting = $settings['homepage_banner_height'] ?? 'auto';
     $heightMap = [
-        'auto'      => 'h-auto aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1]',
-        'natural'   => 'h-auto aspect-[16/9] sm:aspect-[21/9]',
-        'panoramic' => 'h-auto aspect-[2/1] sm:aspect-[21/9] lg:aspect-[3/1]',
-        'cinematic' => 'h-auto aspect-[16/9] sm:aspect-[16/9]',
-        'compact'   => 'h-[260px] sm:h-[320px] lg:h-[380px]',
-        'medium'    => 'h-[340px] sm:h-[420px] lg:h-[480px]',
-        'large'     => 'h-[440px] sm:h-[540px] lg:h-[620px]',
-        'full'      => 'h-[70vh] sm:h-[80vh] lg:h-[88vh]',
+        'auto'      => 'min-h-[260px] sm:min-h-[360px] lg:min-h-[440px] aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[3/1]',
+        'natural'   => 'min-h-[240px] sm:min-h-[340px] aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9]',
+        'panoramic' => 'min-h-[220px] sm:min-h-[320px] aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1]',
+        'cinematic' => 'min-h-[280px] sm:min-h-[400px] aspect-[4/3] sm:aspect-[16/9]',
+        'compact'   => 'min-h-[240px] h-[260px] sm:h-[320px] lg:h-[380px]',
+        'medium'    => 'min-h-[300px] h-[340px] sm:h-[420px] lg:h-[480px]',
+        'large'     => 'min-h-[380px] h-[440px] sm:h-[540px] lg:h-[620px]',
+        'full'      => 'min-h-[70vh] h-[75vh] sm:h-[82vh] lg:h-[90vh]',
     ];
-    $heightClass = $heightMap[$bannerHeightSetting] ?? (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') ? '' : 'h-auto aspect-[16/9] sm:aspect-[21/9]');
+    $heightClass = $heightMap[$bannerHeightSetting] ?? (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') ? '' : 'min-h-[260px] sm:min-h-[360px] aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9]');
     $customHeightStyle = (!isset($heightMap[$bannerHeightSetting]) && (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') || str_ends_with($bannerHeightSetting, '%'))) 
         ? "height: {$bannerHeightSetting};" 
         : '';
@@ -38,9 +38,9 @@
 
     $overlayClasses = [
         'none'   => 'bg-transparent',
-        'light'  => 'bg-black/20',
-        'medium' => 'bg-gradient-to-t from-black/80 via-black/35 to-transparent',
-        'dark'   => 'bg-gradient-to-t from-black via-black/60 to-black/30',
+        'light'  => 'bg-black/25',
+        'medium' => 'bg-gradient-to-t from-black/85 via-black/35 to-black/10',
+        'dark'   => 'bg-gradient-to-t from-black via-black/65 to-black/35',
     ];
     $overlayClass = $overlayClasses[$bannerOverlay] ?? $overlayClasses['medium'];
 @endphp

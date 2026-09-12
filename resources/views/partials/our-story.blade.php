@@ -5,10 +5,10 @@
     $storySub = $settings['homepage_story_subtitle'] ?? ($isAr ? 'حرفية وفخامة بلا مساومة' : 'UNCOMPROMISING ARTISANAL HERITAGE');
     $storyTitle = $settings['homepage_story_title'] ?? ($isAr ? 'عن Atelier — فلسفة التصميم والأناقة الخالدة' : 'The Atelier Standard: Mastercrafted Elegance');
     $storyBody = $settings['homepage_story_body'] ?? ($isAr 
-        ? 'انطلقت Atelier برؤية لإعادة تعريف الإكسسوارات الفاخرة، حيث تلتقي أجود الخامات العالمية بأعلى مستويات الحرفية والتفصيل الدقيق. كل قطعة في تشكيلاتنا صُممت بعناية فائقة لتمنحك حضوراً فريداً وتجربة استخدام راقية تدوم طويلاً.' 
-        : 'Born from a devotion to minimalist geometry and tactile permanence, Atelier creates bespoke EDC accessories using hand-selected full-grain leathers and aerospace grade hardware. Every piece is an artifact of precision, tailored for those who appreciate quiet luxury and enduring craftsmanship.');
+        ? 'انطلقت Atelier برؤية لإعادة تعريف الديكورات والإكسسوارات الفاخرة، حيث تلتقي أجود الخامات العالمية بأعلى مستويات الحرفية والتفصيل الدقيق. كل قطعة في تشكيلاتنا صُممت بعناية فائقة لتمنح مساحتك حضوراً فريداً وأناقة تدوم طويلاً.' 
+        : 'Born from a devotion to minimalist geometry and timeless aesthetic permanence, Atelier crafts bespoke interior pieces and lifestyle decor using hand-selected materials and meticulous artisan standards. Every piece is an artifact of precision, tailored for those who appreciate quiet luxury.');
     
-    $storyImg = $settings['homepage_story_image'] ?? 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=900&q=85';
+    $storyImg = $settings['homepage_story_image'] ?? 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1000&q=85';
 @endphp
 
 @if($storyEnabled)
@@ -44,7 +44,7 @@
                 <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
                     <div>
                         <span class="font-mono font-black text-xl sm:text-2xl text-white block">100%</span>
-                        <span class="text-[9px] font-editorial uppercase tracking-wider text-white/50 block mt-0.5">{{ $isAr ? 'جلد طبيعي فاخر' : 'Full-Grain Leather' }}</span>
+                        <span class="text-[9px] font-editorial uppercase tracking-wider text-white/50 block mt-0.5">{{ $isAr ? 'حرفية وتفاصيل متقنة' : 'Artisanal Craft' }}</span>
                     </div>
                     <div>
                         <span class="font-mono font-black text-xl sm:text-2xl text-white block">2 YRS</span>

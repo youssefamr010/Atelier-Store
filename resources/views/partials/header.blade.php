@@ -192,10 +192,9 @@
             <!-- Right: Nav Links + Account + Bag (Clean & Complete) -->
             <div class="flex items-center gap-3 sm:gap-4 shrink-0">
                 <!-- Desktop Nav Links -->
-                <nav class="hidden xl:flex items-center gap-5">
+                <nav class="hidden xl:flex items-center gap-6">
                     @php
                         $isHome = request()->routeIs('home');
-                        $isCollectionsPage = request()->is('collections') || (request()->is('collections/*') && !request()->is('collections/all'));
                         $isAllCatalog = request()->is('collections/all');
                         $isTrack = request()->routeIs('track.order');
                         $navLinkClass = 'relative font-editorial font-bold text-[11px] uppercase tracking-[0.14em] transition-colors py-1 whitespace-nowrap group';
@@ -204,11 +203,6 @@
                     <a href="{{ route('home') }}" class="{{ $navLinkClass }} {{ $isHome ? 'text-black' : 'text-black/60 hover:text-black' }}">
                         <span>{{ $isAr ? 'الرئيسية' : 'Home' }}</span>
                         <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isHome ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
-                    </a>
-
-                    <a href="{{ url('/collections') }}" class="{{ $navLinkClass }} {{ $isCollectionsPage ? 'text-black' : 'text-black/60 hover:text-black' }}">
-                        <span>{{ $isAr ? 'التشكيلات' : 'Collections' }}</span>
-                        <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isCollectionsPage ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
                     </a>
 
                     <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="{{ $navLinkClass }} {{ $isAllCatalog ? 'text-black' : 'text-black/60 hover:text-black' }}">

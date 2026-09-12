@@ -538,16 +538,54 @@ function createProductForm() {
                 this.toastMessage = '';
             }, 3500);
         },
-        extractImages(event) {
-            const items = event.clipboardData?.items || [];
-            const files = [];
-            for (const item of items) {
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const f = item.getAsFile();
-                    if (f) files.push(f);
+        async resolveDropOrPasteFiles(event) {
+            // 1. Direct files from local system
+            const directFiles = Array.from(event.dataTransfer?.files || event.clipboardData?.files || []).filter(f => f.type && f.type.startsWith('image/'));
+            if (directFiles.length > 0) return directFiles;
+
+            // 2. External URL drag-and-drop or HTML from Amazon / external sites
+            let url = null;
+            const uriList = event.dataTransfer?.getData('text/uri-list') || '';
+            const htmlData = event.dataTransfer?.getData('text/html') || event.clipboardData?.getData('text/html') || '';
+            const plainText = event.dataTransfer?.getData('text/plain') || event.clipboardData?.getData('text/plain') || '';
+
+            if (uriList && uriList.startsWith('http')) {
+                url = uriList.trim().split('\n')[0];
+            } else if (htmlData) {
+                const match = htmlData.match(/<img[^>]+src=["'](https?:\/\/[^"']+)["']/i);
+                if (match) url = match[1];
+            }
+            if (!url && plainText && (plainText.match(/^https?:\/\/.+\.(jpg|jpeg|png|webp|avif|gif)(\?.*)?$/i) || (plainText.startsWith('http') && plainText.includes('images')))) {
+                url = plainText.trim();
+            }
+
+            if (url) {
+                this.showToast('⏳ Fetching image from web / Amazon...');
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                    const resp = await fetch('{{ route('admin.images.fetch-url') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ url: url })
+                    });
+                    const data = await resp.json();
+                    if (data.success && data.data_url) {
+                        const blobResp = await fetch(data.data_url);
+                        const blob = await blobResp.blob();
+                        const file = new File([blob], data.filename || 'imported-image.jpg', { type: data.mime || 'image/jpeg' });
+                        return [file];
+                    } else {
+                        this.showToast('⚠️ ' + (data.message || 'Could not load image from link'));
+                    }
+                } catch(err) {
+                    this.showToast('⚠️ Failed to download image from link');
                 }
             }
-            return files;
+            return [];
         },
         setCoverFile(file) {
             if (!file) return;
@@ -556,31 +594,32 @@ function createProductForm() {
             this.$refs.coverInput.files = transfer.files;
             this.coverPreview = URL.createObjectURL(file);
         },
-        handleCoverPaste(event) {
-            const files = this.extractImages(event);
+        async handleCoverPaste(event) {
+            const files = await this.resolveDropOrPasteFiles(event);
             if (files.length > 0) {
                 this.setCoverFile(files[0]);
-                this.showToast('✓ Primary cover image pasted from clipboard');
+                this.showToast('✓ Primary cover image updated');
             }
         },
-        handleGalleryPaste(event) {
-            const files = this.extractImages(event);
+        async handleGalleryPaste(event) {
+            const files = await this.resolveDropOrPasteFiles(event);
             if (files.length > 0) {
                 this.setGalleryFiles(files);
-                this.showToast('✓ ' + files.length + ' photo(s) pasted to gallery');
+                this.showToast('✓ ' + files.length + ' photo(s) added to gallery');
             }
         },
-        handleVariantPaste(event, index) {
-            const files = this.extractImages(event);
+        async handleVariantPaste(event, index) {
+            const files = await this.resolveDropOrPasteFiles(event);
             if (files.length > 0 && this.variants[index]) {
                 this.setVariantFile(files[0], index);
-                this.showToast('✓ Photo pasted for finish #' + (index + 1));
+                this.showToast('✓ Photo updated for finish #' + (index + 1));
             }
         },
-        setVariantFromDrop(event, index) {
-            const file = [...event.dataTransfer.files].find(f => f.type.startsWith('image/'));
-            if (file && this.variants[index]) {
-                this.setVariantFile(file, index);
+        async setVariantFromDrop(event, index) {
+            const files = await this.resolveDropOrPasteFiles(event);
+            if (files.length > 0 && this.variants[index]) {
+                this.setVariantFile(files[0], index);
+                this.showToast('✓ Photo loaded for finish #' + (index + 1));
             }
         },
         setVariantFile(file, index) {
@@ -600,18 +639,24 @@ function createProductForm() {
                 this.coverPreview = URL.createObjectURL(file);
             }
         },
-        setCoverFromDrop(event) {
+        async setCoverFromDrop(event) {
             this.draggingCover = false;
-            const file = [...event.dataTransfer.files].find(file => file.type.startsWith('image/'));
-            if (!file) return;
-            this.setCoverFile(file);
+            const files = await this.resolveDropOrPasteFiles(event);
+            if (files.length > 0) {
+                this.setCoverFile(files[0]);
+                this.showToast('✓ Primary cover image loaded');
+            }
         },
-        setGalleryFromDrop(event) {
+        async setGalleryFromDrop(event) {
             this.draggingGallery = false;
-            this.setGalleryFiles(event.dataTransfer.files);
+            const files = await this.resolveDropOrPasteFiles(event);
+            if (files.length > 0) {
+                this.setGalleryFiles(files);
+                this.showToast('✓ ' + files.length + ' photo(s) added to gallery');
+            }
         },
         setGalleryFiles(files) {
-            this.galleryFiles = [...this.galleryFiles, ...Array.from(files).filter(file => file.type.startsWith('image/'))];
+            this.galleryFiles = [...this.galleryFiles, ...Array.from(files).filter(file => file.type && file.type.startsWith('image/'))];
             const transfer = new DataTransfer();
             this.galleryFiles.forEach(file => transfer.items.add(file));
             this.$refs.galleryInput.files = transfer.files;

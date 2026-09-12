@@ -130,6 +130,24 @@
                 const found = this.variantsMap.find(v => v.title.toLowerCase().includes(colorParam.toLowerCase()));
                 if (found) this.selectVariant(found);
             }
+
+            // Record to recently viewed v2
+            try {
+                if (localStorage.getItem('atelier_recently_viewed')) {
+                    localStorage.removeItem('atelier_recently_viewed');
+                }
+                const stored = JSON.parse(localStorage.getItem('atelier_recently_viewed_v2') || '[]');
+                const currentItem = {
+                    id: {{ $product->id }},
+                    title: @json($product->title),
+                    price: '{{ $basePriceEgp }}',
+                    image: '{{ $mainImg }}',
+                    url: '{{ route('products.show', ['slug' => $product->slug]) }}'
+                };
+                const filtered = stored.filter(i => i && i.id !== currentItem.id);
+                filtered.unshift(currentItem);
+                localStorage.setItem('atelier_recently_viewed_v2', JSON.stringify(filtered.slice(0, 8)));
+            } catch(e) {}
         },
         selectVariant(v) {
             this.selectedVariantId = v.id;
