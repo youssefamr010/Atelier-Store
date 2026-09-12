@@ -113,34 +113,35 @@
                         {{-- Left Badges: OFFER only (no duplicate CLR badge) --}}
                         @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
                             @php $savePct = round((($product->compare_at_price_minor - $product->retail_price_minor) / $product->compare_at_price_minor) * 100); @endphp
-                            <div class="absolute top-2 left-2">
+                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
                                 <span class="bg-red-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? '-' . $savePct . '%' : $savePct . '% OFF' }}
                                 </span>
                             </div>
                         @elseif($isNew)
-                            <div class="absolute top-2 left-2">
+                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
                                 <span class="bg-emerald-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? 'جديد' : 'NEW' }}
                                 </span>
                             </div>
                         @elseif($isBestseller)
-                            <div class="absolute top-2 left-2">
+                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
                                 <span class="bg-amber-500 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? 'الأكثر مبيعاً' : 'BEST' }}
                                 </span>
                             </div>
                         @endif
 
-                        {{-- Minimal Floating Wishlist Heart Button with satisfying spring/pop micro-animation --}}
+                        {{-- Minimal Floating Wishlist Heart Button — responsive sizing to avoid covering image on small mobile cards --}}
                         <button 
                             type="button" 
                             @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 hover:bg-white backdrop-blur-xs border border-black/20 hover:border-black flex items-center justify-center shadow-xs transition-all duration-200 active:scale-125 z-10 cursor-pointer"
-                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 bg-white border-red-300 shadow-sm' : 'text-black/60 hover:text-black'"
+                            class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm border border-black/20 hover:border-black flex items-center justify-center shadow-sm transition-all duration-200 active:scale-125 z-10 touch-manipulation"
+                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 bg-white border-red-300 shadow' : 'text-black/60 hover:text-black'"
                             title="Save to Wishlist"
+                            aria-label="Save to Wishlist"
                         >
-                            <x-icon name="heart" class="w-3.5 h-3.5 transition-transform duration-200" />
+                            <x-icon name="heart" class="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-200" />
                         </button>
                     </div>
 
