@@ -1116,3 +1116,8 @@ Route::get('/storage/{path}', function (string $path) {
         abort(500, "Error serving file: {$e->getMessage()}");
     }
 })->where('path', '.*')->name('storage.serve');
+
+Route::get('/offline', function () {
+    return view('errors.offline');
+})->name('offline');
+
