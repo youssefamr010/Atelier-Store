@@ -50,7 +50,7 @@
                     class="group border-2 border-black bg-white p-2.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex flex-col justify-between"
                 >
                     <div class="aspect-square border border-black/10 bg-[#F5F5F0] overflow-hidden mb-2 p-1 flex items-center justify-center">
-                        <img :src="item.image" :alt="item.title" @error="removeBrokenItem(item.id)" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200">
+                        <img :src="item.image" :alt="item.title" x-on:error="removeBrokenItem(item.id)" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200">
                     </div>
                     <div>
                         <h4 class="font-editorial font-bold text-xs uppercase tracking-tight text-black truncate group-hover:underline" x-text="item.title"></h4>
