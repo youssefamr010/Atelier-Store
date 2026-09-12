@@ -1,4 +1,4 @@
-{{-- Top Promotional Banner (Smart Adaptive Dimensions, Zero-Crop Auto-Fit & Luxury Ambient Fill) --}}
+{{-- Top Promotional Banner (Smart Adaptive Dimensions, Zero-Crop Natural Fit & Luxury Dynamic Rendering) --}}
 @php
     $isArabicStore = ($settings['storefront_lang'] ?? 'en') === 'ar';
     $bannerImg = $settings['homepage_banner_image'] ?? '';
@@ -7,66 +7,40 @@
     $bannerSubtitle = $settings['homepage_banner_subtitle'] ?? '';
     $bannerLink = $settings['homepage_banner_link'] ?? '';
     
-    // Only build URL if an actual image was configured by the admin (never use unwanted fallback placeholders)
     $bannerImgUrl = $bannerImg ? (str_starts_with($bannerImg, 'http') ? $bannerImg : url($bannerImg)) : '';
     $bannerVideoUrl = $bannerVideo ? (str_starts_with($bannerVideo, 'http') ? $bannerVideo : url($bannerVideo)) : '';
-
-    $bannerHeightSetting = $settings['homepage_banner_height'] ?? 'auto';
-    $bannerPosition = $settings['homepage_banner_position'] ?? 'center center';
-    $bannerFit = $settings['homepage_banner_fit'] ?? 'contain';
-    $bannerOverlay = $settings['homepage_banner_overlay'] ?? 'medium';
-
-    $overlayClasses = [
-        'none'   => 'bg-transparent',
-        'light'  => 'bg-black/20',
-        'medium' => 'bg-gradient-to-t from-black/85 via-black/30 to-black/10',
-        'dark'   => 'bg-gradient-to-t from-black via-black/60 to-black/35',
-    ];
-    $overlayClass = $overlayClasses[$bannerOverlay] ?? $overlayClasses['medium'];
+    $hasText = !empty($bannerTitle) || !empty($bannerSubtitle);
 @endphp
 
 @if(!empty($bannerImgUrl) || !empty($bannerVideoUrl))
-<section class="relative w-full overflow-hidden border-b border-black bg-neutral-950 text-white reveal-on-scroll group select-none">
+<section class="relative w-full overflow-hidden border-b border-black bg-[#F5F5F0] reveal-on-scroll group select-none">
     @if(!empty($bannerLink))
-        <a href="{{ str_starts_with($bannerLink, 'http') ? $bannerLink : url($bannerLink) }}" class="block relative w-full h-full">
+        <a href="{{ str_starts_with($bannerLink, 'http') ? $bannerLink : url($bannerLink) }}" class="block relative w-full h-full cursor-pointer">
     @endif
 
-        {{-- 1. Ambient Background Layer --}}
-        @if(!empty($bannerImgUrl))
-            <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-                <img src="{{ $bannerImgUrl }}" alt="" class="w-full h-full object-cover blur-2xl scale-125 opacity-35 transition-opacity duration-700">
-            </div>
-        @endif
-
-        {{-- 2. Main Media Container --}}
-        <div class="relative w-full flex items-center justify-center min-h-[200px] sm:min-h-[300px] lg:min-h-[420px] max-h-[80vh]">
+        {{-- Main Media Container: Fluid Natural Height --}}
+        <div class="relative w-full flex items-center justify-center">
             @if(!empty($bannerVideoUrl))
                 <video autoplay muted loop playsinline preload="metadata" poster="{{ $bannerImgUrl }}"
-                    class="w-full h-full object-cover max-h-[80vh]"
-                    style="object-position: {{ $bannerPosition }};">
+                    class="w-full h-auto max-h-[85vh] object-cover">
                     <source src="{{ $bannerVideoUrl }}">
                 </video>
             @else
                 <img 
                     src="{{ $bannerImgUrl }}" 
                     alt="{{ $bannerTitle ?: 'Promotional Banner' }}"
-                    class="w-full h-auto max-h-[80vh] object-contain sm:object-cover hero-slow-zoom transition-all duration-500"
-                    style="object-position: {{ $bannerPosition }};"
+                    class="w-full h-auto max-h-[85vh] object-cover sm:object-contain transition-transform duration-700 ease-out group-hover:scale-[1.01]"
                     loading="eager"
-                    decoding="async"
+                    fetchpriority="high"
                 >
             @endif
 
-            {{-- Dynamic Readability Overlay --}}
-            @if($bannerOverlay !== 'none' && (!empty($bannerTitle) || !empty($bannerSubtitle) || !empty($bannerLink)))
-                <div class="absolute inset-0 {{ $overlayClass }} pointer-events-none"></div>
-            @endif
-
-            {{-- Floating Content (Title, Subtitle, Shop CTA) --}}
-            @if(!empty($bannerTitle) || !empty($bannerSubtitle) || !empty($bannerLink))
-                <div class="absolute inset-x-0 bottom-0 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pb-6 sm:pb-10 flex flex-col justify-end space-y-2 sm:space-y-3">
+            {{-- Floating Content / CTA Pill --}}
+            @if($hasText)
+                {{-- Rich Text Overlay --}}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-8 lg:p-12 space-y-2">
                     @if(!empty($bannerSubtitle))
-                        <div class="inline-flex items-center gap-2 border border-white/40 px-2.5 py-0.5 bg-black/60 w-fit backdrop-blur-sm rounded-sm">
+                        <div class="inline-flex items-center gap-2 border border-white/40 px-2.5 py-0.5 bg-black/70 w-fit backdrop-blur-sm">
                             <span class="w-1.5 h-1.5 bg-white"></span>
                             <span class="font-editorial font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white">
                                 {{ $bannerSubtitle }}
@@ -75,7 +49,7 @@
                     @endif
 
                     @if(!empty($bannerTitle))
-                        <h2 class="font-editorial font-black text-xl sm:text-3xl lg:text-5xl uppercase tracking-normal text-white leading-tight max-w-3xl drop-shadow-lg">
+                        <h2 class="font-editorial font-black text-xl sm:text-3xl lg:text-5xl uppercase tracking-normal text-white leading-tight max-w-3xl drop-shadow-md">
                             {{ $bannerTitle }}
                         </h2>
                     @endif
@@ -88,6 +62,13 @@
                         </div>
                     @endif
                 </div>
+            @elseif(!empty($bannerLink))
+                {{-- Minimalist Floating Luxury Badge (Zero image obstruction) --}}
+                <div class="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 z-10">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/85 text-white font-editorial font-bold text-[10px] sm:text-xs uppercase tracking-[0.15em] backdrop-blur-sm border border-white/20 shadow-lg group-hover:bg-black group-hover:scale-105 transition-all duration-200">
+                        <span>{{ $isArabicStore ? 'تسوق التشكيلة الآن ←' : 'Explore Collection Now →' }}</span>
+                    </span>
+                </div>
             @endif
         </div>
 
@@ -96,3 +77,4 @@
     @endif
 </section>
 @endif
+

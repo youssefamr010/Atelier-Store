@@ -257,60 +257,108 @@
                         <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                             <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'رصيد النقاط المتاح' : 'Available Points Balance' }}</span>
                             <span class="text-3xl font-black font-mono text-amber-600 block mt-1">{{ number_format($loyaltyBalance) }} <small class="text-xs font-editorial">PTS</small></span>
-                            <span class="text-[10px] text-gray-400 mt-1 block">جاهزة للاستبدال كخصم</span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">{{ $isArAccount ? 'جاهزة للاستبدال كخصم' : 'Available for checkout redemption' }}</span>
                         </div>
 
                         <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                             <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'قيمة الخصم المعادلة' : 'Redeemable Value' }}</span>
                             <span class="text-3xl font-black font-mono text-emerald-600 block mt-1">{{ number_format($discountEquiv) }} <small class="text-xs font-editorial">EGP</small></span>
-                            <span class="text-[10px] text-gray-400 mt-1 block">كل {{ $redeemUnit }} نقطة = {{ $discountEgp }} ج.م خصم</span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">{{ $isArAccount ? "كل {$redeemUnit} نقطة = {$discountEgp} ج.م خصم" : "Every {$redeemUnit} pts = {$discountEgp} EGP discount" }}</span>
                         </div>
 
                         <div class="bg-white border-2 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                             <span class="text-[10px] font-editorial font-bold uppercase tracking-widest text-gray-500 block">{{ $isArAccount ? 'معدل الكسب' : 'Earning Privilege' }}</span>
                             <span class="text-xl font-bold font-mono text-black block mt-2">1 pt / {{ $earnRate }} EGP</span>
-                            <span class="text-[10px] text-gray-400 mt-1 block">تضاف تلقائياً عند استلام الطلب</span>
+                            <span class="text-[10px] text-gray-400 mt-1 block">{{ $isArAccount ? 'تضاف تلقائياً عند استلام الطلب' : 'Credited automatically upon delivery' }}</span>
                         </div>
                     </div>
 
                     <!-- Points History Ledger -->
                     <div class="space-y-3">
-                        <h3 class="font-editorial font-bold text-xs uppercase tracking-wider text-black">{{ $isArAccount ? 'سجل المعاملات والنقاط' : 'Privilege Activity Ledger' }}</h3>
-                        
-                        <div class="border-2 border-black bg-white overflow-x-auto shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <table class="w-full text-right text-xs">
-                                <thead class="bg-black text-white text-[10px] uppercase font-editorial tracking-wider">
-                                    <tr>
-                                        <th class="p-3">التاريخ</th>
-                                        <th class="p-3">نوع العملية</th>
-                                        <th class="p-3">التفاصيل</th>
-                                        <th class="p-3 text-left">النقاط</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 font-sans">
-                                    @forelse($loyaltyLedgers as $ledger)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="p-3 font-mono text-gray-500 text-[11px]">{{ $ledger->created_at->format('Y-m-d H:i') }}</td>
-                                            <td class="p-3">
-                                                <span class="px-2 py-0.5 text-[9px] font-bold uppercase {{ $ledger->points > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' }}">
-                                                    {{ str_replace('_', ' ', $ledger->type) }}
-                                                </span>
-                                            </td>
-                                            <td class="p-3 text-gray-700 text-xs">{{ $ledger->notes ?: '—' }}</td>
-                                            <td class="p-3 font-mono font-black text-sm text-left {{ $ledger->points > 0 ? 'text-emerald-600' : 'text-red-600' }}">
-                                                {{ $ledger->points > 0 ? '+' . $ledger->points : $ledger->points }} pts
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="p-6 text-center text-gray-400 font-editorial uppercase tracking-wider text-xs">
-                                                {{ $isArAccount ? 'لا توجد حركات نقاط مسجلة حتى الآن.' : 'No reward points transactions recorded yet.' }}
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-editorial font-bold text-xs uppercase tracking-wider text-black flex items-center gap-2">
+                                <span class="w-2 h-2 bg-black inline-block"></span>
+                                <span>{{ $isArAccount ? 'سجل المعاملات والنقاط' : 'Privilege Activity Ledger' }}</span>
+                            </h3>
+                            <span class="text-[10px] font-mono text-black/50 font-bold uppercase">
+                                {{ $loyaltyLedgers->count() }} {{ $isArAccount ? 'معاملة' : 'Entries' }}
+                            </span>
                         </div>
+                        
+                        @if($loyaltyLedgers->isNotEmpty())
+                            {{-- Mobile View: Luxury Activity Stream (sm:hidden) --}}
+                            <div class="sm:hidden space-y-2.5">
+                                @foreach($loyaltyLedgers as $ledger)
+                                    @php
+                                        $isPositive = $ledger->points > 0;
+                                        $typeLabel = str_replace('_', ' ', strtoupper($ledger->type));
+                                    @endphp
+                                    <div class="border-2 border-black bg-white p-3.5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="px-2 py-0.5 text-[9px] font-mono font-black uppercase tracking-wider border border-black/20 {{ $isPositive ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-rose-50 text-rose-800 border-rose-300' }}">
+                                                {{ $typeLabel }}
+                                            </span>
+                                            <span class="font-mono text-[10px] text-gray-500">
+                                                {{ $ledger->created_at->format('Y-m-d · H:i') }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between gap-3 pt-1 border-t border-black/5">
+                                            <p class="text-xs text-black/80 font-sans font-medium line-clamp-2 min-w-0">
+                                                {{ $ledger->notes ?: ($isArAccount ? 'معاملة نقاط' : 'Points Transaction') }}
+                                            </p>
+                                            <span class="shrink-0 font-mono font-black text-sm px-2.5 py-1 border border-black/10 {{ $isPositive ? 'bg-emerald-500/10 text-emerald-700' : 'bg-rose-500/10 text-rose-700' }}">
+                                                {{ $isPositive ? '+' . $ledger->points : $ledger->points }} PTS
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Desktop View: Structured Luxury Table (hidden sm:block) --}}
+                            <div class="hidden sm:block border-2 border-black bg-white overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                <table class="w-full text-xs {{ $isArAccount ? 'text-right' : 'text-left' }}">
+                                    <thead class="bg-black text-white text-[10px] uppercase font-editorial tracking-wider">
+                                        <tr>
+                                            <th class="p-3.5">{{ $isArAccount ? 'التاريخ والوقت' : 'Date & Time' }}</th>
+                                            <th class="p-3.5">{{ $isArAccount ? 'نوع العملية' : 'Transaction' }}</th>
+                                            <th class="p-3.5">{{ $isArAccount ? 'التفاصيل والطلب' : 'Reference & Details' }}</th>
+                                            <th class="p-3.5 {{ $isArAccount ? 'text-left' : 'text-right' }}">{{ $isArAccount ? 'قيمة النقاط' : 'Points Delta' }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100 font-sans">
+                                        @foreach($loyaltyLedgers as $ledger)
+                                            @php
+                                                $isPositive = $ledger->points > 0;
+                                                $typeLabel = str_replace('_', ' ', strtoupper($ledger->type));
+                                            @endphp
+                                            <tr class="hover:bg-neutral-50/80 transition-colors">
+                                                <td class="p-3.5 font-mono text-gray-500 text-[11px] whitespace-nowrap">
+                                                    {{ $ledger->created_at->format('Y-m-d H:i') }}
+                                                </td>
+                                                <td class="p-3.5 whitespace-nowrap">
+                                                    <span class="inline-block px-2.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider border {{ $isPositive ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200' }}">
+                                                        {{ $typeLabel }}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3.5 text-gray-800 text-xs font-medium">
+                                                    {{ $ledger->notes ?: '—' }}
+                                                </td>
+                                                <td class="p-3.5 font-mono font-black text-sm whitespace-nowrap {{ $isArAccount ? 'text-left' : 'text-right' }} {{ $isPositive ? 'text-emerald-600' : 'text-rose-600' }}">
+                                                    {{ $isPositive ? '+' . $ledger->points : $ledger->points }} <span class="text-xs font-editorial">PTS</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="border-2 border-black bg-white p-8 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                <p class="font-editorial text-xs uppercase tracking-wider text-black/50">
+                                    {{ $isArAccount ? 'لا توجد حركات نقاط مسجلة حتى الآن.' : 'No privilege reward transactions recorded yet.' }}
+                                </p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

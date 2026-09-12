@@ -5,23 +5,6 @@
 @endphp
 <section class="w-full bg-[#F5F5F0]">
 
-    {{-- Section Header Strip --}}
-    <div class="border-b border-black/10 py-4 px-4 sm:px-8 lg:px-14 bg-white/60">
-        <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 bg-black inline-block"></span>
-                <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.25em] text-black">
-                    {{ $isArabicStore ? 'اختيارات وألوان متاحة' : 'Products & available colors' }}
-                </span>
-            </div>
-            <a href="{{ route('collections.show', ['slug' => 'all']) }}"
-               class="font-editorial font-bold text-[10px] uppercase tracking-[0.2em] text-black/60 hover:text-black transition-colors flex items-center gap-1">
-                <span>{{ $isArabicStore ? 'كل المنتجات' : 'View all products' }}</span>
-                <span>→</span>
-            </a>
-        </div>
-    </div>
-
     {{-- 1. Main High-Density Product Grid --}}
     <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-10 py-6 lg:py-8">
         @if(isset($products) && $products->count() > 0)
