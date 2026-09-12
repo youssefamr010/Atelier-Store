@@ -1,4 +1,4 @@
-{{-- Top Promotional Banner (Auto-switching between Hero & Offers) --}}
+{{-- Top Promotional Banner (Smart Responsive Dimensions & Ambient Fill) --}}
 @php
     $isArabicStore = ($settings['storefront_lang'] ?? 'en') === 'ar';
     $bannerImg = $settings['homepage_banner_image'] ?? '';
@@ -13,16 +13,19 @@
     
     $bannerImgUrl = $bannerImg ? (str_starts_with($bannerImg, 'http') ? $bannerImg : url($bannerImg)) : '';
     $bannerVideoUrl = $bannerVideo ? (str_starts_with($bannerVideo, 'http') ? $bannerVideo : url($bannerVideo)) : '';
-    $offersBannerImg = url('/imges/decor/offers-banner.jpg');
 
-    $bannerHeightSetting = $settings['homepage_banner_height'] ?? '48vh';
+    $bannerHeightSetting = $settings['homepage_banner_height'] ?? 'auto';
     $heightMap = [
-        'compact' => 'h-[280px] sm:h-[340px] lg:h-[380px]',
-        'medium'  => 'h-[360px] sm:h-[440px] lg:h-[500px]',
-        'large'   => 'h-[460px] sm:h-[560px] lg:h-[640px]',
-        'full'    => 'h-[70vh] sm:h-[80vh] lg:h-[88vh]',
+        'auto'      => 'h-auto aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1]',
+        'natural'   => 'h-auto aspect-[16/9] sm:aspect-[21/9]',
+        'panoramic' => 'h-auto aspect-[2/1] sm:aspect-[21/9] lg:aspect-[3/1]',
+        'cinematic' => 'h-auto aspect-[16/9] sm:aspect-[16/9]',
+        'compact'   => 'h-[260px] sm:h-[320px] lg:h-[380px]',
+        'medium'    => 'h-[340px] sm:h-[420px] lg:h-[480px]',
+        'large'     => 'h-[440px] sm:h-[540px] lg:h-[620px]',
+        'full'      => 'h-[70vh] sm:h-[80vh] lg:h-[88vh]',
     ];
-    $heightClass = $heightMap[$bannerHeightSetting] ?? (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') ? '' : 'h-[36vh] sm:h-[44vh] lg:h-[48vh]');
+    $heightClass = $heightMap[$bannerHeightSetting] ?? (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') ? '' : 'h-auto aspect-[16/9] sm:aspect-[21/9]');
     $customHeightStyle = (!isset($heightMap[$bannerHeightSetting]) && (str_ends_with($bannerHeightSetting, 'vh') || str_ends_with($bannerHeightSetting, 'px') || str_ends_with($bannerHeightSetting, '%'))) 
         ? "height: {$bannerHeightSetting};" 
         : '';
@@ -35,45 +38,52 @@
 
     $overlayClasses = [
         'none'   => 'bg-transparent',
-        'light'  => 'bg-black/25',
-        'medium' => 'bg-gradient-to-t from-black via-black/60 to-black/40',
-        'dark'   => 'bg-gradient-to-t from-black via-black/80 to-black/60',
+        'light'  => 'bg-black/20',
+        'medium' => 'bg-gradient-to-t from-black/80 via-black/35 to-transparent',
+        'dark'   => 'bg-gradient-to-t from-black via-black/60 to-black/30',
     ];
     $overlayClass = $overlayClasses[$bannerOverlay] ?? $overlayClasses['medium'];
 @endphp
 
 @if(!empty($bannerImgUrl) || !empty($bannerVideoUrl))
-<section class="relative w-full overflow-hidden border-b border-black bg-black text-white reveal-on-scroll {{ $heightClass }}" style="{{ $customHeightStyle }}"
-    x-data="{ slide: 0 }"
-    x-init="setInterval(() => slide = slide === 0 ? 1 : 0, 5000)"
->
-    {{-- SLIDE 0: Original Hero --}}
-    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out" :class="slide === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'">
-        @if(!empty($bannerLink))
-            <a href="{{ str_starts_with($bannerLink, 'http') ? $bannerLink : url($bannerLink) }}" class="block group absolute inset-0">
+<section class="relative w-full overflow-hidden border-b border-black bg-neutral-950 text-white reveal-on-scroll {{ $heightClass }}" style="{{ $customHeightStyle }}">
+    @if(!empty($bannerLink))
+        <a href="{{ str_starts_with($bannerLink, 'http') ? $bannerLink : url($bannerLink) }}" class="block group absolute inset-0">
+    @endif
+
+        {{-- Smart Ambient Backdrop: Soft blurred glow of image to eliminate dark voids --}}
+        @if(!empty($bannerImgUrl))
+            <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                <img src="{{ $bannerImgUrl }}" alt="" class="w-full h-full object-cover blur-2xl scale-125 opacity-35">
+            </div>
         @endif
 
-            @if(!empty($bannerVideoUrl))
-                <video autoplay muted loop playsinline preload="metadata" poster="{{ $bannerImgUrl }}"
-                    class="absolute inset-0 w-full h-full object-cover grayscale contrast-125"
-                    style="object-position: {{ $bannerPosition }}; transform: scale({{ $bannerZoom }});">
-                    <source src="{{ $bannerVideoUrl }}">
-                </video>
-            @else
-                <img src="{{ $bannerImgUrl }}" alt="{{ $bannerTitle ?: 'Promotional Banner' }}"
-                    class="absolute inset-0 w-full h-full grayscale contrast-125 hero-slow-zoom"
-                    style="object-position: {{ $bannerPosition }}; object-fit: {{ $bannerFit }}; transform-origin:center center;">
-            @endif
+        @if(!empty($bannerVideoUrl))
+            <video autoplay muted loop playsinline preload="metadata" poster="{{ $bannerImgUrl }}"
+                class="absolute inset-0 w-full h-full object-cover"
+                style="object-position: {{ $bannerPosition }}; transform: scale({{ $bannerZoom }});">
+                <source src="{{ $bannerVideoUrl }}">
+            </video>
+        @else
+            <img src="{{ $bannerImgUrl }}" alt="{{ $bannerTitle ?: 'Promotional Banner' }}"
+                class="absolute inset-0 w-full h-full hero-slow-zoom"
+                style="object-position: {{ $bannerPosition }}; object-fit: {{ $bannerFit }}; transform-origin:center center;">
+        @endif
 
+        @if($bannerOverlay !== 'none')
             <div class="absolute inset-0 {{ $overlayClass }}"></div>
+        @endif
 
+        @if(!empty($bannerTitle) || !empty($bannerSubtitle) || !empty($bannerLink))
             <div class="relative z-10 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col justify-end pb-8 sm:pb-12 space-y-2 sm:space-y-3">
-                <div class="inline-flex items-center gap-2 border border-white/40 px-2.5 py-0.5 bg-black/60 w-fit">
-                    <span class="w-1.5 h-1.5 bg-white"></span>
-                    <span class="font-editorial font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white">
-                        {{ $isArabicStore ? 'ديكورات منزلية مختارة' : 'Curated Home Decoration' }}
-                    </span>
-                </div>
+                @if(!empty($bannerSubtitle))
+                    <div class="inline-flex items-center gap-2 border border-white/40 px-2.5 py-0.5 bg-black/60 w-fit backdrop-blur-xs">
+                        <span class="w-1.5 h-1.5 bg-white"></span>
+                        <span class="font-editorial font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white">
+                            {{ $bannerSubtitle }}
+                        </span>
+                    </div>
+                @endif
 
                 @if(!empty($bannerTitle))
                     <h2 class="font-editorial font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-normal text-white leading-tight max-w-3xl drop-shadow-md">
@@ -89,46 +99,10 @@
                     </div>
                 @endif
             </div>
-
-        @if(!empty($bannerLink))
-            </a>
         @endif
-    </div>
 
-    {{-- SLIDE 1: Special Offers --}}
-    <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out" :class="slide === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'">
-        <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="block group absolute inset-0">
-
-            <img src="{{ $offersBannerImg }}" alt="Special Offers — Up to 40% Off"
-                class="absolute inset-0 w-full h-full object-cover">
-
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
-
-            <div class="relative z-10 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col justify-end pb-8 sm:pb-12 space-y-2 sm:space-y-3">
-                <div class="inline-flex items-center gap-2 border border-red-400/60 px-3 py-1 bg-red-600/80 w-fit">
-                    <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                    <span class="font-editorial font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white">
-                        {{ $isArabicStore ? 'عروض حصرية لفترة محدودة' : 'Limited Time Offers' }}
-                    </span>
-                </div>
-
-                <h2 class="font-editorial font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-normal text-white leading-tight max-w-3xl drop-shadow-md">
-                    {{ $isArabicStore ? 'خصومات تصل إلى 40%' : 'Special Offers — Up to 40% Off' }}
-                </h2>
-
-                <p class="font-sans text-sm sm:text-base text-white/80 max-w-xl">
-                    {{ $isArabicStore ? 'ديكورات منزلية أنيقة بأسعار استثنائية.' : 'Elegant home decorations at exceptional prices.' }}
-                </p>
-
-                <div class="pt-2">
-                    <span class="inline-flex items-center gap-2 font-editorial font-bold text-xs uppercase tracking-[0.15em] bg-white text-black px-5 py-2.5 group-hover:bg-neutral-100 transition-colors shadow-lg">
-                        <span>{{ $isArabicStore ? 'تسوق العروض ←' : 'Shop Offers →' }}</span>
-                    </span>
-                </div>
-            </div>
-
+    @if(!empty($bannerLink))
         </a>
-    </div>
-
+    @endif
 </section>
 @endif

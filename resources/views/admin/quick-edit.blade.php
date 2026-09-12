@@ -689,6 +689,9 @@
                         zoom: '{{ $currentZoom }}',
                         overlay: '{{ $currentOverlay }}',
                         get heightStyle() {
+                            if (this.height === 'auto' || this.height === 'natural') return 'auto; min-height: 240px; aspect-ratio: 21/9';
+                            if (this.height === 'panoramic') return 'auto; min-height: 220px; aspect-ratio: 21/9';
+                            if (this.height === 'cinematic') return 'auto; min-height: 260px; aspect-ratio: 16/9';
                             if (this.height === 'compact') return '300px';
                             if (this.height === 'medium') return '420px';
                             if (this.height === 'large') return '560px';
@@ -707,22 +710,29 @@
 
                     <!-- Live Preview Box -->
                     <div 
-                        class="relative w-full border-2 border-black bg-black overflow-hidden cursor-pointer transition-all duration-300"
+                        class="relative w-full border-2 border-black bg-neutral-950 overflow-hidden cursor-pointer transition-all duration-300"
                         :style="'height: ' + heightStyle"
                         @click="triggerPromoBannerUpload()"
                         title="Click to replace Homepage Promotional Banner"
                     >
+                        <!-- Ambient Blur Glow -->
+                        <img 
+                            src="{{ $bannerImgUrl }}" 
+                            alt=""
+                            class="absolute inset-0 w-full h-full object-cover blur-xl scale-125 opacity-35 pointer-events-none"
+                        >
+
                         <img 
                             id="banner-img-preview"
                             src="{{ $bannerImgUrl }}" 
                             alt="Image for: Homepage Promotional Banner"
-                            class="w-full h-full grayscale contrast-125 transition-all duration-300"
+                            class="relative z-1 w-full h-full transition-all duration-300"
                             :style="'object-position: ' + position + '; object-fit: ' + fit + '; transform: scale(' + (zoom/100) + ');'"
                         >
 
                         <!-- Dark Overlay Preview -->
                         <div 
-                            class="absolute inset-0 transition-colors pointer-events-none"
+                            class="absolute inset-0 z-2 transition-colors pointer-events-none"
                             :class="{
                                 'bg-transparent': overlay === 'none',
                                 'bg-black/25': overlay === 'light',
@@ -732,7 +742,7 @@
                         ></div>
 
                         <!-- Sample Overlay Text Preview -->
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end text-white pointer-events-none">
+                        <div class="absolute inset-0 z-3 p-6 flex flex-col justify-end text-white pointer-events-none">
                             <span class="text-[9px] font-bold uppercase tracking-widest border border-white/40 px-2 py-0.5 bg-black/60 w-fit mb-2">
                                 LIVE BANNER PREVIEW
                             </span>
@@ -740,20 +750,20 @@
                             <p class="text-xs text-white/80 max-w-lg mt-1" x-text="$refs.subInput ? $refs.subInput.value : '{{ addslashes($settings['homepage_banner_subtitle'] ?? 'Handcrafted full-grain Italian leather...') }}'"></p>
                         </div>
 
-                        <div class="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4 text-center">
+                        <div class="absolute inset-0 z-4 bg-black/60 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4 text-center">
                             <span class="text-2xl mb-1"><svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></span>
                             <span class="text-sm font-bold uppercase tracking-wider">Click to Replace Image</span>
                             <span class="text-xs text-gray-300 mt-1">Image for: Homepage Promotional Banner</span>
                         </div>
 
                         <!-- Loading Spinner -->
-                        <div id="banner-img-loader" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white p-2 text-center" style="display: none;">
+                        <div id="banner-img-loader" class="absolute inset-0 z-10 bg-black/70 flex flex-col items-center justify-center text-white p-2 text-center" style="display: none;">
                             <div class="spinner mb-2"></div>
                             <span class="text-xs font-bold uppercase">Uploading New Banner...</span>
                         </div>
 
                         <!-- Success -->
-                        <div id="banner-img-success" class="absolute inset-0 bg-green-600/90 flex flex-col items-center justify-center text-white p-2 text-center" style="display: none;">
+                        <div id="banner-img-success" class="absolute inset-0 z-10 bg-green-600/90 flex flex-col items-center justify-center text-white p-2 text-center" style="display: none;">
                             <span class="text-3xl font-bold">✓</span>
                             <span class="text-sm font-bold uppercase tracking-wider">Banner Updated!</span>
                         </div>
@@ -781,14 +791,38 @@
                             <!-- 1. Height / Dimensions -->
                             <div>
                                 <label class="block text-xs font-black uppercase tracking-wider text-black mb-2">
-                                    <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199"/></svg> 1. Banner Height (Dimensions):
+                                    <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199"/></svg> 1. Banner Dimensions & Height:
                                 </label>
-                                <div class="grid grid-cols-2 gap-2 mb-2">
+                                <div class="grid grid-cols-3 gap-2 mb-2">
+                                    <button 
+                                        type="button" 
+                                        @click="height = 'auto'" 
+                                        :class="height === 'auto' || height === 'natural' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
+                                    >
+                                        Auto (No Black Bars)
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="height = 'panoramic'" 
+                                        :class="height === 'panoramic' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
+                                    >
+                                        Panoramic (21:9)
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="height = 'cinematic'" 
+                                        :class="height === 'cinematic' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
+                                    >
+                                        Cinematic (16:9)
+                                    </button>
                                     <button 
                                         type="button" 
                                         @click="height = 'compact'" 
                                         :class="height === 'compact' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
-                                        class="p-2 text-xs border border-black uppercase text-center"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
                                     >
                                         Compact (300px)
                                     </button>
@@ -796,29 +830,21 @@
                                         type="button" 
                                         @click="height = 'medium'" 
                                         :class="height === 'medium' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
-                                        class="p-2 text-xs border border-black uppercase text-center"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
                                     >
                                         Medium (420px)
                                     </button>
                                     <button 
                                         type="button" 
-                                        @click="height = 'large'" 
-                                        :class="height === 'large' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
-                                        class="p-2 text-xs border border-black uppercase text-center"
-                                    >
-                                        Large (560px)
-                                    </button>
-                                    <button 
-                                        type="button" 
                                         @click="height = 'full'" 
                                         :class="height === 'full' ? 'bg-black text-white font-bold' : 'bg-gray-100 text-black hover:bg-gray-200'"
-                                        class="p-2 text-xs border border-black uppercase text-center"
+                                        class="p-2 text-[11px] border border-black uppercase text-center"
                                     >
-                                        Full Screen (75vh)
+                                        Full (75vh)
                                     </button>
                                 </div>
                                 <div class="flex items-center gap-2 mt-2">
-                                    <span class="text-[10px] text-gray-500 font-bold uppercase">Or Custom Height:</span>
+                                    <span class="text-[10px] text-gray-500 font-bold uppercase">Or Custom Value:</span>
                                     <input type="text" x-model="height" placeholder="e.g. 480px or 60vh" class="border border-black p-1.5 text-xs bg-gray-50 w-32 font-mono">
                                 </div>
                             </div>
