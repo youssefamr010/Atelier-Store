@@ -63,7 +63,7 @@
                     class="group block border-2 border-black bg-white p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-200 ease-out reveal-on-scroll relative"
                     style="transition-delay: {{ ($index % 5) * 50 }}ms;"
                 >
-                    {{-- Image Frame with smooth hover zoom --}}
+                    {{-- Image Frame: clean — badge top-left only, NO heart button inside the image at all --}}
                     <div class="product-media-frame relative border border-black/10 mb-2.5 bg-[#FBFBFA] overflow-hidden" style="aspect-ratio:4/3;">
                         <img
                             :src="current"
@@ -74,47 +74,36 @@
                             sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                         >
 
-                        {{-- Left Badges: OFFER only (no duplicate CLR badge) --}}
+                        {{-- Badge: top-left corner only, black/white editorial style, pointer-events-none so it never blocks clicks --}}
                         @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
                             @php $savePct = round((($product->compare_at_price_minor - $product->retail_price_minor) / $product->compare_at_price_minor) * 100); @endphp
-                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
-                                <span class="bg-red-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
-                                    {{ $isArabicStore ? '-' . $savePct . '%' : $savePct . '% OFF' }}
+                            <div class="absolute top-2 left-2 pointer-events-none">
+                                <span class="bg-black text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
+                                    -{{ $savePct }}%
                                 </span>
                             </div>
                         @elseif($isNew)
-                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
-                                <span class="bg-emerald-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
+                            <div class="absolute top-2 left-2 pointer-events-none">
+                                <span class="bg-black text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
                                     {{ $isArabicStore ? 'جديد' : 'NEW' }}
                                 </span>
                             </div>
                         @elseif($isBestseller)
-                            <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
-                                <span class="bg-amber-500 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
+                            <div class="absolute top-2 left-2 pointer-events-none">
+                                <span class="bg-black text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
                                     {{ $isArabicStore ? 'الأكثر مبيعاً' : 'BEST' }}
                                 </span>
                             </div>
                         @endif
-
-                        {{-- Minimal Floating Wishlist Heart Button — responsive sizing to avoid covering image on small mobile cards --}}
-                        <button 
-                            type="button" 
-                            @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                            class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm border border-black/20 hover:border-black flex items-center justify-center shadow-sm transition-all duration-200 active:scale-125 z-10 touch-manipulation"
-                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 bg-white border-red-300 shadow' : 'text-black/60 hover:text-black'"
-                            title="Save to Wishlist"
-                            aria-label="Save to Wishlist"
-                        >
-                            <x-icon name="heart" class="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-200" />
-                        </button>
                     </div>
 
-                    {{-- Details --}}
-                    <div class="space-y-1.5">
-                        {{-- Color Dots + Stock Dot Row --}}
-                        <div class="flex items-center justify-between gap-1 min-h-[16px]">
+                    {{-- Card Details --}}
+                    <div class="space-y-2 mt-0">
+
+                        {{-- Row 1: Color dots + Stock indicator --}}
+                        <div class="flex items-center justify-between gap-1 min-h-[14px]">
                             @if($colorSwatches->isNotEmpty())
-                                <div class="flex items-center gap-1.5" aria-label="{{ $isArabicStore ? 'الألوان المتاحة' : 'Available colors' }}">
+                                <div class="flex items-center gap-1" aria-label="{{ $isArabicStore ? 'الألوان المتاحة' : 'Available colors' }}">
                                     @foreach($product->variants as $variant)
                                         @php
                                             $variantColor = $variant->attributes_json['color_hex'] ?? $variant->attributes_json['hex'] ?? null;
@@ -123,62 +112,74 @@
                                         @if(is_string($variantColor) && preg_match('/^#[0-9a-fA-F]{6}$/', $variantColor))
                                             <i
                                                 @if($variantImage) @mouseenter='current = @json($variantImage)' @mouseleave="current = '{{ $img }}'" @endif
-                                                class="shrink-0 border border-black/30 hover:border-black cursor-pointer transition-transform hover:scale-125 inline-block"
-                                                style="background-color:{{ $variantColor }};width:8px;height:8px;border-radius:50%;display:inline-block;"
+                                                class="shrink-0 border border-black/20 hover:border-black cursor-pointer transition-transform hover:scale-110 inline-block rounded-full"
+                                                style="background-color:{{ $variantColor }};width:7px;height:7px;"
                                                 title="{{ $variant->title }}"
                                             ></i>
                                         @endif
                                     @endforeach
                                     @if($product->variants->count() > $colorSwatches->count())
-                                        <span class="text-[9px] font-mono text-black/50 font-bold">+{{ $product->variants->count() - $colorSwatches->count() }}</span>
+                                        <span class="text-[8px] font-mono text-black/40">+{{ $product->variants->count() - $colorSwatches->count() }}</span>
                                     @endif
                                 </div>
                             @else
-                                <span class="text-[9px] font-editorial uppercase tracking-widest text-black/40">{{ $isArabicStore ? 'قطعة' : 'Piece' }}</span>
+                                <span class="text-[8px] text-black/25">—</span>
                             @endif
 
-                            {{-- Stock Indicator (Clean Dot, or Urgency Text ONLY if low stock) --}}
                             @php
                                 $urgencyThreshold = (int)($settings['urgency_stock_threshold'] ?? 5);
                                 $isLowStock = $product->inventory > 0 && $product->inventory <= $urgencyThreshold;
                             @endphp
                             @if($isLowStock)
-                                <span class="text-[9px] font-mono font-bold text-amber-600 animate-pulse shrink-0">
-                                    🔥 {{ $isArabicStore ? 'متبقي ' . $product->inventory : 'Only ' . $product->inventory . ' left' }}
+                                <span class="text-[8px] font-mono text-black/60 shrink-0">
+                                    {{ $isArabicStore ? 'متبقي ' . $product->inventory : $product->inventory . ' left' }}
                                 </span>
                             @else
-                                <span class="text-[10px] {{ $product->inventory > 0 ? 'text-emerald-600' : 'text-red-500' }} shrink-0" title="{{ $product->inventory > 0 ? 'In Stock' : 'Out of Stock' }}">
-                                    ●
-                                </span>
+                                <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $product->inventory > 0 ? 'bg-emerald-500' : 'bg-black/15' }}"
+                                    title="{{ $product->inventory > 0 ? 'In Stock' : 'Out of Stock' }}"></span>
                             @endif
                         </div>
 
-                        {{-- Title --}}
-                        <h3 class="font-editorial font-bold text-xs sm:text-sm uppercase tracking-tight text-black group-hover:underline line-clamp-1 leading-snug">
-                            {{ $product->title }}
-                        </h3>
+                        {{-- Row 2: Title + Wishlist Heart (inline — heart is BELOW the image, next to the title) --}}
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="font-editorial font-bold text-xs sm:text-sm uppercase tracking-tight text-black group-hover:underline line-clamp-1 leading-snug flex-1 min-w-0">
+                                {{ $product->title }}
+                            </h3>
 
-                        {{-- Price + Subtle View Affordance Row (Clean, decluttered) --}}
-                        <div class="pt-2 flex items-center justify-between border-t border-black/10 mt-1.5">
+                            {{-- Elegant inline wishlist heart — black when saved, not red --}}
+                            <button
+                                type="button"
+                                @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
+                                class="atelier-wishlist-btn shrink-0 flex items-center justify-center w-6 h-6 touch-manipulation outline-none"
+                                :class="$store.wishlist.has({{ $product->id }}) ? 'is-wishlisted' : ''"
+                                title="{{ $isArabicStore ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
+                                aria-label="{{ $isArabicStore ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
+                            >
+                                <svg class="atelier-heart-icon" width="14" height="13" viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path class="atelier-heart-path" d="M21 8.5C21 14 12 20 12 20C12 20 3 14 3 8.5C3 5.46 5.46 3 8.5 3C10.24 3 11.79 3.84 12.82 5.14C13.85 3.84 15.4 3 17.14 3C20.18 3 22.64 5.46 22.64 8.5H21Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- Row 3: Price + View affordance --}}
+                        <div class="flex items-center justify-between border-t border-black/8 pt-1.5">
                             <div class="flex items-baseline gap-1.5 flex-wrap min-w-0">
-                                <span class="font-editorial font-black text-xs sm:text-sm text-black block leading-none">
+                                <span class="font-editorial font-black text-xs sm:text-sm text-black leading-none">
                                     {{ $price }}
                                 </span>
                                 @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
-                                    <span class="text-[10px] text-black/40 line-through font-mono">
+                                    <span class="text-[9px] text-black/35 line-through font-mono">
                                         {{ number_format($product->compare_at_price_minor / 100, 0) }}
                                     </span>
                                 @endif
                             </div>
-
-                            {{-- Subtle Minimal View Affordance --}}
-                            <span class="text-xs font-editorial font-bold uppercase tracking-wider text-black/50 group-hover:text-black group-hover:translate-x-0.5 transition-all duration-200 flex items-center gap-1 shrink-0">
-                                <span>{{ $isArabicStore ? 'عرض' : 'View' }}</span>
-                                <span class="font-mono text-[11px]">→</span>
+                            <span class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/40 group-hover:text-black transition-colors duration-200 flex items-center gap-0.5 shrink-0">
+                                {{ $isArabicStore ? 'عرض' : 'View' }} <span class="font-mono">→</span>
                             </span>
                         </div>
                     </div>
                 </a>
+
             @endforeach
         </div>
 

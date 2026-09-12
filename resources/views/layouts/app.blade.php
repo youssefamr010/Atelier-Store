@@ -333,6 +333,58 @@
         /* ── ALPINE CLOAK ───────────────────────────────────────────── */
         [x-cloak] { display: none !important; }
 
+        /* ── ATELIER WISHLIST HEART ─────────────────────────────────── */
+        /* Heart button — zero chrome, just the icon inline with title   */
+        .atelier-wishlist-btn {
+            color: rgba(0,0,0,0.28);
+            min-height: unset;  /* override the global a,button min-height:44px for this compact element */
+            transition: color 0.22s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .atelier-wishlist-btn:hover {
+            color: rgba(0,0,0,0.75);
+            transform: scale(1.15);
+        }
+        .atelier-wishlist-btn:active {
+            transform: scale(0.88);
+        }
+
+        /* The SVG heart icon */
+        .atelier-heart-icon {
+            display: block;
+            overflow: visible;
+        }
+        /* The SVG path: outline only by default */
+        .atelier-heart-path {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linejoin: round;
+            transition: fill 0.28s cubic-bezier(0.34,1.56,0.64,1),
+                        stroke 0.28s ease;
+        }
+
+        /* Wishlisted state: fill black solid, stroke black — no red */
+        .atelier-wishlist-btn.is-wishlisted {
+            color: #000000;
+            transform: scale(1.08);
+        }
+        .atelier-wishlist-btn.is-wishlisted .atelier-heart-path {
+            fill: #000000;
+            stroke: #000000;
+        }
+
+        /* Pop animation when toggling on */
+        @keyframes heart-pop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.35); }
+            70%  { transform: scale(0.9); }
+            100% { transform: scale(1.08); }
+        }
+        .atelier-wishlist-btn.is-wishlisted {
+            animation: heart-pop 0.38s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+
         /* ── SCROLLBAR ──────────────────────────────────────────────── */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #F5F5F0; }
