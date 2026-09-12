@@ -210,7 +210,7 @@
                                             </button>
                                         </div>
 
-                                        <h3 class="font-editorial font-bold text-xs uppercase tracking-tight text-black line-clamp-1">{{ $wProd->title }}</h3>
+                                        <h3 class="font-editorial font-bold text-xs uppercase tracking-tight text-black line-clamp-2 leading-snug">{{ $wProd->title }}</h3>
                                         <div class="flex items-baseline justify-between">
                                             <span class="font-editorial font-black text-sm text-black">{{ $wPrice }}</span>
                                             <span class="text-[9px] font-mono {{ $wProd->inventory > 0 ? 'text-emerald-700 font-bold' : 'text-red-600' }}">

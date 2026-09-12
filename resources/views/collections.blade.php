@@ -177,21 +177,21 @@
                         </div>
 
                         {{-- Row 2: Title + Wishlist Heart inline (BELOW image, never overlapping) --}}
-                        <div class="flex items-center justify-between gap-2">
-                            <h3 class="font-editorial font-bold text-xs sm:text-sm uppercase tracking-tight text-black group-hover:underline line-clamp-1 leading-snug flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-1.5 min-h-[2.4rem] sm:min-h-[2.6rem]">
+                            <h3 class="font-editorial font-bold text-xs sm:text-sm text-black group-hover:underline line-clamp-2 leading-tight flex-1 min-w-0" title="{{ $product->title }}">
                                 {{ $product->title }}
                             </h3>
 
                             <button
                                 type="button"
                                 @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                                class="atelier-wishlist-btn shrink-0 flex items-center justify-center w-6 h-6 touch-manipulation outline-none"
+                                class="atelier-wishlist-btn shrink-0 flex items-center justify-center w-6 h-6 -mt-0.5 text-black/40 hover:text-black touch-manipulation outline-none"
                                 :class="$store.wishlist.has({{ $product->id }}) ? 'is-wishlisted' : ''"
                                 title="{{ $isArCol ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
                                 aria-label="{{ $isArCol ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
                             >
-                                <svg class="atelier-heart-icon" width="14" height="13" viewBox="0 0 24 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path class="atelier-heart-path" d="M21 8.5C21 14 12 20 12 20C12 20 3 14 3 8.5C3 5.46 5.46 3 8.5 3C10.24 3 11.79 3.84 12.82 5.14C13.85 3.84 15.4 3 17.14 3C20.18 3 22.64 5.46 22.64 8.5H21Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                                <svg class="atelier-heart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path class="atelier-heart-path" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                                 </svg>
                             </button>
                         </div>
