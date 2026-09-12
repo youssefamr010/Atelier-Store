@@ -96,73 +96,60 @@
                     href="{{ route('products.show', ['slug' => $product->slug]) }}"
                     data-prefetch-url="{{ route('products.show', ['slug' => $product->slug]) }}"
                     x-data="{ current: '{{ $img }}' }"
-                    class="group block border border-black bg-white p-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all duration-300 reveal-on-scroll"
-                    style="transition-delay: {{ ($index % 5) * 60 }}ms;"
+                    class="group block border-2 border-black bg-white p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all duration-200 ease-out reveal-on-scroll relative"
+                    style="transition-delay: {{ ($index % 5) * 50 }}ms;"
                 >
-                    {{-- Image Frame --}}
-                    <div class="product-media-frame relative border border-black/8 mb-2" style="aspect-ratio:4/3;overflow:hidden;">
+                    {{-- Image Frame with smooth hover zoom --}}
+                    <div class="product-media-frame relative border border-black/10 mb-2.5 bg-[#FBFBFA] overflow-hidden" style="aspect-ratio:4/3;">
                         <img
                             :src="current"
                             alt="{{ $product->title }}"
-                            class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                            class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300 ease-out"
                             loading="{{ $index < 10 ? 'eager' : 'lazy' }}"
                             decoding="async"
                             sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, (max-width:1280px) 25vw, 20vw"
                         >
 
-                        {{-- Left Badges: OFFER + Colors --}}
-                        <div class="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
-                            @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
-                                @php $savePct = round((($product->compare_at_price_minor - $product->retail_price_minor) / $product->compare_at_price_minor) * 100); @endphp
-                                <span class="bg-red-600 text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-sm">
+                        {{-- Left Badges: OFFER only (no duplicate CLR badge) --}}
+                        @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
+                            @php $savePct = round((($product->compare_at_price_minor - $product->retail_price_minor) / $product->compare_at_price_minor) * 100); @endphp
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-red-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? '-' . $savePct . '%' : $savePct . '% OFF' }}
                                 </span>
-                            @else
-                                <span class="bg-black text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
-                                    {{ $isArCol ? 'ديكور' : 'DECOR' }}
-                                </span>
-                            @endif
-                            @if($product->variants->count() > 1)
-                                <span class="bg-black/75 text-white text-[7px] font-mono font-bold uppercase px-1.5 py-0.5 leading-tight border border-white/20">
-                                    {{ $product->variants->count() }} {{ $isArCol ? 'ألوان' : 'CLR' }}
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- Right Badges: NEW / BESTSELLER --}}
-                        @if($isNew || $isBestseller)
-                        <div class="absolute top-1.5 right-1.5 flex flex-col gap-0.5">
-                            @if($isNew)
-                                <span class="bg-emerald-600 text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
+                            </div>
+                        @elseif($isNew)
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-emerald-600 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? 'جديد' : 'NEW' }}
                                 </span>
-                            @endif
-                            @if($isBestseller)
-                                <span class="bg-amber-500 text-white text-[8px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight">
+                            </div>
+                        @elseif($isBestseller)
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-amber-500 text-white text-[9px] font-editorial font-bold uppercase tracking-widest px-1.5 py-0.5 leading-tight shadow-xs">
                                     {{ $isArCol ? 'الأكثر مبيعاً' : 'BEST' }}
                                 </span>
-                            @endif
-                        </div>
+                            </div>
                         @endif
 
-                        {{-- Floating Wishlist Button --}}
+                        {{-- Minimal Floating Wishlist Heart Button with satisfying spring/pop micro-animation --}}
                         <button 
                             type="button" 
                             @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                            class="absolute bottom-1.5 right-1.5 w-6 h-6 bg-white/90 hover:bg-white border border-black flex items-center justify-center shadow-xs transition-transform active:scale-90 z-10 cursor-pointer"
-                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 fill-red-600' : 'text-black'"
+                            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 hover:bg-white backdrop-blur-xs border border-black/20 hover:border-black flex items-center justify-center shadow-xs transition-all duration-200 active:scale-125 z-10 cursor-pointer"
+                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-red-600 bg-white border-red-300 shadow-sm' : 'text-black/60 hover:text-black'"
                             title="Save to Wishlist"
                         >
-                            <x-icon name="heart" class="w-3.5 h-3.5" />
+                            <x-icon name="heart" class="w-3.5 h-3.5 transition-transform duration-200" />
                         </button>
                     </div>
 
                     {{-- Details --}}
-                    <div class="space-y-1">
-                        {{-- Color dots + In-stock row --}}
+                    <div class="space-y-1.5">
+                        {{-- Color Dots + Stock Dot Row --}}
                         <div class="flex items-center justify-between gap-1 min-h-[16px]">
                             @if($colorSwatches->isNotEmpty())
-                                <span class="flex items-center gap-1" aria-label="{{ $isArCol ? 'الألوان المتاحة' : 'Available colors' }}">
+                                <div class="flex items-center gap-1.5" aria-label="{{ $isArCol ? 'الألوان المتاحة' : 'Available colors' }}">
                                     @foreach($product->variants as $variant)
                                         @php
                                             $variantColor = $variant->attributes_json['color_hex'] ?? null;
@@ -178,42 +165,51 @@
                                         @endif
                                     @endforeach
                                     @if($product->variants->count() > $colorSwatches->count())
-                                        <span class="text-[8px] font-mono text-black/50">+{{ $product->variants->count() - $colorSwatches->count() }}</span>
+                                        <span class="text-[9px] font-mono text-black/50 font-bold">+{{ $product->variants->count() - $colorSwatches->count() }}</span>
                                     @endif
+                                </div>
+                            @else
+                                <span class="text-[9px] font-editorial uppercase tracking-widest text-black/40">{{ $isArCol ? 'قطعة' : 'Piece' }}</span>
+                            @endif
+
+                            {{-- Stock Indicator (Clean Dot, or Urgency Text ONLY if low stock) --}}
+                            @php
+                                $urgencyThreshold = (int)($settings['urgency_stock_threshold'] ?? 5);
+                                $isLowStock = $product->inventory > 0 && $product->inventory <= $urgencyThreshold;
+                            @endphp
+                            @if($isLowStock)
+                                <span class="text-[9px] font-mono font-bold text-amber-600 animate-pulse shrink-0">
+                                    🔥 {{ $isArCol ? 'متبقي ' . $product->inventory : 'Only ' . $product->inventory . ' left' }}
                                 </span>
                             @else
-                                <span class="text-[8px] font-editorial uppercase tracking-widest text-black/40">{{ $isArCol ? 'قطعة' : 'Piece' }}</span>
+                                <span class="text-[10px] {{ $product->inventory > 0 ? 'text-emerald-600' : 'text-red-500' }} shrink-0" title="{{ $product->inventory > 0 ? 'In Stock' : 'Out of Stock' }}">
+                                    ●
+                                </span>
                             @endif
-                            <span class="text-[8px] font-mono text-emerald-700 font-bold uppercase shrink-0">● {{ $isArCol ? 'متوفر' : 'Stock' }}</span>
                         </div>
 
                         {{-- Title --}}
-                        <h3 class="font-editorial font-black text-xs sm:text-sm uppercase tracking-tight text-black group-hover:underline line-clamp-1 leading-snug">
+                        <h3 class="font-editorial font-bold text-xs sm:text-sm uppercase tracking-tight text-black group-hover:underline line-clamp-1 leading-snug">
                             {{ $product->title }}
                         </h3>
 
-                        {{-- Description --}}
-                        <p class="font-sans text-[10px] text-black/60 line-clamp-2 leading-snug">
-                            {{ $product->description }}
-                        </p>
-
-                        {{-- Price + View Product --}}
-                        <div class="pt-2 flex items-center justify-between border-t border-black/10 mt-2 gap-1">
-                            <div class="min-w-0">
-                                <div class="flex items-baseline gap-1 flex-wrap">
-                                    <span class="font-editorial font-black text-xs sm:text-sm text-black block leading-none">
-                                        {{ $price }}
+                        {{-- Price + Subtle View Affordance Row (Clean, decluttered) --}}
+                        <div class="pt-2 flex items-center justify-between border-t border-black/10 mt-1.5">
+                            <div class="flex items-baseline gap-1.5 flex-wrap min-w-0">
+                                <span class="font-editorial font-black text-xs sm:text-sm text-black block leading-none">
+                                    {{ $price }}
+                                </span>
+                                @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
+                                    <span class="text-[10px] text-black/40 line-through font-mono">
+                                        {{ number_format($product->compare_at_price_minor / 100, 0) }}
                                     </span>
-                                    @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
-                                        <span class="text-[9px] text-black/35 line-through font-mono">
-                                            {{ number_format($product->compare_at_price_minor / 100, 0) }}
-                                        </span>
-                                    @endif
-                                </div>
-                                <span class="text-[8px] text-green-700 font-bold uppercase">{{ $isArCol ? 'شحن سريع' : 'Ships Fast' }}</span>
+                                @endif
                             </div>
-                            <span class="font-editorial font-bold text-[9px] uppercase tracking-wider bg-black text-white px-2 py-1.5 group-hover:bg-neutral-800 transition-colors shrink-0 whitespace-nowrap" style="min-height:32px;display:flex;align-items:center;">
-                                {{ $isArCol ? 'عرض المنتج ←' : 'View Product →' }}
+
+                            {{-- Subtle Minimal View Affordance --}}
+                            <span class="text-xs font-editorial font-bold uppercase tracking-wider text-black/50 group-hover:text-black group-hover:translate-x-0.5 transition-all duration-200 flex items-center gap-1 shrink-0">
+                                <span>{{ $isArCol ? 'عرض' : 'View' }}</span>
+                                <span class="font-mono text-[11px]">→</span>
                             </span>
                         </div>
                     </div>
