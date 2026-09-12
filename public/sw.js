@@ -1,5 +1,5 @@
 // ATELIER Studio Egypt — Service Worker for PWA
-const CACHE_NAME = 'atelier-v6';
+const CACHE_NAME = 'atelier-v7';
 const ASSETS_TO_CACHE = [
   '/offline',
   '/manifest.json',

@@ -218,7 +218,7 @@ class ProductCardService
     public static function formatAssetUrl(?string $url): string
     {
         if (empty($url)) {
-            return 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=800&q=80';
+            return '';
         }
 
         // If local loopback URL was saved in database, convert to request host

@@ -42,11 +42,7 @@
         <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4 hidden">
             @foreach($products as $index => $product)
                 @php
-                    $img = $product->image_url
-                        ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url))
-                        : ($product->mediaAssets->first()?->url
-                            ? (str_starts_with($product->mediaAssets->first()->url, 'http') ? $product->mediaAssets->first()->url : url($product->mediaAssets->first()->url))
-                            : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=75');
+                    $img = $product->image_url ?: ($product->mediaAssets->first()?->url ?: '');
                     $price = $product->retail_price_minor ? number_format($product->retail_price_minor / 100, 0) . ' ' . ($isArabicStore ? 'ج.م' : 'EGP') : '—';
                     $colorSwatches = $product->variants->map(function ($variant) {
                         $attributes = $variant->attributes_json ?? [];
@@ -65,6 +61,7 @@
                 >
                     {{-- Image Frame: clean — badge top-left only, NO heart button inside the image at all --}}
                     <div class="product-media-frame relative border border-black/10 mb-2.5 bg-[#FBFBFA] overflow-hidden" style="aspect-ratio:4/3;">
+                        @if(!empty($img))
                         <img
                             src="{{ $img }}"
                             :src="current"
@@ -72,8 +69,12 @@
                             class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300 ease-out"
                             loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
                             decoding="async"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80';"
                         >
+                        @else
+                        <div class="w-full h-full flex items-center justify-center bg-[#F5F5F0]">
+                            <span class="font-editorial font-bold text-xs uppercase tracking-widest text-black/40">ATELIER</span>
+                        </div>
+                        @endif
 
                         {{-- Badge: top-left corner only, black/white editorial style, pointer-events-none so it never blocks clicks --}}
                         @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)

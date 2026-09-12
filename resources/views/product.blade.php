@@ -4,11 +4,11 @@
 @section('meta_description', $product->seo_description ?: Str::limit(strip_tags($product->description ?? ''), 160))
 @section('canonical', route('products.show', ['slug' => $product->slug]))
 @section('og_type', 'product')
-@section('og_image', $product->image_url ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url)) : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85')
+@section('og_image', $product->image_url ?: ($product->mediaAssets->first()?->url ?: asset('favicon.png')))
 
 @push('structured_data')
 @php
-    $schemaImg = $product->image_url ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url)) : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85';
+    $schemaImg = $product->image_url ?: ($product->mediaAssets->first()?->url ?: asset('favicon.png'));
     $schemaPrice = number_format(($product->retail_price_minor ?: 78000) / 100, 2, '.', '');
 @endphp
 <script type="application/ld+json">
@@ -44,7 +44,7 @@
 @section('content')
 @php
     $isArProd = ($settings['storefront_lang'] ?? 'en') === 'ar';
-    $mainImg = $product->image_url ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url)) : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85';
+    $mainImg = $product->image_url ?: ($product->mediaAssets->first()?->url ?: '');
     $basePriceEgp = $product->retail_price_minor ? number_format($product->retail_price_minor / 100, 0) . ' EGP' : '780 EGP';
     $variants = $product->variants ?? collect();
     $mediaAssets = $product->mediaAssets ?? collect();
@@ -231,7 +231,6 @@ function productDetailComponent() {
                             alt="{{ $product->title }}" 
                             class="w-full h-full object-contain object-center transition-all duration-500 ease-out"
                             fetchpriority="high" decoding="async"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85';"
                         >
                     </div>
                 </div>
@@ -246,7 +245,7 @@ function productDetailComponent() {
                             class="w-16 h-16 border p-0.5 bg-white shrink-0 cursor-pointer transition-all duration-200"
                             :class="activeImage === thumb ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-black/30 opacity-70 hover:opacity-100'"
                         >
-                            <img :src="thumb" alt="" class="w-full h-full object-contain bg-white" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&q=80';">
+                            <img :src="thumb" alt="" class="w-full h-full object-contain bg-white" loading="lazy" decoding="async">
                         </button>
                     </template>
                 </div>

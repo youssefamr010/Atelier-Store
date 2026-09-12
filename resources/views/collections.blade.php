@@ -234,11 +234,7 @@
         >
             @forelse($products as $index => $product)
                 @php
-                    $img = $product->image_url
-                        ? (str_starts_with($product->image_url, 'http') ? $product->image_url : url($product->image_url))
-                        : ($product->mediaAssets->first()?->url
-                            ? (str_starts_with($product->mediaAssets->first()->url, 'http') ? $product->mediaAssets->first()->url : url($product->mediaAssets->first()->url))
-                            : 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=75');
+                    $img = $product->image_url ?: ($product->mediaAssets->first()?->url ?: '');
                     $price = $product->retail_price_minor ? number_format($product->retail_price_minor / 100, 0) . ' ' . ($isArCol ? 'ج.م' : 'EGP') : '—';
                     $colorSwatches = $product->variants->map(function ($variant) {
                         $attributes = $variant->attributes_json ?? [];
@@ -263,6 +259,7 @@
                     >
                         {{-- Visual Container: Image + Badges ONLY --}}
                         <div class="relative w-full overflow-hidden bg-[#FAFAF7] border border-black/8 mb-2.5 aspect-square">
+                            @if(!empty($img))
                             <img
                                 src="{{ $img }}"
                                 :src="current"
@@ -270,8 +267,12 @@
                                 class="w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105"
                                 loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
                                 decoding="async"
-                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80';"
                             >
+                            @else
+                            <div class="w-full h-full flex items-center justify-center bg-[#F5F5F0]">
+                                <span class="font-editorial font-bold text-xs uppercase tracking-widest text-black/40">ATELIER</span>
+                            </div>
+                            @endif
 
                             {{-- Badges: top-left --}}
                             @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
