@@ -66,12 +66,13 @@
                     {{-- Image Frame: clean — badge top-left only, NO heart button inside the image at all --}}
                     <div class="product-media-frame relative border border-black/10 mb-2.5 bg-[#FBFBFA] overflow-hidden" style="aspect-ratio:4/3;">
                         <img
+                            src="{{ $img }}"
                             :src="current"
                             alt="{{ $product->title }}"
                             class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300 ease-out"
-                            loading="{{ $index < 10 ? 'eager' : 'lazy' }}"
+                            loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
                             decoding="async"
-                            sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, (max-width:1280px) 25vw, 20vw"
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80';"
                         >
 
                         {{-- Badge: top-left corner only, black/white editorial style, pointer-events-none so it never blocks clicks --}}

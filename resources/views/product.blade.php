@@ -226,10 +226,12 @@ function productDetailComponent() {
                 <div class="relative w-full overflow-hidden border-2 border-black bg-white p-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
                     <div class="product-media-frame relative">
                         <img 
+                            src="{{ $mainImg }}"
                             :src="activeImage" 
                             alt="{{ $product->title }}" 
                             class="w-full h-full object-contain object-center transition-all duration-500 ease-out"
                             fetchpriority="high" decoding="async"
+                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=1000&q=85';"
                         >
                     </div>
                 </div>
@@ -244,7 +246,7 @@ function productDetailComponent() {
                             class="w-16 h-16 border p-0.5 bg-white shrink-0 cursor-pointer transition-all duration-200"
                             :class="activeImage === thumb ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]' : 'border-black/30 opacity-70 hover:opacity-100'"
                         >
-                            <img :src="thumb" alt="" class="w-full h-full object-contain bg-white" loading="lazy" decoding="async">
+                            <img :src="thumb" alt="" class="w-full h-full object-contain bg-white" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&q=80';">
                         </button>
                     </template>
                 </div>
@@ -561,11 +563,13 @@ function productDetailComponent() {
                class="product-card group block bg-white border border-black overflow-hidden">
                 <div class="product-media-frame relative w-full">
                     <img
+                        src="{{ $relImg }}"
                         :src="current"
                         alt="{{ $related->title }}"
                         class="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500 ease-out"
                         style="position: absolute; inset: 0; width: 100%; height: 100%;"
                         loading="lazy"
+                        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80';"
                     >
                 </div>
                 <div class="p-3 border-t border-black/10">

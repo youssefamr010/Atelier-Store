@@ -264,12 +264,13 @@
                         {{-- Visual Container: Image + Badges ONLY --}}
                         <div class="relative w-full overflow-hidden bg-[#FAFAF7] border border-black/8 mb-2.5 aspect-square">
                             <img
+                                src="{{ $img }}"
                                 :src="current"
                                 alt="{{ $product->title }}"
                                 class="w-full h-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105"
-                                loading="{{ $index < 8 ? 'eager' : 'lazy' }}"
+                                loading="{{ $index < 6 ? 'eager' : 'lazy' }}"
                                 decoding="async"
-                                sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 20vw"
+                                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&q=80';"
                             >
 
                             {{-- Badges: top-left --}}
