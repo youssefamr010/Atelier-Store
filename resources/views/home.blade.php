@@ -8,18 +8,15 @@
     <!-- 0. Top Admin-Controlled Promotional Banner (Smart Adaptive) -->
     @include('partials.promo-banner')
 
-    <!-- 0.5 Instant Quick Category Navigation Strip -->
-    @include('partials.categories')
-
     <!-- 1. Product Scroll Showcase -->
     @include('partials.showcase')
 
     <!-- 1.5 Recently Viewed Strip -->
     @include('partials.recently-viewed')
 
-    <!-- 1.75 Brand Heritage & Editorial Story -->
+    <!-- 1.75 Brand Heritage & Editorial Story (Compact) -->
     @include('partials.our-story')
 
-    <!-- 2. Craftsmanship & Heritage Guarantee Banner -->
+    <!-- 2. Craftsmanship & Heritage Guarantee Banner (Compact) -->
     @include('partials.banner')
 @endsection

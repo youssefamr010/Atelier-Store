@@ -28,7 +28,7 @@
 @endif
 
 {{-- Dynamic Animated Ticker Bar --}}
-<div class="hidden md:block bg-black text-white border-b border-white/10 overflow-hidden" style="height: 32px;">
+<div class="hidden md:block bg-black text-white border-b border-white/10 overflow-hidden" style="height: 30px;">
     <style>
         @keyframes atl-ticker {
             0%   { transform: translateX(0); }
@@ -48,10 +48,10 @@
             padding: 0 2rem;
             font-family: 'Cinzel', Georgia, serif;
             font-weight: 700;
-            font-size: 9px;
+            font-size: 8.5px;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            line-height: 32px;
+            line-height: 30px;
             color: rgba(255,255,255,0.78);
         }
         .atl-ticker-sep {
@@ -80,56 +80,52 @@
         @foreach($tickerItems as $t)
         <span class="atl-ticker-item">{{ $t }}<span class="atl-ticker-sep"></span></span>
         @endforeach
-        {{-- Duplicate for seamless loop --}}
         @foreach($tickerItems as $t)
         <span class="atl-ticker-item">{{ $t }}<span class="atl-ticker-sep"></span></span>
         @endforeach
     </div>
 </div>
 
-<!-- Main Sticky Luxury Navigation Header -->
+<!-- Main Sticky Navigation Header (Signature Atelier Brutalist Luxury Design) -->
 <header 
     x-data="headerSearchComponent()"
-    class="site-header sticky top-0 z-40 backdrop-blur-xl border-b border-black/10 transition-all duration-300"
+    class="site-header sticky top-0 z-40 bg-[#F5F5F0]/95 backdrop-blur-xl border-b-2 border-black transition-all duration-300"
 >
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <!-- Main Top Row -->
-        <div class="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
+        <div class="flex items-center justify-between h-16 sm:h-20 gap-3">
             
-            <!-- Left: Sidebar Menu Trigger Button + Brand Wordmark -->
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                <!-- Sidebar Menu Trigger Button (Prominent on BOTH Desktop & Mobile) -->
+            <!-- 1. LEFT: Menu Trigger Button + Atelier Brand Wordmark -->
+            <div class="flex items-center gap-3 shrink-0">
+                <!-- Signature Menu Toggle Button (Same Brutalist Luxury Theme) -->
                 <button 
                     type="button" 
                     @click="mobileMenuOpen = true"
-                    class="inline-flex items-center gap-2 px-2.5 py-2 sm:px-3 sm:py-2 rounded-lg border border-black/15 bg-white hover:bg-black hover:text-white text-black transition-all duration-200 active:scale-95 shadow-sm min-h-[40px] cursor-pointer group"
-                    aria-label="{{ $isAr ? 'فتح القائمة الجانبية' : 'Toggle sidebar menu' }}"
-                    title="{{ $isAr ? 'القائمة الجانبية' : 'Menu' }}"
+                    class="h-10 px-3 border-2 border-black bg-white hover:bg-black hover:text-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all flex items-center justify-center gap-2 font-editorial font-bold text-[11px] uppercase tracking-wider cursor-pointer group"
+                    aria-label="{{ $isAr ? 'القائمة الجانبية' : 'Menu' }}"
+                    title="{{ $isAr ? 'فتح القائمة' : 'Toggle Menu' }}"
                 >
-                    <svg class="w-5 h-5 stroke-[2.2] group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 stroke-[2.2] group-hover:rotate-90 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
-                    <span class="hidden sm:inline font-editorial font-bold text-[11px] uppercase tracking-wider">
-                        {{ $isAr ? 'القائمة' : 'Menu' }}
-                    </span>
+                    <span class="hidden sm:inline">{{ $isAr ? 'القائمة' : 'MENU' }}</span>
                 </button>
 
-                <!-- Brand Wordmark & Tagline -->
-                <a href="{{ route('home') }}" class="group flex flex-col items-start focus:outline-none">
-                    <span class="font-editorial font-black tracking-normal text-xl sm:text-2xl md:text-3xl text-black uppercase leading-none transition-transform group-hover:scale-[1.02]">
+                <!-- Brand Wordmark -->
+                <a href="{{ route('home') }}" class="group flex flex-col items-start focus:outline-none pl-1">
+                    <span class="font-editorial font-black text-xl sm:text-2xl lg:text-3xl text-black uppercase leading-none tracking-tight transition-transform group-hover:scale-[1.02]">
                         {{ $settings['store_name'] ?? ($settings['storeName'] ?? 'ATELIER') }}
                     </span>
-                    <span class="font-editorial font-bold text-[7.5px] sm:text-[8.5px] tracking-[0.3em] text-black/55 uppercase mt-0.5 whitespace-nowrap">
+                    <span class="font-editorial font-bold text-[7px] sm:text-[8px] tracking-[0.32em] text-black/60 uppercase mt-0.5 whitespace-nowrap">
                         STUDIO EGYPT · 2026
                     </span>
                 </a>
             </div>
 
-            <!-- Center: Prominent Live Search Bar (Desktop & Tablet) -->
-            <div class="hidden md:flex flex-1 max-w-md lg:max-w-xl mx-2 lg:mx-4 relative">
+            <!-- 2. CENTER: Unified Integrated Search Bar (Desktop & Tablet) -->
+            <div class="hidden md:flex flex-1 max-w-sm lg:max-w-md mx-2 relative">
                 <form action="{{ route('collections.show', ['slug' => 'all']) }}" method="GET" class="w-full relative" @submit="submitSearch">
-                    <div class="header-search-shell flex items-center bg-white transition-all w-full border border-black/15 rounded-xl shadow-xs overflow-hidden focus-within:border-black focus-within:ring-2 focus-within:ring-black/5">
-                        <div class="pl-3 pr-2 text-black/50 flex items-center shrink-0">
+                    <div class="h-10 flex items-center bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] w-full overflow-hidden focus-within:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all">
+                        <div class="pl-3 pr-1 text-black/50 flex items-center shrink-0">
                             <svg class="w-4 h-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
                             </svg>
@@ -141,12 +137,12 @@
                             @input.debounce.250ms="performLiveSearch()"
                             @focus="searchFocused = true"
                             @click.away="searchFocused = false"
-                            placeholder="{{ $isAr ? 'ابحث في التشكيلات والمنتجات الفاخرة...' : 'Search collections, products, decor...' }}" 
-                            class="w-full py-2 px-2 text-xs font-sans text-black placeholder:text-black/40 focus:outline-none bg-transparent"
+                            placeholder="{{ $isAr ? 'ابحث عن قطعة أو منتج...' : 'Search pieces & products...' }}" 
+                            class="w-full h-full py-1 px-2 text-xs font-sans text-black placeholder:text-black/40 focus:outline-none bg-transparent"
                             autocomplete="off"
                         >
-                        <button type="submit" class="m-1 px-3 py-1.5 bg-black hover:bg-neutral-800 text-white font-editorial font-bold text-[10px] uppercase tracking-wider rounded-lg shrink-0 transition-colors">
-                            {{ $isAr ? 'بحث' : 'Search' }}
+                        <button type="submit" class="h-full px-3.5 bg-black hover:bg-neutral-800 text-white font-editorial font-bold text-[10px] uppercase tracking-wider shrink-0 transition-colors border-l-2 border-black">
+                            {{ $isAr ? 'بحث' : 'SEARCH' }}
                         </button>
                     </div>
 
@@ -155,11 +151,11 @@
                         x-show="searchFocused && liveResults.length > 0" 
                         x-transition 
                         x-cloak
-                        class="absolute left-0 right-0 top-full mt-1.5 bg-white border-2 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] z-50 max-h-80 overflow-y-auto divide-y divide-black/10"
+                        class="absolute left-0 right-0 top-full mt-1.5 bg-white border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] z-50 max-h-80 overflow-y-auto divide-y divide-black/10"
                     >
                         <template x-for="item in liveResults" :key="item.id">
                             <a :href="item.url" class="flex items-center gap-3 p-3 hover:bg-[#F5F5F0] transition-colors">
-                                <img :src="item.image" :alt="item.title" class="w-11 h-11 object-cover border border-black/15 shrink-0 bg-[#F5F5F0] rounded-md">
+                                <img :src="item.image" :alt="item.title" class="w-10 h-10 object-cover border border-black/15 shrink-0 bg-[#F5F5F0]">
                                 <div class="flex-1 min-w-0">
                                     <p class="font-editorial font-bold text-xs uppercase tracking-normal text-black truncate" x-text="item.title"></p>
                                     <p class="font-sans font-semibold text-[11px] text-black/70 mt-0.5" x-text="item.price"></p>
@@ -167,72 +163,59 @@
                                 <span class="text-xs font-editorial text-black/40">View →</span>
                             </a>
                         </template>
-                        <div class="p-2.5 bg-[#FAFAFA] text-center border-t border-black/10">
+                        <div class="p-2 bg-[#FAFAFA] text-center border-t border-black/10">
                             <a :href="'/collections/all?q=' + encodeURIComponent(searchQuery)" class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black hover:underline">
-                                {{ $isAr ? 'عرض جميع النتائج المطابقة ←' : 'View all matching results →' }}
+                                {{ $isAr ? 'عرض كافة النتائج ←' : 'View all matching results →' }}
                             </a>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- Right: Nav Links + Collections + Account + Bag (Clean, Symmetrical, Organized) -->
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <!-- 3. RIGHT: Perfectly Symmetrical Buttons (Exact Same Height, Border, Font, Spacing) -->
+            <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
                 
-                <!-- Desktop Primary Nav Links -->
-                <nav class="hidden xl:flex items-center gap-5 mr-1">
-                    @php
-                        $isHome = request()->routeIs('home');
-                        $isAllCatalog = request()->is('collections/all');
-                        $isTrack = request()->routeIs('track.order');
-                        $navLinkClass = 'relative font-editorial font-bold text-[11px] uppercase tracking-[0.14em] transition-colors py-1 whitespace-nowrap group';
-                    @endphp
-
-                    <a href="{{ route('home') }}" class="{{ $navLinkClass }} {{ $isHome ? 'text-black' : 'text-black/60 hover:text-black' }}">
-                        <span>{{ $isAr ? 'الرئيسية' : 'Home' }}</span>
-                        <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isHome ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
-                    </a>
-
-                    <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="{{ $navLinkClass }} {{ $isAllCatalog ? 'text-black' : 'text-black/60 hover:text-black' }}">
-                        <span>{{ $isAr ? 'كل المنتجات' : 'All Products' }}</span>
-                        <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isAllCatalog ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
-                    </a>
-
-                    <a href="{{ route('track.order') }}" class="{{ $navLinkClass }} {{ $isTrack ? 'text-black' : 'text-black/60 hover:text-black' }}">
-                        <span>{{ $isAr ? 'تتبع الطلب' : 'Track' }}</span>
-                        <span class="absolute bottom-0 left-0 w-full h-[2px] bg-black transition-transform duration-300 {{ $isTrack ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100' }}"></span>
-                    </a>
-                </nav>
-
-                <!-- Desktop Collections Action Button -->
+                <!-- Desktop: All Products / Catalog Button -->
                 <a 
-                    href="{{ url('/collections') }}" 
-                    class="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-black/15 hover:border-black bg-[#F8F7F4] hover:bg-black hover:text-white transition-all duration-200 text-[11px] font-editorial font-bold uppercase tracking-wider text-black shrink-0 group shadow-xs min-h-[40px]"
-                    title="{{ $isAr ? 'تصفح التشكيلات' : 'Explore Collections' }}"
+                    href="{{ route('collections.show', ['slug' => 'all']) }}" 
+                    class="hidden xl:flex h-10 px-3.5 border-2 border-black {{ request()->is('collections/all') ? 'bg-black text-white' : 'bg-white hover:bg-black hover:text-white text-black' }} shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all items-center justify-center gap-1.5 font-editorial font-bold text-[11px] uppercase tracking-wider"
+                    title="{{ $isAr ? 'كل المنتجات' : 'All Products' }}"
                 >
-                    <svg class="w-3.5 h-3.5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    <svg class="w-3.5 h-3.5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
-                    <span>{{ $isAr ? 'التشكيلات' : 'Collections' }}</span>
+                    <span>{{ $isAr ? 'المنتجات' : 'CATALOG' }}</span>
                 </a>
 
-                <!-- Client Account (Desktop & Mobile) -->
+                <!-- Desktop: Track Order Button -->
+                <a 
+                    href="{{ route('track.order') }}" 
+                    class="hidden lg:flex h-10 px-3.5 border-2 border-black {{ request()->routeIs('track.order') ? 'bg-black text-white' : 'bg-white hover:bg-black hover:text-white text-black' }} shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all items-center justify-center gap-1.5 font-editorial font-bold text-[11px] uppercase tracking-wider"
+                    title="{{ $isAr ? 'تتبع الطلب' : 'Track Order' }}"
+                >
+                    <svg class="w-3.5 h-3.5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    </svg>
+                    <span>{{ $isAr ? 'تتبع الطلب' : 'TRACK' }}</span>
+                </a>
+
+                <!-- Account Button (Desktop & Tablet) -->
                 <a 
                     href="{{ route('account') }}" 
-                    class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg border border-black/10 hover:border-black bg-white hover:bg-black hover:text-white text-[11px] font-editorial font-bold uppercase tracking-wider text-black transition-all duration-200 shrink-0 shadow-xs min-h-[40px]"
+                    class="hidden sm:flex h-10 px-3.5 border-2 border-black {{ request()->routeIs('account*') ? 'bg-black text-white' : 'bg-white hover:bg-black hover:text-white text-black' }} shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all items-center justify-center gap-1.5 font-editorial font-bold text-[11px] uppercase tracking-wider"
                     title="{{ $isAr ? 'حسابي' : 'Client Account' }}"
                 >
-                    <svg class="w-4 h-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-3.5 h-3.5 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>{{ $isAr ? 'حسابي' : 'Account' }}</span>
+                    <span>{{ $isAr ? 'حسابي' : 'ACCOUNT' }}</span>
                 </a>
 
-                <!-- Mobile Quick Search Trigger (Phones only) -->
+                <!-- Mobile: Quick Search Icon Trigger -->
                 <button 
                     type="button" 
                     onclick="window.dispatchEvent(new CustomEvent('open-smart-search'))"
-                    class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg border border-black/15 bg-white text-black hover:bg-black hover:text-white transition-colors active:scale-95 shadow-xs shrink-0"
+                    class="md:hidden h-10 w-10 border-2 border-black bg-white hover:bg-black hover:text-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
                     aria-label="{{ $isAr ? 'بحث' : 'Search' }}"
                 >
                     <svg class="w-4 h-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -240,17 +223,17 @@
                     </svg>
                 </button>
 
-                <!-- Luxury Shopping Bag Button (Desktop & Mobile) -->
+                <!-- Luxury Shopping Bag Button (Exact Matching Height & Signature Aesthetic) -->
                 <a 
                     href="{{ route('cart.index') }}" 
-                    class="inline-flex items-center gap-2 bg-black text-white hover:bg-neutral-800 px-3 sm:px-4 py-2 rounded-lg text-[11px] font-editorial font-bold uppercase tracking-wider transition-all duration-200 shadow-sm active:scale-95 cursor-pointer shrink-0 min-h-[40px]"
+                    class="h-10 px-3.5 sm:px-4 border-2 border-black bg-black text-white hover:bg-neutral-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all flex items-center justify-center gap-2 font-editorial font-bold text-[11px] uppercase tracking-wider cursor-pointer shrink-0"
                     title="{{ $isAr ? 'السلة وإتمام الطلب' : 'Shopping Bag & Checkout' }}"
                 >
-                    <svg class="w-4 h-4 text-white stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-3.5 h-3.5 text-white stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                     <span class="tracking-widest hidden xs:inline sm:inline">{{ $isAr ? 'السلة' : 'BAG' }}</span>
-                    <span class="bg-white text-black text-[10px] font-mono font-black px-1.5 py-0.5 rounded-sm leading-none">
+                    <span class="bg-white text-black text-[10px] font-mono font-black px-1.5 py-0.5 border border-black leading-none">
                         {{ $cartCount }}
                     </span>
                 </a>
@@ -258,10 +241,9 @@
             </div>
 
         </div>
-
     </div>
 
-    <!-- Luxury Off-Canvas Sidebar Drawer (Desktop & Mobile Responsive Master Menu) -->
+    <!-- Luxury Off-Canvas Sidebar Drawer (Desktop & Mobile Master Drawer) -->
     <div 
         x-show="mobileMenuOpen"
         x-cloak
@@ -282,7 +264,7 @@
             class="fixed inset-0 bg-black/70 backdrop-blur-md"
         ></div>
 
-        <!-- Sliding Menu Panel (High-End Studio Design with High Contrast Active States) -->
+        <!-- Sliding Menu Panel -->
         <div 
             x-show="mobileMenuOpen"
             x-transition:enter="transition ease-out duration-300 transform"
@@ -295,7 +277,7 @@
             dir="{{ $isAr ? 'rtl' : 'ltr' }}"
             style="height: 100dvh; max-height: 100dvh;"
         >
-            <!-- Drawer Top Bar: Brand & Minimal Close Button -->
+            <!-- Drawer Top Bar -->
             <div class="shrink-0 px-5 py-4 border-b-2 border-black flex items-center justify-between bg-white">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 min-w-0 group" @click="mobileMenuOpen = false">
                     <div class="w-9 h-9 border-2 border-black bg-black text-white flex items-center justify-center font-editorial font-black text-sm shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -335,7 +317,7 @@
             </div>
             @endif
 
-            <!-- Drawer Body (Scrollable, High Contrast Active Styles) -->
+            <!-- Drawer Body -->
             <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-5 space-y-6">
                 
                 <!-- Quick Search Input inside Drawer -->
@@ -353,7 +335,7 @@
                     </button>
                 </form>
 
-                <!-- Primary Category Navigation Grid (High-Contrast Bold Cards) -->
+                <!-- Primary Category Navigation Grid -->
                 <div>
                     <p class="text-[10px] font-editorial font-bold uppercase tracking-[0.2em] text-black/50 mb-3 px-1 flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 bg-black inline-block"></span>
@@ -422,16 +404,16 @@
                         <!-- All Collections Index -->
                         <a href="{{ url('/collections') }}" 
                            @click="mobileMenuOpen = false"
-                           class="flex items-center justify-between p-3.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
+                           class="flex items-center justify-between p-3 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
+                                <div class="w-7 h-7 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
                                     <svg class="w-4 h-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="text-xs font-editorial font-bold uppercase tracking-wider text-black group-hover:underline">{{ $isAr ? 'دليل كافة التشكيلات' : 'All Collections Directory' }}</p>
-                                    <p class="text-[10px] text-black/50 font-sans">{{ $isAr ? 'تصفح كل الأقسام بالتفصيل' : 'Explore full categories' }}</p>
+                                    <p class="text-[9.5px] text-black/50 font-sans">{{ $isAr ? 'تصفح كل الأقسام بالتفصيل' : 'Explore full categories' }}</p>
                                 </div>
                             </div>
                             <span class="text-xs font-editorial font-bold text-black {{ $isAr ? 'rotate-180' : '' }}">→</span>
@@ -440,16 +422,16 @@
                         <!-- Track Order -->
                         <a href="{{ route('track.order') }}" 
                            @click="mobileMenuOpen = false"
-                           class="flex items-center justify-between p-3.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
+                           class="flex items-center justify-between p-3 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
+                                <div class="w-7 h-7 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
                                     <svg class="w-4 h-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="text-xs font-editorial font-bold uppercase tracking-wider text-black group-hover:underline">{{ $isAr ? 'تتبع الشحنة والطلب' : 'Track Your Shipment' }}</p>
-                                    <p class="text-[10px] text-black/50 font-sans">{{ $isAr ? 'معرفة حالة الشحنة بالرقم' : 'Real-time order tracker' }}</p>
+                                    <p class="text-[9.5px] text-black/50 font-sans">{{ $isAr ? 'معرفة حالة الشحنة بالرقم' : 'Real-time order tracker' }}</p>
                                 </div>
                             </div>
                             <span class="text-xs font-editorial font-bold text-black {{ $isAr ? 'rotate-180' : '' }}">→</span>
@@ -458,22 +440,22 @@
                         <!-- Client Account -->
                         <a href="{{ route('account') }}" 
                            @click="mobileMenuOpen = false"
-                           class="flex items-center justify-between p-3.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
+                           class="flex items-center justify-between p-3 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
+                                <div class="w-7 h-7 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
                                     <svg class="w-4 h-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="text-xs font-editorial font-bold uppercase tracking-wider text-black group-hover:underline">{{ $isAr ? 'الحساب الشخصي' : 'Client Profile' }}</p>
-                                    <p class="text-[10px] text-black/50 font-sans">{{ $isAr ? 'الطلبات والعناوين المحفوظة' : 'Orders & saved details' }}</p>
+                                    <p class="text-[9.5px] text-black/50 font-sans">{{ $isAr ? 'الطلبات والعناوين المحفوظة' : 'Orders & saved details' }}</p>
                                 </div>
                             </div>
                             <span class="text-xs font-editorial font-bold text-black {{ $isAr ? 'rotate-180' : '' }}">→</span>
                         </a>
 
-                        <!-- VIP WhatsApp Concierge Support -->
+                        <!-- VIP WhatsApp Concierge -->
                         @php
                             $drawerWaNum = preg_replace('/[^0-9]/', '', $settings['social_whatsapp'] ?? '201000000000');
                             $drawerWaMsg = $settings['social_whatsapp_msg'] ?? ($isAr ? 'مرحباً، أود الاستفسار عن منتجات Atelier' : 'Hello, I have an inquiry about Atelier products');
@@ -481,16 +463,16 @@
                         <a href="https://wa.me/{{ $drawerWaNum }}?text={{ urlencode($drawerWaMsg) }}" 
                            target="_blank" 
                            rel="noopener noreferrer"
-                           class="flex items-center justify-between p-3.5 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
+                           class="flex items-center justify-between p-3 bg-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
+                                <div class="w-7 h-7 border border-black/20 bg-[#F5F5F0] flex items-center justify-center text-black shrink-0">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.112.551 4.095 1.517 5.823l-1.61 5.885 6.036-1.583c1.667.909 3.578 1.427 5.609 1.427 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
                                     </svg>
                                 </div>
                                 <div>
                                     <p class="text-xs font-editorial font-bold uppercase tracking-wider text-black group-hover:underline">{{ $isAr ? 'خدمة العملاء VIP واتساب' : 'VIP Concierge WhatsApp' }}</p>
-                                    <p class="text-[10px] text-black/50 font-sans">{{ $isAr ? 'رد فوري ومساعدة مخصصة' : 'Instant live assistance' }}</p>
+                                    <p class="text-[9.5px] text-black/50 font-sans">{{ $isAr ? 'رد فوري ومساعدة مخصصة' : 'Instant live assistance' }}</p>
                                 </div>
                             </div>
                             <span class="text-[9px] font-mono font-bold uppercase bg-black text-white px-2 py-0.5 rounded-sm">Online</span>
@@ -498,9 +480,9 @@
                     </div>
                 </div>
 
-                <!-- Brand Guarantee / Heritage Badge -->
-                <div class="p-4 border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-center">
-                    <p class="text-[11px] font-editorial font-bold uppercase tracking-wider text-black mb-1">
+                <!-- Brand Guarantee -->
+                <div class="p-3.5 border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] text-center">
+                    <p class="text-[10.5px] font-editorial font-bold uppercase tracking-wider text-black mb-0.5">
                         ✦ {{ $isAr ? 'جلد طبيعي 100% وضمان ممتد' : '100% Full-Grain Leather Guaranteed' }} ✦
                     </p>
                     <p class="text-[9px] font-sans text-black/60">
@@ -509,11 +491,11 @@
                 </div>
             </div>
 
-            <!-- Drawer Bottom Dedicated Footer (Always clearly visible and unobstructed) -->
-            <div class="p-4 sm:p-5 border-t-2 border-black bg-white shrink-0 shadow-lg">
+            <!-- Drawer Bottom Checkout Footer -->
+            <div class="p-4 border-t-2 border-black bg-white shrink-0 shadow-lg">
                 <a href="{{ route('cart.index') }}" 
                    @click="mobileMenuOpen = false"
-                   class="btn-luxury w-full py-4 text-center text-xs tracking-[0.18em] flex items-center justify-center gap-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-95 cursor-pointer">
+                   class="btn-luxury w-full py-3.5 text-center text-xs tracking-[0.18em] flex items-center justify-center gap-2.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:scale-95 cursor-pointer">
                     <svg class="w-4 h-4 stroke-[2.2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
@@ -533,7 +515,6 @@ function headerSearchComponent() {
         searchFocused: false,
         liveResults: [],
         init() {
-            // Allow global events to open/close menu
             window.addEventListener('open-sidebar-menu', () => { this.mobileMenuOpen = true; });
             window.addEventListener('close-sidebar-menu', () => { this.mobileMenuOpen = false; });
         },
