@@ -107,18 +107,30 @@
 
 @endphp
 
-<div 
-    x-data="{ 
-        activeImage: '{{ $mainImg }}',
-        selectedImage: '{{ $mainImg }}',
-        activePrice: '{{ count($variantsJson) > 0 ? $variantsJson[0]['price'] : $basePriceEgp }}',
-        activeStock: {{ count($variantsJson) > 0 ? $variantsJson[0]['inventory'] : $product->inventory }},
-        selectedVariantId: '{{ count($variantsJson) > 0 ? $variantsJson[0]['id'] : '' }}',
-        selectedOptionTitle: '{{ count($variantsJson) > 0 ? $variantsJson[0]['title'] : '' }}',
+<script>
+function productDetailComponent() {
+    const variants = @json($variantsJson);
+    const defaultGallery = @json($uniqueAssetUrls);
+    const fallbackMainImg = @json($mainImg);
+    const initialPrice = @json(count($variantsJson) > 0 ? $variantsJson[0]['price'] : $basePriceEgp);
+    const initialStock = {{ count($variantsJson) > 0 ? (int)$variantsJson[0]['inventory'] : (int)$product->inventory }};
+    const initialVarId = @json(count($variantsJson) > 0 ? (string)$variantsJson[0]['id'] : '');
+    const initialOptionTitle = @json(count($variantsJson) > 0 ? (string)$variantsJson[0]['title'] : '');
+    const currentProdId = {{ (int)$product->id }};
+    const currentProdTitle = @json($product->title);
+    const currentProdUrl = @json(route('products.show', ['slug' => $product->slug]));
+
+    return {
+        activeImage: fallbackMainImg,
+        selectedImage: fallbackMainImg,
+        activePrice: initialPrice,
+        activeStock: initialStock,
+        selectedVariantId: initialVarId,
+        selectedOptionTitle: initialOptionTitle,
         qty: 1,
-        variantsMap: {{ json_encode($variantsJson) }},
-        defaultGallery: {{ json_encode($uniqueAssetUrls) }},
-        currentGallery: {{ json_encode($uniqueAssetUrls) }},
+        variantsMap: variants,
+        defaultGallery: defaultGallery,
+        currentGallery: defaultGallery,
         init() {
             const params = new URLSearchParams(window.location.search);
             const varId = params.get('variant');
@@ -127,7 +139,7 @@
                 const found = this.variantsMap.find(v => String(v.id) === String(varId));
                 if (found) this.selectVariant(found);
             } else if (colorParam && this.variantsMap.length > 0) {
-                const found = this.variantsMap.find(v => v.title.toLowerCase().includes(colorParam.toLowerCase()));
+                const found = this.variantsMap.find(v => v.title && v.title.toLowerCase().includes(colorParam.toLowerCase()));
                 if (found) this.selectVariant(found);
             }
 
@@ -138,11 +150,11 @@
                 }
                 const stored = JSON.parse(localStorage.getItem('atelier_recently_viewed_v2') || '[]');
                 const currentItem = {
-                    id: {{ $product->id }},
-                    title: @json($product->title),
-                    price: '{{ $basePriceEgp }}',
-                    image: '{{ $mainImg }}',
-                    url: '{{ route('products.show', ['slug' => $product->slug]) }}'
+                    id: currentProdId,
+                    title: currentProdTitle,
+                    price: initialPrice,
+                    image: fallbackMainImg,
+                    url: currentProdUrl
                 };
                 const filtered = stored.filter(i => i && i.id !== currentItem.id);
                 filtered.unshift(currentItem);
@@ -150,8 +162,9 @@
             } catch(e) {}
         },
         selectVariant(v) {
-            this.selectedVariantId = v.id;
-            this.selectedOptionTitle = v.title;
+            if (!v) return;
+            this.selectedVariantId = String(v.id);
+            this.selectedOptionTitle = v.title || '';
             this.activePrice = v.price;
             this.activeStock = v.inventory;
             
@@ -165,28 +178,44 @@
                     this.activeImage = v.image;
                     this.selectedImage = v.image;
                 } else {
-                    this.activeImage = this.defaultGallery[0] || '{{ $mainImg }}';
-                    this.selectedImage = this.defaultGallery[0] || '{{ $mainImg }}';
+                    this.activeImage = (this.defaultGallery && this.defaultGallery[0]) || fallbackMainImg;
+                    this.selectedImage = (this.defaultGallery && this.defaultGallery[0]) || fallbackMainImg;
                 }
             }
         },
+        selectVariantById(id) {
+            const v = this.variantsMap.find(item => String(item.id) === String(id));
+            if (v) this.selectVariant(v);
+        },
         previewVariant(v) { 
+            if (!v) return;
             if (v.gallery && v.gallery.length > 0) {
                 this.activeImage = v.gallery[0];
             } else if (v.image) {
                 this.activeImage = v.image;
             }
         },
-        restoreSelectedImage() { this.activeImage = this.selectedImage || '{{ $mainImg }}'; },
+        previewVariantById(id) {
+            const v = this.variantsMap.find(item => String(item.id) === String(id));
+            if (v) this.previewVariant(v);
+        },
+        restoreSelectedImage() { 
+            this.activeImage = this.selectedImage || fallbackMainImg; 
+        },
         shareProduct() {
             if (navigator.share) {
-                navigator.share({ title: '{{ $product->title }}', url: window.location.href });
+                navigator.share({ title: currentProdTitle, url: window.location.href }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(window.location.href);
                 alert('Link copied to clipboard!');
             }
         }
-    }"
+    };
+}
+</script>
+
+<div 
+    x-data="productDetailComponent()"
     class="bg-[#F5F5F0] min-h-screen py-5 sm:py-8 lg:py-20"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
@@ -228,7 +257,7 @@
                         </div>
                         <div class="flex items-center gap-3 flex-wrap">
                             @foreach($variantsJson as $vItem)
-                                <button type="button" @click="selectVariant({{ json_encode($vItem) }})" @mouseenter="previewVariant({{ json_encode($vItem) }})" @mouseleave="restoreSelectedImage()" class="group flex flex-col items-center gap-1.5" :aria-label="'{{ addslashes($vItem['title']) }}'">
+                                <button type="button" @click="selectVariantById('{{ $vItem['id'] }}')" @mouseenter="previewVariantById('{{ $vItem['id'] }}')" @mouseleave="restoreSelectedImage()" class="group flex flex-col items-center gap-1.5" :aria-label="'{{ addslashes($vItem['title']) }}'">
                                     <span class="w-9 h-9 rounded-full border-2 transition-all shadow-sm" style="background-color: {{ $vItem['color_hex'] }}" :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'ring-2 ring-black ring-offset-2 border-black scale-110' : 'border-black/20 hover:scale-105'"></span>
                                     <span class="max-w-[68px] truncate text-[9px] font-semibold text-black/60 group-hover:text-black">{{ $vItem['title'] }}</span>
                                 </button>
@@ -350,8 +379,8 @@
                             @foreach($variantsJson as $vItem)
                                 <button 
                                     type="button" 
-                                    @click="selectVariant({{ json_encode($vItem) }})"
-                                    @mouseenter="previewVariant({{ json_encode($vItem) }})"
+                                    @click="selectVariantById('{{ $vItem['id'] }}')"
+                                    @mouseenter="previewVariantById('{{ $vItem['id'] }}')"
                                     @mouseleave="restoreSelectedImage()"
                                     class="flex items-center gap-2.5 border-2 px-3.5 py-2.5 text-xs font-editorial font-bold uppercase tracking-wider transition-all min-h-[44px] cursor-pointer"
                                     :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'border-black bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5' : 'border-black/20 bg-white text-black hover:border-black'"
