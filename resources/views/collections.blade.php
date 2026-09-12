@@ -153,7 +153,7 @@
 
         {{-- ── 3. Sticky Filter & Category Rail (When in Products Mode or Single Collection) ── --}}
         <div 
-            x-show="viewMode === 'products' || !{{ $isAllOverview ? 'true' : 'false' }}"
+            x-show="viewMode === 'products' || {{ $isAllOverview ? 'false' : 'true' }}"
             class="sticky top-14 z-30 bg-[#F5F5F0]/95 backdrop-blur-md py-3 -mx-3 px-3 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10 border-b border-black/10 mb-6 sm:mb-8 transition-all"
         >
             <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
@@ -224,7 +224,7 @@
 
         {{-- ── 4. Actual Product Grid ── --}}
         <div 
-            x-show="viewMode === 'products' || !{{ $isAllOverview ? 'true' : 'false' }}"
+            x-show="viewMode === 'products' || {{ $isAllOverview ? 'false' : 'true' }}"
             id="col-product-grid" 
             class="grid gap-3 lg:gap-4"
             :class="{
