@@ -1,7 +1,6 @@
 // ATELIER Studio Egypt — Service Worker for PWA
-const CACHE_NAME = 'atelier-v2';
+const CACHE_NAME = 'atelier-v5';
 const ASSETS_TO_CACHE = [
-  '/',
   '/manifest.json',
   '/favicon.png',
   '/apple-touch-icon.png',
@@ -35,8 +34,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // Network first, fallback to cache
+  // For HTML navigation requests, always fetch fresh from network
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  // Network first, fallback to cache for static assets
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
+
