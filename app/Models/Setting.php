@@ -43,15 +43,15 @@ class Setting extends Model
             'homeHeroSecondaryCta'     => 'View Featured Piece',
             'homeHeroPriceBadge'       => 'From 540 EGP · 2-Year Warranty',
 
-            // Promo Banner
-            'homepage_banner_image'    => 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1800&q=85',
+            // Promo Banner (Default empty — never force unwanted deleted images!)
+            'homepage_banner_image'    => '',
             'homepage_banner_video'    => '',
-            'homepage_banner_title'    => 'EXCLUSIVE ARCHIVE RELEASE — LIMITED DISPATCH',
-            'homepage_banner_subtitle' => 'Handcrafted full-grain Italian leather, aerospace titanium hardware, and bespoke craftsmanship.',
-            'homepage_banner_link'     => '/collections/all',
-            'homepage_banner_height'   => '48vh',
+            'homepage_banner_title'    => '',
+            'homepage_banner_subtitle' => '',
+            'homepage_banner_link'     => '',
+            'homepage_banner_height'   => 'auto',
             'homepage_banner_position' => 'center center',
-            'homepage_banner_fit'      => 'cover',
+            'homepage_banner_fit'      => 'contain',
             'homepage_banner_zoom'     => '100',
             'homepage_banner_overlay'  => 'medium',
 
@@ -78,6 +78,7 @@ class Setting extends Model
 
     /**
      * Get all settings as a simple key => value array with defaults merged.
+     * Database values always take precedence even if empty string.
      */
     public static function allAsMap(): array
     {
@@ -92,13 +93,14 @@ class Setting extends Model
 
     /**
      * Get a single setting by key, with an optional default.
+     * If the setting exists in the database, its exact value is returned.
      */
     public static function get(string $key, mixed $default = null): mixed
     {
         $defaults = static::defaults();
         try {
             $setting = static::where('key', $key)->first();
-            if ($setting && $setting->value !== null && $setting->value !== '') {
+            if ($setting !== null) {
                 return $setting->value;
             }
             return $defaults[$key] ?? $default;

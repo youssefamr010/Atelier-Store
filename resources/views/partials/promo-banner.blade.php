@@ -7,16 +7,13 @@
     $bannerSubtitle = $settings['homepage_banner_subtitle'] ?? '';
     $bannerLink = $settings['homepage_banner_link'] ?? '';
     
-    if (empty($bannerImg) && (!empty($bannerTitle) || !empty($bannerSubtitle))) {
-        $bannerImg = 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1800&q=85';
-    }
-    
+    // Only build URL if an actual image was configured by the admin (never use unwanted fallback placeholders)
     $bannerImgUrl = $bannerImg ? (str_starts_with($bannerImg, 'http') ? $bannerImg : url($bannerImg)) : '';
     $bannerVideoUrl = $bannerVideo ? (str_starts_with($bannerVideo, 'http') ? $bannerVideo : url($bannerVideo)) : '';
 
     $bannerHeightSetting = $settings['homepage_banner_height'] ?? 'auto';
     $bannerPosition = $settings['homepage_banner_position'] ?? 'center center';
-    $bannerFit = $settings['homepage_banner_fit'] ?? 'contain'; // Smart default to preserve entire image
+    $bannerFit = $settings['homepage_banner_fit'] ?? 'contain';
     $bannerOverlay = $settings['homepage_banner_overlay'] ?? 'medium';
 
     $overlayClasses = [
@@ -34,14 +31,14 @@
         <a href="{{ str_starts_with($bannerLink, 'http') ? $bannerLink : url($bannerLink) }}" class="block relative w-full h-full">
     @endif
 
-        {{-- 1. Ambient Background Layer (Blurred backdrop to gracefully fill any aspect ratio gaps without dark voids) --}}
+        {{-- 1. Ambient Background Layer --}}
         @if(!empty($bannerImgUrl))
             <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
                 <img src="{{ $bannerImgUrl }}" alt="" class="w-full h-full object-cover blur-2xl scale-125 opacity-35 transition-opacity duration-700">
             </div>
         @endif
 
-        {{-- 2. Main Media Container (Adapts smartly to image proportion on mobile & desktop) --}}
+        {{-- 2. Main Media Container --}}
         <div class="relative w-full flex items-center justify-center min-h-[200px] sm:min-h-[300px] lg:min-h-[420px] max-h-[80vh]">
             @if(!empty($bannerVideoUrl))
                 <video autoplay muted loop playsinline preload="metadata" poster="{{ $bannerImgUrl }}"
@@ -60,7 +57,7 @@
                 >
             @endif
 
-            {{-- Dynamic Readability Overlay (if title or link is present) --}}
+            {{-- Dynamic Readability Overlay --}}
             @if($bannerOverlay !== 'none' && (!empty($bannerTitle) || !empty($bannerSubtitle) || !empty($bannerLink)))
                 <div class="absolute inset-0 {{ $overlayClass }} pointer-events-none"></div>
             @endif
