@@ -133,20 +133,24 @@ class WebCheckoutController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'saved_address_id'      => 'nullable|integer|exists:addresses,id',
-            'full_name'             => 'nullable|required_without:saved_address_id|string|max:150',
-            'phone'                 => 'nullable|required_without:saved_address_id|string|max:30',
-            'city'                  => 'nullable|required_without:saved_address_id|string|max:100',
-            'street_address'        => 'nullable|required_without:saved_address_id|string|max:255',
-            'state'                 => 'nullable|string|max:100',
-            'postal_code'           => 'nullable|string|max:30',
-            'latitude'              => 'nullable|numeric|between:-90,90',
-            'longitude'             => 'nullable|numeric|between:-180,180',
-            'address_label'         => 'nullable|string|max:50',
-            'save_to_address_book'  => 'nullable|boolean',
-            'payment_method'        => 'required|in:cod,paymob,stripe',
-            'product_id'            => 'nullable|integer|exists:products,id',
-            'variant_id'            => 'nullable|integer|exists:product_variants,id',
+            'saved_address_id'        => 'nullable|integer|exists:addresses,id',
+            'full_name'               => 'nullable|required_without:saved_address_id|string|max:150',
+            'phone'                   => 'nullable|required_without:saved_address_id|string|max:30',
+            'city'                    => 'nullable|required_without:saved_address_id|string|max:100',
+            'street_address'          => 'nullable|required_without:saved_address_id|string|max:255',
+            'state'                   => 'nullable|string|max:100',
+            'postal_code'             => 'nullable|string|max:30',
+            'latitude'                => 'nullable|numeric|between:-90,90',
+            'longitude'               => 'nullable|numeric|between:-180,180',
+            'address_label'           => 'nullable|string|max:50',
+            'save_to_address_book'    => 'nullable|boolean',
+            'gift_wrap'               => 'nullable|boolean',
+            'gift_message'            => 'nullable|string|max:500',
+            'preferred_delivery_time' => 'nullable|string|max:50',
+            'delivery_instructions'   => 'nullable|string|max:500',
+            'payment_method'          => 'required|in:cod,paymob,stripe',
+            'product_id'              => 'nullable|integer|exists:products,id',
+            'variant_id'              => 'nullable|integer|exists:product_variants,id',
         ]);
 
         if ($validated['payment_method'] === 'paymob' && (blank(config('payment.paymob.secret_key')) || blank(config('payment.paymob.public_key')) || empty(array_filter(config('payment.paymob.integration_ids', []))))) {

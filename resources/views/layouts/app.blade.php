@@ -64,11 +64,11 @@
             theme: {
                 extend: {
                     colors: {
-                        black: '#000000',
+                        black: '#0A0A0A',
                         white: '#FFFFFF',
-                        'off-white': '#F5F5F0',
+                        'off-white': '#F8F7F3',
                         'warm-grey': '#E8E8E3',
-                        'charcoal': '#121212',
+                        'charcoal': '#141414',
                         'muted-border': '#E0E0DB'
                     },
                     fontFamily: {
@@ -78,17 +78,6 @@
                         editorial: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],
                         /* sans: body text, descriptions — Inter */
                         sans: ['Inter', '"Space Grotesk"', 'system-ui', 'sans-serif']
-                    },
-                    borderRadius: {
-                        none: '0px',
-                        DEFAULT: '0px',
-                        sm: '0px',
-                        md: '0px',
-                        lg: '0px',
-                        xl: '0px',
-                        '2xl': '0px',
-                        '3xl': '0px',
-                        full: '0px'
                     }
                 }
             }
@@ -100,9 +89,7 @@
 
     <!-- Custom Animation, Typography & Mobile Stylesheet -->
     <style>
-        /* ── Softer surfaces make long shopping sessions more comfortable ── */
         *, *::before, *::after {
-            border-radius: 8px !important;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
