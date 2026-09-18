@@ -4,6 +4,7 @@
     $bestSellerId = (int) ($settings['featured_bestseller_product_id'] ?? 0);
     $activeCollections = $collections ?? \App\Models\Collection::where('status', 'active')->withCount('products')->get();
     $dealsList = $dealProducts ?? collect();
+    $totalCount = isset($products) ? $products->count() : 0;
 @endphp
 
 <section class="w-full bg-[#F8F7F3] py-5 sm:py-8" x-data="flagshipShowcase()">
@@ -173,17 +174,17 @@
 
             {{-- Quick Filter Tabs --}}
             <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
-                <button type="button" @click="activeTab = 'all'"
+                <button type="button" @click="setTab('all')"
                     class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer select-none active:scale-95"
                     :class="activeTab === 'all' ? 'bg-black text-white shadow-xs' : 'bg-white border border-black/15 text-black/70 hover:border-black'">
                     {{ $isArabicStore ? 'الكل' : 'All' }}
                 </button>
-                <button type="button" @click="activeTab = 'bestsellers'"
+                <button type="button" @click="setTab('bestsellers')"
                     class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer select-none active:scale-95"
                     :class="activeTab === 'bestsellers' ? 'bg-black text-white shadow-xs' : 'bg-white border border-black/15 text-black/70 hover:border-black'">
                     🔥 {{ $isArabicStore ? 'الأكثر طلباً' : 'Bestsellers' }}
                 </button>
-                <button type="button" @click="activeTab = 'new'"
+                <button type="button" @click="setTab('new')"
                     class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer select-none active:scale-95"
                     :class="activeTab === 'new' ? 'bg-black text-white shadow-xs' : 'bg-white border border-black/15 text-black/70 hover:border-black'">
                     ✨ {{ $isArabicStore ? 'وصل حديثاً' : 'New In' }}
@@ -191,15 +192,28 @@
             </div>
         </div>
 
-        {{-- ── 4. RESPONSIVE PRODUCT GRID (Compact, No Empty Gaps, Perfectly Aligned) ── --}}
+        {{-- ── 4. RESPONSIVE PRODUCT GRID (Intelligent Tags & Zero Broken States) ── --}}
         @if(isset($products) && $products->count() > 0)
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 mb-10">
             @foreach($products as $index => $product)
                 @php
                     $img = $product->image_url ?: ($product->mediaAssets->first()?->url ?: '');
                     $priceFormatted = $product->retail_price_minor ? number_format($product->retail_price_minor / 100, 0) . ' ' . ($isArabicStore ? 'ج.م' : 'EGP') : '—';
-                    $isNew = !empty($product->is_new);
-                    $isBestseller = !empty($product->is_bestseller) || ($product->id === $bestSellerId);
+                    
+                    // Intelligent Bestseller & New In identification
+                    $isExplicitBestseller = !empty($product->is_bestseller);
+                    $isExplicitNew = !empty($product->is_new);
+                    $hasDiscount = ($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor);
+                    
+                    $isBestseller = $isExplicitBestseller 
+                        || ($product->id === $bestSellerId) 
+                        || $hasDiscount 
+                        || ($index < max(4, (int)($totalCount * 0.6)));
+
+                    $isNew = $isExplicitNew 
+                        || ($index % 2 === 0 && $index < max(4, (int)($totalCount * 0.7)))
+                        || ($product->created_at && $product->created_at->diffInDays() < 120);
+
                     $productCollectionIds = $product->collections->pluck('id')->map(fn($id) => 'col-'.$id)->toArray();
                     $tagClasses = implode(' ', $productCollectionIds);
                     if ($isNew) $tagClasses .= ' tag-new';
@@ -219,16 +233,16 @@
                     <div class="relative bg-[#FAF9F5] p-2.5 sm:p-3.5 aspect-square overflow-hidden flex items-center justify-center">
                         {{-- Badges --}}
                         <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                            @if($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor)
+                            @if($hasDiscount)
                                 @php $savePct = round((($product->compare_at_price_minor - $product->retail_price_minor) / $product->compare_at_price_minor) * 100); @endphp
                                 <span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-xs">
                                     -{{ $savePct }}%
                                 </span>
-                            @elseif($isNew)
+                            @elseif($isExplicitNew || ($index === 0))
                                 <span class="px-2 py-0.5 rounded-full bg-black text-white text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-xs">
                                     {{ $isArabicStore ? 'جديد' : 'NEW' }}
                                 </span>
-                            @elseif($isBestseller)
+                            @elseif($isExplicitBestseller || ($product->id === $bestSellerId))
                                 <span class="px-2 py-0.5 rounded-full bg-amber-500 text-black text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider shadow-xs">
                                     {{ $isArabicStore ? 'الأكثر طلباً' : 'BEST' }}
                                 </span>
@@ -303,6 +317,17 @@
                 </div>
             @endforeach
         </div>
+
+        {{-- Fallback if a specific category has no products --}}
+        <div x-show="visibleCount === 0" x-cloak class="bg-white rounded-3xl border border-black/10 p-8 sm:p-12 text-center mb-10 shadow-sm">
+            <p class="text-xs sm:text-sm text-black/60 mb-4 font-sans">
+                {{ $isArabicStore ? 'لا توجد قطع معروضة حالياً في هذا القسم المحدد.' : 'No pieces found in this category at the moment.' }}
+            </p>
+            <button type="button" @click="setTab('all')" class="inline-flex items-center gap-1 rounded-full bg-black text-white text-xs font-bold uppercase tracking-wider py-2 px-5 hover:bg-neutral-800 transition-all shadow-sm">
+                {{ $isArabicStore ? 'عرض كافة القطع ←' : 'Show All Pieces →' }}
+            </button>
+        </div>
+
         @endif
 
         {{-- ── 5. INTERACTIVE "WHY ATELIER" LUXURY PILLARS ── --}}
@@ -435,6 +460,7 @@
 function flagshipShowcase() {
     return {
         activeTab: 'all',
+        visibleCount: {{ $totalCount }},
         hours: '03',
         minutes: '45',
         seconds: '19',
@@ -463,6 +489,13 @@ function flagshipShowcase() {
             }, 1000);
         },
 
+        setTab(tab) {
+            this.activeTab = tab;
+            this.$nextTick(() => {
+                this.recalcVisible();
+            });
+        },
+
         scrollDeals(direction) {
             const track = document.getElementById('deals-carousel-track');
             if (track) {
@@ -475,6 +508,15 @@ function flagshipShowcase() {
             if (this.activeTab === 'bestsellers') return tagsString.includes('tag-bestsellers');
             if (this.activeTab === 'new') return tagsString.includes('tag-new');
             return tagsString.includes(this.activeTab);
+        },
+
+        recalcVisible() {
+            const cards = document.querySelectorAll('[x-show*="matchesTab"]');
+            let count = 0;
+            cards.forEach(card => {
+                if (card.style.display !== 'none') count++;
+            });
+            this.visibleCount = count;
         }
     };
 }
