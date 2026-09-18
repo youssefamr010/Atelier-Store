@@ -48,7 +48,7 @@ class Coupon extends Model
 
     public function calculateDiscount(int $subtotalMinor): int
     {
-        if ($subtotalMinor < $this->min_order_amount_minor) {
+        if ($this->min_order_amount_minor && $subtotalMinor < $this->min_order_amount_minor) {
             return 0;
         }
 
@@ -67,5 +67,10 @@ class Coupon extends Model
         }
 
         return 0;
+    }
+
+    public function calculateDiscountMinor(int $subtotalMinor): int
+    {
+        return $this->calculateDiscount($subtotalMinor);
     }
 }

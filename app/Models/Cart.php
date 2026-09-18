@@ -15,6 +15,15 @@ class Cart extends Model
         'currency',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (Cart $cart) {
+            if (empty($cart->session_id)) {
+                $cart->session_id = $cart->user_id ? 'user_' . $cart->user_id : 'cart_' . \Illuminate\Support\Str::random(32);
+            }
+        });
+    }
+
     public function items()
     {
         return $this->hasMany(CartItem::class);

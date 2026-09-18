@@ -168,10 +168,10 @@ class WebCheckoutController extends Controller
             $latitude = $address->latitude;
             $longitude = $address->longitude;
         } else {
-            $fullName = $validated['full_name'] ?? ($user?->name ?? 'Valued Client');
-            $phone = $validated['phone'] ?? '';
-            $city = $validated['city'] ?? 'Cairo';
-            $streetAddress = $validated['street_address'] ?? '';
+            $fullName = !empty($validated['full_name']) ? trim((string)$validated['full_name']) : ($user?->name ?: 'Valued Client');
+            $phone = !empty($validated['phone']) ? trim((string)$validated['phone']) : '';
+            $city = !empty($validated['city']) ? trim((string)$validated['city']) : 'Cairo';
+            $streetAddress = !empty($validated['street_address']) ? trim((string)$validated['street_address']) : 'Direct Delivery';
             $state = $validated['state'] ?? null;
             $postalCode = $validated['postal_code'] ?? null;
             $latitude = $request->filled('latitude') ? (float)$request->input('latitude') : null;
@@ -195,20 +195,24 @@ class WebCheckoutController extends Controller
             }
         }
 
-        $email = $user ? $user->email : preg_replace('/[^0-9]/', '', $phone) . '@client.atelier.com';
+        $email = $user ? $user->email : (preg_replace('/[^0-9]/', '', $phone) ?: Str::random(8)) . '@client.atelier.com';
 
-        // Find or create customer record
-        $nameParts = explode(' ', $fullName, 2);
+        // Find or create customer record with safe non-null fallback
+        $trimmedName = trim((string)$fullName);
+        $nameParts = explode(' ', $trimmedName, 2);
+        $firstName = $nameParts[0] !== '' ? $nameParts[0] : 'Client';
+        $lastName  = isset($nameParts[1]) && trim($nameParts[1]) !== '' ? trim($nameParts[1]) : '.';
+
         $customer = Customer::firstOrCreate(
             ['email' => mb_strtolower(trim($email))],
             [
-                'first_name' => $nameParts[0],
-                'last_name'  => $nameParts[1] ?? '',
+                'first_name' => $firstName,
+                'last_name'  => $lastName,
                 'phone'      => $phone,
             ]
         );
 
-        $order = DB::transaction(function () use ($validated, $user, $customer, $email, $fullName, $phone, $city, $streetAddress, $state, $postalCode, $latitude, $longitude) {
+        $order = DB::transaction(function () use ($validated, $user, $customer, $email, $fullName, $phone, $city, $streetAddress, $state, $postalCode, $latitude, $longitude, $request, $firstName, $lastName) {
             $activeCart = app(CartController::class)->getCartItems();
             $itemsToProcess = [];
             $subtotalMinor = 0;
@@ -221,19 +225,20 @@ class WebCheckoutController extends Controller
                     abort_if(!empty($validated['variant_id']) && ! $variant, 422, 'Selected product option is unavailable.');
                     $attrs = $variant?->attributes_json ?? [];
                     $cover = $product->mediaAssets->first();
+                    $unitMinor = $variant ? $variant->effective_price_minor : (int)($product->retail_price_minor ?? 0);
                     $itemsToProcess[] = [
-                        'product'    => $product,
-                        'variant_id' => $variant?->id,
+                        'product'       => $product,
+                        'variant_id'    => $variant?->id,
                         'variant_title' => $variant?->title ?: $variant?->attribute_value,
-                        'color_hex' => $attrs['color_hex'] ?? null,
-                        'image' => $variant?->image_url ?: ($attrs['image_url'] ?? ($cover?->url ?: $product->image_url)),
-                        'title'      => $product->title,
-                        'sku'        => $product->sku,
-                        'unit_minor' => $variant?->effective_price_minor ?: $product->retail_price_minor,
-                        'qty'        => 1,
-                        'total_minor'=> $variant?->effective_price_minor ?: $product->retail_price_minor,
+                        'color_hex'     => $attrs['color_hex'] ?? null,
+                        'image'         => $variant?->image_url ?: ($attrs['image_url'] ?? ($cover?->url ?: $product->image_url)),
+                        'title'         => $product->title,
+                        'sku'           => $product->sku ?: ('SKU-' . $product->id),
+                        'unit_minor'    => $unitMinor,
+                        'qty'           => 1,
+                        'total_minor'   => $unitMinor,
                     ];
-                    $subtotalMinor += $product->retail_price_minor;
+                    $subtotalMinor += $unitMinor;
                 }
             } elseif (!empty($activeCart)) {
                 // Multi-item shopping bag checkout — Strictly database-verified pricing
@@ -241,7 +246,6 @@ class WebCheckoutController extends Controller
                     $p = Product::with(['variants'])->find($cartItem['product_id']);
                     if ($p && $p->status === 'active') {
                         $qty = max(1, min(20, (int) ($cartItem['qty'] ?? 1)));
-                        // Always calculate price strictly from database records to prevent price tampering
                         $unitMinor = (int) ($p->retail_price_minor ?? 0);
                         $var = null;
                         if (!empty($cartItem['variant_id'])) {
@@ -250,16 +254,16 @@ class WebCheckoutController extends Controller
                         }
                         $lineTotalMinor = $unitMinor * $qty;
                         $itemsToProcess[] = [
-                            'product'    => $p,
-                            'variant_id' => $cartItem['variant_id'] ?? null,
+                            'product'       => $p,
+                            'variant_id'    => $cartItem['variant_id'] ?? null,
                             'variant_title' => $var?->title ?: $var?->attribute_value,
-                            'color_hex' => $var?->attributes_json['color_hex'] ?? ($cartItem['color_hex'] ?? null),
-                            'image' => $var?->image_url ?: ($var?->attributes_json['image_url'] ?? ($cartItem['image'] ?? $p->image_url)),
-                            'title'      => $p->title,
-                            'sku'        => $p->sku,
-                            'unit_minor' => $unitMinor,
-                            'qty'        => $qty,
-                            'total_minor'=> $lineTotalMinor,
+                            'color_hex'     => $var?->attributes_json['color_hex'] ?? ($cartItem['color_hex'] ?? null),
+                            'image'         => $var?->image_url ?: ($var?->attributes_json['image_url'] ?? ($cartItem['image'] ?? $p->image_url)),
+                            'title'         => $p->title,
+                            'sku'           => $p->sku ?: ('SKU-' . $p->id),
+                            'unit_minor'    => $unitMinor,
+                            'qty'           => $qty,
+                            'total_minor'   => $lineTotalMinor,
                         ];
                         $subtotalMinor += $lineTotalMinor;
                     }
@@ -267,25 +271,26 @@ class WebCheckoutController extends Controller
             }
 
             if (empty($itemsToProcess)) {
-                $fallback = Product::active()->first();
+                $fallback = Product::where('status', 'active')->first() ?? Product::first();
                 if ($fallback) {
+                    $unitMinor = (int)($fallback->retail_price_minor ?? 250000);
                     $itemsToProcess[] = [
-                        'product'    => $fallback,
-                        'variant_id' => null,
-                        'title'      => $fallback->title,
-                        'sku'        => $fallback->sku,
-                        'unit_minor' => $fallback->retail_price_minor,
-                        'qty'        => 1,
-                        'total_minor'=> $fallback->retail_price_minor,
+                        'product'     => $fallback,
+                        'variant_id'  => null,
+                        'title'       => $fallback->title,
+                        'sku'         => $fallback->sku ?: ('SKU-' . $fallback->id),
+                        'unit_minor'  => $unitMinor,
+                        'qty'         => 1,
+                        'total_minor' => $unitMinor,
                     ];
-                    $subtotalMinor += $fallback->retail_price_minor;
+                    $subtotalMinor += $unitMinor;
                 }
             }
 
             // 2. Resolve dynamic shipping zone and fee
             $zone = ShippingZone::findForGovernorate($city) ?? ShippingZone::findForGovernorate($state);
             $defaultShippingMinor = (int) round(((float) Setting::get('default_shipping_rate', 75)) * 100);
-            $shippingMinor = $zone ? $zone->rate_minor : $defaultShippingMinor;
+            $shippingMinor = $zone ? (int)$zone->rate_minor : $defaultShippingMinor;
 
             // 3. Free Shipping Threshold Check
             $freeThreshold = Setting::get('free_shipping_threshold');
@@ -313,7 +318,8 @@ class WebCheckoutController extends Controller
             // 6. Points Redemption & Coupon Discount
             $pointsDiscountMinor = 0;
             $pointsRedeemed = 0;
-            if ($user && $request->boolean('redeem_points') && Setting::get('loyalty_enabled', '1') === '1') {
+            $redeemRequested = $request->boolean('redeem_points') || $request->boolean('redeem_loyalty_points');
+            if ($user && $redeemRequested && Setting::get('loyalty_enabled', '1') === '1') {
                 $userBalance = $user->loyaltyPointsBalance();
                 $ptsUnit = (int) Setting::get('loyalty_redeem_pts_unit', 100);
                 $ptsDiscountEgp = (float) Setting::get('loyalty_redeem_discount_egp', 50);
@@ -367,6 +373,8 @@ class WebCheckoutController extends Controller
                     'delivery_estimate' => 'Usually delivers from 3 to 5 business days (Maximum 4 days from order date)',
                     'points_redeemed'   => $pointsRedeemed,
                     'coupon_code'       => $appliedCouponCode,
+                    'customer_name'     => $fullName,
+                    'customer_phone'    => $phone,
                     'shipping_address'  => [
                         'name'      => $fullName,
                         'phone'     => $phone,
@@ -382,13 +390,17 @@ class WebCheckoutController extends Controller
             ]);
 
             if ($pointsRedeemed > 0 && $user) {
-                \App\Models\LoyaltyPointLedger::create([
-                    'user_id' => $user->id,
-                    'order_id' => $order->id,
-                    'points' => -$pointsRedeemed,
-                    'type' => 'redeem',
-                    'notes' => "Redeemed {$pointsRedeemed} pts for discount on Order #{$order->order_number}",
-                ]);
+                try {
+                    \App\Models\LoyaltyPointLedger::create([
+                        'user_id' => $user->id,
+                        'order_id' => $order->id,
+                        'points' => -$pointsRedeemed,
+                        'type' => 'redeem',
+                        'notes' => "Redeemed {$pointsRedeemed} pts for discount on Order #{$order->order_number}",
+                    ]);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Loyalty point ledger entry skipped: ' . $e->getMessage());
+                }
             }
 
             foreach ($itemsToProcess as $it) {
@@ -401,15 +413,20 @@ class WebCheckoutController extends Controller
                     'quantity'           => $it['qty'],
                     'unit_price_minor'   => $it['unit_minor'],
                     'total_price_minor'  => $it['total_minor'],
-                    // Keep a private supplier-link snapshot for fulfilment notifications.
                     'metadata_json'      => array_filter([
                         'supplier_product_url' => $it['product']->attributes_json['supplier_product_url'] ?? null,
-                        'variant_title' => $it['variant_title'] ?? null,
-                        'color_hex' => $it['color_hex'] ?? null,
-                        'image_url' => $it['image'] ?? null,
+                        'variant_title'        => $it['variant_title'] ?? null,
+                        'color_hex'            => $it['color_hex'] ?? null,
+                        'image_url'            => $it['image'] ?? null,
                     ]),
                 ]);
 
+                if (!empty($it['variant_id'])) {
+                    $variantModel = \App\Models\ProductVariant::find($it['variant_id']);
+                    if ($variantModel && $variantModel->inventory > 0) {
+                        $variantModel->decrement('inventory', min($variantModel->inventory, $it['qty']));
+                    }
+                }
                 if ($it['product']->inventory > 0) {
                     $it['product']->decrement('inventory', min($it['product']->inventory, $it['qty']));
                 }
@@ -422,14 +439,14 @@ class WebCheckoutController extends Controller
                 session()->forget('cart');
             }
 
-            // Sync CustomerAddress
+            // Sync CustomerAddress safely
             CustomerAddress::updateOrCreate(
                 ['customer_id' => $customer->id, 'type' => 'shipping'],
                 [
-                    'first_name'     => $customer->first_name,
-                    'last_name'      => $customer->last_name,
-                    'address_line_1' => $streetAddress,
-                    'city'           => $city,
+                    'first_name'     => $firstName,
+                    'last_name'      => $lastName,
+                    'address_line_1' => $streetAddress ?: ($city ?: 'Standard Delivery'),
+                    'city'           => $city ?: 'Cairo',
                     'state'          => $state,
                     'postal_code'    => $postalCode,
                     'country_code'   => 'EG',
@@ -444,6 +461,9 @@ class WebCheckoutController extends Controller
                 'currency'        => 'EGP',
                 'status'          => $validated['payment_method'] === 'cod' ? 'pending' : 'pending',
                 'idempotency_key' => Str::uuid()->toString(),
+                'metadata_json'   => [
+                    'payment_method' => $validated['payment_method'],
+                ],
             ]);
 
             return $order;

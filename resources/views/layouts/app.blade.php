@@ -544,6 +544,9 @@
     <!-- Master Footer Partials -->
     @include('partials.footer')
 
+    <!-- Master Mobile Bottom Navigation Bar -->
+    @include('partials.bottom-nav')
+
     {{-- Global Luxury Toast Notification Container --}}
     <div 
         x-data="{ 

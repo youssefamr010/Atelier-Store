@@ -27,3 +27,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+*.sqlite
+*.sqlite-journal
+database/*.sqlite
+database/*.sqlite-journal
+scratch/
+mt_commerce
+127.0.0.1
