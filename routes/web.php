@@ -361,31 +361,56 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 
 
 // Public Track Order (Phone, Email or Order Number)
-Route::get('/track-order', function () {
+Route::get('/track-order', function (Request $request) {
     try {
         $settings = Setting::allAsMap();
+        $isArabicStore = ($settings['storefront_lang'] ?? 'en') === 'ar';
         $userOrders = collect();
+
         if (Auth::check()) {
             $user = Auth::user();
             $userEmail = strtolower((string) ($user->email ?? ''));
-            if (! empty($userEmail)) {
-                $userOrders = Order::query()
-                    ->where('customer_email', $userEmail)
-                    ->orWhereHas('customer', fn ($cq) => $cq->where('email', $userEmail))
-                    ->with(['items'])
-                    ->orderByDesc('id')
-                    ->take(10)
-                    ->get();
-            }
+            $userPhone = (string) ($user->phone ?? ($user->defaultAddress()?->phone ?? ''));
+            $phoneDigits = preg_replace('/[^0-9]/', '', $userPhone);
+
+            $userOrders = Order::query()
+                ->where(function ($q) use ($user, $userEmail, $phoneDigits) {
+                    if (!empty($userEmail)) {
+                        $q->where('customer_email', $userEmail)
+                          ->orWhereHas('customer', fn ($cq) => $cq->where('email', $userEmail)->orWhere('user_id', $user->id));
+                    }
+                    if (!empty($phoneDigits) && strlen($phoneDigits) >= 8) {
+                        $q->orWhere('customer_phone', 'like', "%{$phoneDigits}%")
+                          ->orWhere('notes', 'like', "%{$phoneDigits}%")
+                          ->orWhere('metadata_json', 'like', "%{$phoneDigits}%")
+                          ->orWhereHas('customer', fn ($cq) => $cq->where('phone', 'like', "%{$phoneDigits}%"));
+                    }
+                })
+                ->with(['items.product', 'items.variant'])
+                ->orderByDesc('id')
+                ->take(10)
+                ->get();
         }
 
-        return view('track-order', compact('settings', 'userOrders'));
+        // Fetch curated luxury recommendations for instant suggestions
+        $recommendedProducts = Product::active()
+            ->with(['variants' => fn ($query) => $query->where('status', 'active')->with('mediaAssets'), 'mediaAssets'])
+            ->inRandomOrder()
+            ->take(6)
+            ->get();
+        $recommendedCards = ProductCardService::toDisplayCards($recommendedProducts, $isArabicStore)->take(4);
+
+        $autoSearchQuery = trim((string) $request->query('order', $request->query('phone', $request->query('q', ''))));
+
+        return view('track-order', compact('settings', 'userOrders', 'recommendedProducts', 'recommendedCards', 'autoSearchQuery'));
     } catch (Throwable $e) {
         Log::error('Track order page error: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
         $settings = Setting::allAsMap();
         $userOrders = collect();
+        $recommendedCards = collect();
+        $autoSearchQuery = '';
 
-        return view('track-order', compact('settings', 'userOrders'));
+        return view('track-order', compact('settings', 'userOrders', 'recommendedCards', 'autoSearchQuery'));
     }
 })->name('track.order');
 
