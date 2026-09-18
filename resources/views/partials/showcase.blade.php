@@ -3,30 +3,31 @@
     $isArabicStore = ($settings['storefront_lang'] ?? 'en') === 'ar';
     $bestSellerId = (int) ($settings['featured_bestseller_product_id'] ?? 0);
     $activeCollections = $collections ?? \App\Models\Collection::where('status', 'active')->withCount('products')->get();
+    $dealsList = $dealProducts ?? collect();
 @endphp
 
 <section class="w-full bg-[#F8F7F3] py-6 sm:py-10" x-data="flagshipShowcase()">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- ── 1. CATEGORY STORY CIRCLES / QUICK NAVIGATION (Amazon & Instagram Style) ── --}}
+        {{-- ── 1. CATEGORY STORY CIRCLES (Flawless Geometric Symmetrical Rings) ── --}}
         @if($activeCollections->isNotEmpty())
-        <div class="mb-8 overflow-hidden">
-            <div class="flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none pb-2 pt-1" style="-webkit-overflow-scrolling: touch;">
+        <div class="mb-8">
+            <div class="flex items-center gap-3.5 sm:gap-5 overflow-x-auto scrollbar-none pb-2 pt-1" style="-webkit-overflow-scrolling: touch;">
                 
-                {{-- All Pieces Story Pill --}}
+                {{-- All Pieces Story Ring --}}
                 <button
                     type="button"
                     @click="activeTab = 'all'"
-                    class="group flex flex-col items-center gap-1.5 shrink-0 focus:outline-none cursor-pointer"
+                    class="group flex flex-col items-center gap-2 shrink-0 focus:outline-none cursor-pointer"
                 >
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 transition-all duration-300"
-                         :class="activeTab === 'all' ? 'ring-2 ring-black bg-black' : 'ring-1 ring-black/15 bg-white group-hover:ring-black/40'">
-                        <div class="w-full h-full rounded-full bg-[#FAF9F5] flex items-center justify-center text-xl sm:text-2xl shadow-inner">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 p-1 bg-white flex items-center justify-center aspect-square shrink-0 transition-all duration-300"
+                         :class="activeTab === 'all' ? 'border-black ring-2 ring-black/20 shadow-sm' : 'border-black/15 group-hover:border-black/50'">
+                        <div class="w-full h-full rounded-full bg-[#FAF9F5] flex items-center justify-center text-lg sm:text-xl shadow-inner">
                             ✨
                         </div>
                     </div>
-                    <span class="text-[11px] font-bold text-center transition-colors max-w-[80px] truncate"
+                    <span class="text-[11px] font-bold text-center transition-colors max-w-[85px] truncate"
                           :class="activeTab === 'all' ? 'text-black font-extrabold' : 'text-black/60 group-hover:text-black'">
                         {{ $isArabicStore ? 'كافة القطع' : 'All Pieces' }}
                     </span>
@@ -40,13 +41,13 @@
                 <button
                     type="button"
                     @click="activeTab = 'col-{{ $cItem->id }}'"
-                    class="group flex flex-col items-center gap-1.5 shrink-0 focus:outline-none cursor-pointer"
+                    class="group flex flex-col items-center gap-2 shrink-0 focus:outline-none cursor-pointer"
                 >
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 transition-all duration-300"
-                         :class="activeTab === 'col-{{ $cItem->id }}' ? 'ring-2 ring-black bg-black' : 'ring-1 ring-black/15 bg-white group-hover:ring-black/40'">
-                        <div class="w-full h-full rounded-full bg-[#FAF9F5] overflow-hidden flex items-center justify-center p-1">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 p-1 bg-white flex items-center justify-center aspect-square shrink-0 transition-all duration-300"
+                         :class="activeTab === 'col-{{ $cItem->id }}' ? 'border-black ring-2 ring-black/20 shadow-sm' : 'border-black/15 group-hover:border-black/50'">
+                        <div class="w-full h-full rounded-full overflow-hidden bg-[#FAF9F5] flex items-center justify-center">
                             @if(!empty($cImg))
-                            <img src="{{ $cImg }}" alt="{{ $cItem->title }}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" loading="lazy">
+                            <img src="{{ $cImg }}" alt="{{ $cItem->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy">
                             @else
                             <span class="text-xs font-bold text-black/40">◆</span>
                             @endif
@@ -63,83 +64,106 @@
         </div>
         @endif
 
-        {{-- ── 2. VIP SPOTLIGHT & FLASH DROP (High Conversion Scarcity Banner) ── --}}
-        @if(isset($featuredProduct) && $featuredProduct)
-        @php
-            $fpImg = $featuredProduct->image_url ?: ($featuredProduct->mediaAssets->first()?->url ?: '');
-            $fpPrice = number_format(($featuredProduct->retail_price_minor ?: 78000) / 100);
-            $fpOldPrice = $featuredProduct->compare_at_price_minor ? number_format($featuredProduct->compare_at_price_minor / 100) : null;
-        @endphp
-        <div class="bg-white rounded-3xl border border-black/10 p-6 sm:p-8 mb-10 shadow-sm overflow-hidden relative">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-                
-                {{-- Left / Media --}}
-                <div class="lg:col-span-5 bg-[#FAF9F5] rounded-2xl p-4 sm:p-6 flex items-center justify-center relative overflow-hidden border border-black/5">
-                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-black text-white text-[10px] font-bold uppercase tracking-wider shadow-sm z-10">
-                        ⚡ {{ $isArabicStore ? 'إصدار محدود حصري' : 'Limited VIP Drop' }}
+        {{-- ── 2. VIP OFFERS & FLASH DROPS HORIZONTAL CAROUSEL (Controlled via Admin Bestsellers / Discounts) ── --}}
+        @if($dealsList->isNotEmpty())
+        <div class="bg-white rounded-3xl border border-black/10 p-5 sm:p-7 mb-10 shadow-sm overflow-hidden">
+            {{-- Carousel Top Bar --}}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-black/10">
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                        <span>⚡</span>
+                        <span>{{ $isArabicStore ? 'عروض وتخفيضات حصرية' : 'VIP Flash Deals' }}</span>
                     </span>
-                    @if($fpImg)
-                    <img src="{{ $fpImg }}" alt="{{ $featuredProduct->title }}" class="max-h-56 sm:max-h-64 object-contain hover:scale-105 transition-transform duration-500" loading="eager">
-                    @else
-                    <span class="text-4xl text-black/20">◆</span>
-                    @endif
+                    <h3 class="font-display font-extrabold text-base sm:text-lg uppercase tracking-tight text-black">
+                        {{ $isArabicStore ? 'إصدارات وعروض محدودة' : 'Limited Edition Drops' }}
+                    </h3>
                 </div>
 
-                {{-- Right / Info & Countdown Timer --}}
-                <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
+                {{-- Live Countdown & Prev/Next Slider Controls --}}
+                <div class="flex items-center gap-3 justify-between sm:justify-end">
+                    <div class="flex items-center gap-1.5 font-mono font-bold text-xs bg-[#FAF9F5] px-3 py-1.5 rounded-full border border-black/10">
+                        <span class="text-[10px] uppercase tracking-wider text-black/50 mr-1">{{ $isArabicStore ? 'ينتهي خلال' : 'Ends in' }}:</span>
+                        <span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px]" x-text="hours">03</span>
+                        <span>:</span>
+                        <span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px]" x-text="minutes">45</span>
+                        <span>:</span>
+                        <span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px]" x-text="seconds">19</span>
+                    </div>
+
+                    {{-- Slider Arrows --}}
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" @click="scrollDeals(-1)" class="w-8 h-8 rounded-full border border-black/15 bg-white hover:bg-black hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" aria-label="Previous">
+                            ‹
+                        </button>
+                        <button type="button" @click="scrollDeals(1)" class="w-8 h-8 rounded-full border border-black/15 bg-white hover:bg-black hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" aria-label="Next">
+                            ›
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Horizontal Deals Scroll Track --}}
+            <div id="deals-carousel-track" class="flex items-stretch gap-4 overflow-x-auto scrollbar-none pb-2 scroll-smooth" style="-webkit-overflow-scrolling: touch;">
+                @foreach($dealsList as $dProd)
+                @php
+                    $dImg = $dProd->image_url ?: ($dProd->mediaAssets->first()?->url ?: '');
+                    $dPrice = number_format(($dProd->retail_price_minor ?: 78000) / 100);
+                    $dOldPrice = $dProd->compare_at_price_minor ? number_format($dProd->compare_at_price_minor / 100) : null;
+                    $dSavePct = ($dProd->compare_at_price_minor && $dProd->compare_at_price_minor > $dProd->retail_price_minor)
+                        ? round((($dProd->compare_at_price_minor - $dProd->retail_price_minor) / $dProd->compare_at_price_minor) * 100)
+                        : null;
+                @endphp
+                <div class="min-w-[240px] sm:min-w-[270px] max-w-[280px] shrink-0 bg-[#FAF9F5] rounded-2xl border border-black/10 p-3.5 flex flex-col justify-between hover:border-black/30 hover:shadow-md transition-all group">
                     <div>
-                        <div class="flex items-center gap-2 text-xs font-bold text-amber-700 mb-1">
-                            <span>🔥</span>
-                            <span>{{ $isArabicStore ? 'الأكثر طلباً هذا الأسبوع • شحن فوري مجاني' : 'Top Choice This Week • Express VIP Dispatch' }}</span>
-                        </div>
-                        <h2 class="font-display font-extrabold text-2xl sm:text-3xl uppercase tracking-tight text-black leading-snug">
-                            {{ $featuredProduct->title }}
-                        </h2>
-                        <p class="text-xs sm:text-sm text-black/65 font-sans mt-1.5 line-clamp-2 leading-relaxed">
-                            {{ $featuredProduct->seo_description ?: Str::limit(strip_tags($featuredProduct->description ?? ''), 140) }}
-                        </p>
-                    </div>
-
-                    {{-- Live Countdown Box --}}
-                    <div class="bg-[#FAF9F5] rounded-2xl p-3.5 sm:p-4 border border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-black/70">
-                                {{ $isArabicStore ? 'ينتهي العرض الخاص خلال:' : 'Special Dispatch Offer Ends:' }}
+                        {{-- Image Frame --}}
+                        <div class="aspect-4/3 bg-white rounded-xl p-2.5 mb-3 flex items-center justify-center relative overflow-hidden border border-black/5">
+                            @if($dSavePct)
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-bold uppercase tracking-wider shadow-sm z-10">
+                                -{{ $dSavePct }}%
                             </span>
-                        </div>
-                        <div class="flex items-center gap-2 font-mono font-black text-xs sm:text-sm text-black">
-                            <div class="bg-black text-white px-2.5 py-1 rounded-lg shadow-sm" x-text="hours">04</div>
-                            <span>:</span>
-                            <div class="bg-black text-white px-2.5 py-1 rounded-lg shadow-sm" x-text="minutes">32</div>
-                            <span>:</span>
-                            <div class="bg-black text-white px-2.5 py-1 rounded-lg shadow-sm" x-text="seconds">18</div>
-                        </div>
-                    </div>
-
-                    {{-- Action Row --}}
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                        <div class="flex items-baseline gap-2">
-                            <span class="font-display text-2xl sm:text-3xl font-black text-black">{{ $fpPrice }}</span>
-                            <span class="text-xs font-bold text-black/60">{{ $isArabicStore ? 'ج.م' : 'EGP' }}</span>
-                            @if($fpOldPrice)
-                            <span class="text-sm text-black/40 line-through font-mono">{{ $fpOldPrice }}</span>
+                            @else
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black text-white text-[9px] font-bold uppercase tracking-wider shadow-sm z-10">
+                                VIP DROP
+                            </span>
+                            @endif
+                            @if($dImg)
+                            <img src="{{ $dImg }}" alt="{{ $dProd->title }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                            @else
+                            <span class="text-black/20 text-2xl">◆</span>
                             @endif
                         </div>
 
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('products.show', ['slug' => $featuredProduct->slug]) }}"
-                               class="rounded-xl bg-black text-white font-display text-xs font-bold uppercase tracking-[0.18em] px-6 py-3.5 hover:bg-neutral-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                                <span>{{ $isArabicStore ? 'استكشف واطلب الآن ←' : 'Order Now →' }}</span>
-                            </a>
+                        {{-- Title --}}
+                        <a href="{{ route('products.show', ['slug' => $dProd->slug]) }}">
+                            <h4 class="font-sans font-bold text-xs sm:text-sm text-black group-hover:text-black/70 line-clamp-1 leading-snug">
+                                {{ $dProd->title }}
+                            </h4>
+                        </a>
+                    </div>
+
+                    {{-- Bottom Price & Order CTA --}}
+                    <div class="pt-3 mt-3 border-t border-black/10 flex items-center justify-between gap-2">
+                        <div class="flex items-baseline gap-1.5">
+                            <span class="font-display font-extrabold text-xs sm:text-sm text-black">{{ $dPrice }}</span>
+                            <span class="text-[10px] font-normal text-black/60">{{ $isArabicStore ? 'ج.م' : 'EGP' }}</span>
+                            @if($dOldPrice)
+                            <span class="text-[10px] text-black/40 line-through font-mono">{{ $dOldPrice }}</span>
+                            @endif
                         </div>
+
+                        <a href="{{ route('products.show', ['slug' => $dProd->slug]) }}"
+                           class="inline-flex items-center gap-1 rounded-full bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-wider py-1.5 px-3.5 shadow-xs transition-all active:scale-95 shrink-0">
+                            <span>{{ $isArabicStore ? 'اطلب الآن' : 'Order' }}</span>
+                            <span>→</span>
+                        </a>
                     </div>
                 </div>
-
+                @endforeach
             </div>
         </div>
         @endif
 
-        {{-- ── 3. SMART MULTI-TAB PRODUCT SHOWCASE (Instant Client-Side Filtering) ── --}}
+        {{-- ── 3. SMART MULTI-TAB CATALOG HEADER ── --}}
         <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-black/10 pb-4">
             <div>
                 <span class="text-[10px] font-bold uppercase tracking-[0.25em] text-black/45 block mb-1">
@@ -150,7 +174,7 @@
                 </h2>
             </div>
 
-            {{-- Quick Filter Pills --}}
+            {{-- Quick Filter Tabs --}}
             <div class="flex items-center gap-2 overflow-x-auto scrollbar-none">
                 <button type="button" @click="activeTab = 'all'"
                     class="px-4 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer"
@@ -170,7 +194,7 @@
             </div>
         </div>
 
-        {{-- ── 4. RESPONSIVE PRODUCT GRID ── --}}
+        {{-- ── 4. RESPONSIVE PRODUCT GRID (Refined Vertical Alignment & Pill Buttons) ── --}}
         @if(isset($products) && $products->count() > 0)
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
             @foreach($products as $index => $product)
@@ -260,21 +284,22 @@
                             @endif
 
                             <a href="{{ route('products.show', ['slug' => $product->slug]) }}">
-                                <h3 class="font-display font-bold text-xs sm:text-sm text-black group-hover:underline line-clamp-2 leading-tight">
+                                <h3 class="font-sans font-bold text-xs sm:text-sm text-black group-hover:text-black/70 line-clamp-2 leading-snug">
                                     {{ $product->title }}
                                 </h3>
                             </a>
                         </div>
 
-                        {{-- Price & Quick CTA --}}
-                        <div class="pt-2 border-t border-black/5 flex items-center justify-between gap-2">
+                        {{-- Price & Aligned Pill CTA --}}
+                        <div class="pt-2.5 border-t border-black/5 flex items-center justify-between gap-2">
                             <div class="flex items-baseline gap-1">
                                 <span class="font-display font-extrabold text-xs sm:text-sm text-black">{{ $priceFormatted }}</span>
                             </div>
 
                             <a href="{{ route('products.show', ['slug' => $product->slug]) }}"
-                               class="rounded-xl bg-black text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 hover:bg-neutral-800 active:scale-95 transition-all shrink-0">
-                                {{ $isArabicStore ? 'عرض' : 'View' }} →
+                               class="inline-flex items-center gap-1 rounded-full bg-black text-white hover:bg-neutral-800 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider py-1.5 px-3.5 shadow-xs transition-all active:scale-95 shrink-0">
+                                <span>{{ $isArabicStore ? 'عرض' : 'View' }}</span>
+                                <span>→</span>
                             </a>
                         </div>
                     </div>
@@ -414,11 +439,11 @@ function flagshipShowcase() {
     return {
         activeTab: 'all',
         hours: '03',
-        minutes: '48',
-        seconds: '22',
+        minutes: '45',
+        seconds: '19',
 
         init() {
-            // Live countdown timer ticker
+            // Live countdown ticker
             setInterval(() => {
                 let s = parseInt(this.seconds);
                 let m = parseInt(this.minutes);
@@ -439,6 +464,13 @@ function flagshipShowcase() {
                 this.minutes = String(m).padStart(2, '0');
                 this.hours = String(h).padStart(2, '0');
             }, 1000);
+        },
+
+        scrollDeals(direction) {
+            const track = document.getElementById('deals-carousel-track');
+            if (track) {
+                track.scrollBy({ left: direction * 280, behavior: 'smooth' });
+            }
         },
 
         matchesTab(tagsString) {

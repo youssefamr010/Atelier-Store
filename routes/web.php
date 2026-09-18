@@ -81,11 +81,26 @@ Route::get('/', function () {
     $settings = Setting::allAsMap();
     $isArabicStore = ($settings['storefront_lang'] ?? 'en') === 'ar';
     $displayCards = ProductCardService::toDisplayCards($products, $isArabicStore);
-    $featuredProduct = $products->firstWhere('id', (int) ($settings['featured_bestseller_product_id'] ?? 0)) ?? $products->first();
+    
+    // Featured / Deal products for the horizontal VIP Offers carousel
+    $bestSellerId = (int) ($settings['featured_bestseller_product_id'] ?? 0);
+    $dealProducts = $products->filter(function ($p) use ($bestSellerId) {
+        return ($p->compare_at_price_minor && $p->compare_at_price_minor > $p->retail_price_minor)
+            || !empty($p->is_bestseller)
+            || ($p->id === $bestSellerId);
+    })->values();
+
+    if ($dealProducts->isEmpty()) {
+        $dealProducts = $products->take(6);
+    } else if ($dealProducts->count() < 4) {
+        $dealProducts = $dealProducts->merge($products->take(6))->unique('id')->values();
+    }
+
+    $featuredProduct = $products->firstWhere('id', $bestSellerId) ?? $dealProducts->first() ?? $products->first();
 
     PageView::track('homepage');
 
-    return view('home', compact('products', 'displayCards', 'collections', 'settings', 'featuredProduct'));
+    return view('home', compact('products', 'displayCards', 'collections', 'settings', 'featuredProduct', 'dealProducts'));
 })->name('home');
 
 Route::get('/collections/{slug?}', function (Request $request, string $slug = 'all') {
