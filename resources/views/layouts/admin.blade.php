@@ -498,7 +498,7 @@
                 </div>
             @endif
 
-            @if($errors->any())
+            @if(isset($errors) && $errors->any())
                 <div class="bg-red-50 text-red-900 border border-red-500 p-3.5 mb-5 text-xs font-bold rounded-lg">
                     <p class="mb-1 uppercase tracking-wider">Please fix the following issues:</p>
                     <ul class="list-disc list-inside space-y-0.5 font-normal">

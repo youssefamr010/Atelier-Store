@@ -921,7 +921,8 @@ Route::middleware(['admin'])->group(function () {
         ->name('admin.products.update');
     Route::delete('/admin/products/{id}/delete', [ProductController::class, 'destroy'])
         ->name('admin.products.delete');
-    // replace-image and upload-gallery already registered above via AdminImageController
+    Route::post('/admin/products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])
+        ->name('admin.products.toggle-status');
     Route::post('/admin/products/{id}/upload-video', [ProductController::class, 'uploadVideo'])
         ->name('admin.products.upload-video');
     Route::delete('/admin/products/{id}/delete-video', [ProductController::class, 'deleteVideo'])
