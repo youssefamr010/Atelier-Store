@@ -209,13 +209,32 @@
 
             <!-- Search Dropdown Results -->
             <div 
-                x-show="searchOpen && (searchResults.products.length > 0 || searchResults.orders.length > 0 || searchResults.customers.length > 0 || searchLoading)" 
+                x-show="searchOpen && ((searchResults.navigation && searchResults.navigation.length > 0) || searchResults.products.length > 0 || searchResults.orders.length > 0 || searchResults.customers.length > 0 || searchLoading)" 
                 x-cloak 
                 class="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-96 overflow-y-auto z-50 divide-y divide-gray-100"
             >
                 <div x-show="searchLoading" class="p-3 text-center text-xs text-gray-400 font-mono">
-                    Searching catalog & records...
+                    Searching catalog, integrations & records...
                 </div>
+
+                <!-- Navigation & Integrations Group -->
+                <template x-if="searchResults.navigation && searchResults.navigation.length > 0">
+                    <div class="p-2 bg-neutral-50/80">
+                        <span class="block text-[9px] font-mono font-bold uppercase tracking-widest text-amber-600 px-2 py-1">Quick Navigation & Bots</span>
+                        <template x-for="n in searchResults.navigation" :key="'nav-' + n.label">
+                            <a :href="n.url" class="flex items-center justify-between p-2 hover:bg-white rounded-lg transition-colors border border-transparent hover:border-black/10 shadow-xs mb-1">
+                                <div class="flex items-center gap-2.5 truncate">
+                                    <span class="text-base shrink-0" x-text="n.icon"></span>
+                                    <div class="truncate">
+                                        <span class="block text-xs font-black text-black truncate" x-text="n.label"></span>
+                                        <span class="block text-[10px] text-gray-500 font-medium truncate" x-text="n.sub"></span>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border border-black/20 bg-black text-white shrink-0 ml-2 rounded" x-text="n.badge"></span>
+                            </a>
+                        </template>
+                    </div>
+                </template>
 
                 <!-- Products Group -->
                 <template x-if="searchResults.products && searchResults.products.length > 0">
@@ -334,7 +353,16 @@
                 <button @click="mobileSearchOpen = false" class="absolute right-2.5 text-gray-400 text-xs font-bold">✕</button>
             </div>
             
-            <div x-show="searchOpen && (searchResults.products.length > 0 || searchResults.orders.length > 0 || searchResults.customers.length > 0)" class="mt-2 max-h-64 overflow-y-auto divide-y divide-gray-100">
+            <div x-show="searchOpen && ((searchResults.navigation && searchResults.navigation.length > 0) || searchResults.products.length > 0 || searchResults.orders.length > 0 || searchResults.customers.length > 0)" class="mt-2 max-h-64 overflow-y-auto divide-y divide-gray-100">
+                <template x-for="n in (searchResults.navigation || [])" :key="'mn-' + n.label">
+                    <a :href="n.url" class="flex items-center justify-between p-2 hover:bg-amber-50 text-xs bg-gray-50/80">
+                        <div class="flex items-center gap-2 truncate">
+                            <span x-text="n.icon"></span>
+                            <span class="font-black text-black truncate" x-text="n.label"></span>
+                        </div>
+                        <span class="text-[9px] font-mono font-bold uppercase px-1 py-0.5 bg-black text-white rounded shrink-0 ml-1" x-text="n.badge"></span>
+                    </a>
+                </template>
                 <template x-for="p in searchResults.products" :key="'mp-' + p.id">
                     <a :href="p.url" class="flex items-center justify-between p-2 hover:bg-gray-50 text-xs">
                         <span class="font-bold truncate" x-text="p.label"></span>
