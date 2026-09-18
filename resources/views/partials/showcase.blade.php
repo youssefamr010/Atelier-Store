@@ -113,9 +113,9 @@
                         ? round((($dProd->compare_at_price_minor - $dProd->retail_price_minor) / $dProd->compare_at_price_minor) * 100)
                         : null;
                 @endphp
-                <div class="w-[200px] sm:w-[230px] shrink-0 bg-[#FAF9F5] rounded-2xl border border-black/10 p-3 flex flex-col hover:border-black/30 hover:shadow-md transition-all group snap-start">
+                <div class="w-[200px] sm:w-[230px] shrink-0 bg-white rounded-2xl border border-black/10 p-3 flex flex-col hover:border-black/30 hover:shadow-md transition-all group snap-start">
                     {{-- Compact Image Frame --}}
-                    <div class="w-full aspect-square bg-white rounded-xl p-2 mb-2.5 flex items-center justify-center relative overflow-hidden border border-black/5">
+                    <div class="w-full aspect-square bg-white rounded-xl p-2 mb-2.5 flex items-center justify-center relative overflow-hidden">
                         @if($dSavePct)
                         <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[8px] sm:text-[9px] font-bold uppercase tracking-wider shadow-xs z-10">
                             -{{ $dSavePct }}%
@@ -230,7 +230,7 @@
                     class="group bg-white rounded-2xl sm:rounded-3xl border border-black/10 overflow-hidden shadow-xs hover:shadow-lg hover:border-black/25 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
                 >
                     {{-- Card Media Frame --}}
-                    <div class="relative bg-[#FAF9F5] p-2.5 sm:p-3.5 aspect-square overflow-hidden flex items-center justify-center">
+                    <div class="relative bg-white p-2.5 sm:p-3.5 aspect-square overflow-hidden flex items-center justify-center">
                         {{-- Badges --}}
                         <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
                             @if($hasDiscount)
