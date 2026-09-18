@@ -11,15 +11,19 @@
             <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-500">EXECUTIVE OVERVIEW</span>
             <h1 class="text-3xl font-black uppercase tracking-tight text-black">Store Dashboard</h1>
         </div>
-        <div class="flex items-center gap-2.5 flex-wrap">
+        <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <a href="{{ route('admin.products.create') }}" class="bg-black text-white px-3.5 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-800 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-0.5">
                 + Add Product
             </a>
-            <a href="{{ route('admin.content.index') }}" class="border-2 border-black bg-white px-3.5 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
-                <span>Social & WhatsApp</span>
+            <a href="{{ route('admin.telegram.index') }}" class="border-2 border-blue-600 bg-blue-50 text-blue-900 px-3 py-2 text-xs font-bold uppercase tracking-wider hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <span>✈️</span>
+                <span>Telegram Bot</span>
             </a>
-            <a href="{{ route('admin.content.index') }}" class="border-2 border-black bg-white px-3.5 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors flex items-center gap-1.5">
+            <a href="{{ route('admin.whatsapp.index') }}" class="border-2 border-emerald-600 bg-emerald-50 text-emerald-900 px-3 py-2 text-xs font-bold uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition-colors flex items-center gap-1.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <span>💬</span>
+                <span>WhatsApp Alerts</span>
+            </a>
+            <a href="{{ route('admin.content.index') }}" class="border-2 border-black bg-white px-3 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors flex items-center gap-1.5">
                 <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span>Site Settings</span>
             </a>
@@ -63,6 +67,56 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Bots & Automation Live Status Strip -->
+    @php
+        $dashTgToken = \App\Models\Setting::get('telegram_bot_token', config('services.telegram.bot_token', env('TELEGRAM_BOT_TOKEN')));
+        $dashTgConnected = !empty($dashTgToken);
+        $dashWaEnabled = \App\Models\Setting::get('whatsapp_enabled', '0') === '1';
+    @endphp
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Telegram Bot Quick Access -->
+        <a href="{{ route('admin.telegram.index') }}" class="group block p-4 rounded-2xl border-2 {{ $dashTgConnected ? 'border-blue-300 bg-gradient-to-r from-blue-50/90 to-white' : 'border-neutral-300 bg-neutral-50' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-xs shrink-0">
+                        ✈️
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-xs uppercase tracking-wider text-black">Telegram AI Bot & Alerts</span>
+                            <span class="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded {{ $dashTgConnected ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-amber-100 text-amber-800 border border-amber-400' }}">
+                                {{ $dashTgConnected ? 'Active' : 'Action Required' }}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Instant order dispatch receipts, mobile sales assistant & reports</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform ml-2">Configure →</span>
+            </div>
+        </a>
+
+        <!-- WhatsApp Client Notifications Quick Access -->
+        <a href="{{ route('admin.whatsapp.index') }}" class="group block p-4 rounded-2xl border-2 {{ $dashWaEnabled ? 'border-emerald-300 bg-gradient-to-r from-emerald-50/90 to-white' : 'border-neutral-300 bg-neutral-50' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-xs shrink-0">
+                        💬
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-xs uppercase tracking-wider text-black">WhatsApp Client Alerts</span>
+                            <span class="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded {{ $dashWaEnabled ? 'bg-green-100 text-green-800 border border-green-400' : 'bg-gray-100 text-gray-600 border border-gray-300' }}">
+                                {{ $dashWaEnabled ? 'Active' : 'Disabled' }}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-0.5">Automated order confirmations & tracking messages to customers</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-emerald-600 group-hover:translate-x-1 transition-transform ml-2">Configure →</span>
+            </div>
+        </a>
     </div>
 
     <!-- KPI Metric Cards Grid -->

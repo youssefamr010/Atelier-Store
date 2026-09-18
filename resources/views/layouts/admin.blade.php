@@ -126,6 +126,7 @@
             searchResults: { products: [], orders: [], customers: [] },
             searchOpen: false,
             searchLoading: false,
+            mobileSearchOpen: false,
             searchTimeout: null,
             init() {
                 window.addEventListener('keydown', (e) => {
@@ -136,6 +137,7 @@
                     }
                     if (e.key === 'Escape') {
                         this.searchOpen = false;
+                        this.mobileSearchOpen = false;
                     }
                 });
             },
@@ -161,15 +163,15 @@
                 }, 280);
             }
         }"
-        class="glass-panel sticky top-0 z-30 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 m-2 sm:m-3 border border-black/10 shadow-sm"
+        class="glass-panel sticky top-0 z-30 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 m-2 sm:m-3 border border-black/10 shadow-sm transition-all"
     >
         <!-- Left: Mobile Menu Trigger + Logo -->
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-            <!-- Mobile Menu Toggle Button (Prominent on Phones) -->
+            <!-- Mobile Menu Toggle Button -->
             <button 
                 type="button"
                 @click="sidebarOpen = !sidebarOpen" 
-                class="lg:hidden p-2 rounded-lg border border-black/20 bg-white hover:bg-black hover:text-white text-black transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer shadow-xs active:scale-95"
+                class="lg:hidden p-2 rounded-xl border border-black/20 bg-white hover:bg-black hover:text-white text-black transition-all min-h-[42px] min-w-[42px] flex items-center justify-center cursor-pointer shadow-xs active:scale-95"
                 aria-label="Toggle navigation menu"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,13 +183,13 @@
                 <span class="bg-black text-white px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold tracking-widest uppercase rounded">
                     {{ strtoupper(auth()->user()->admin_role ?? 'ADMIN') }}
                 </span>
-                <a href="{{ route('admin.dashboard') }}" class="font-black text-sm sm:text-base tracking-tight uppercase hover:opacity-80 transition-opacity truncate max-w-[140px] sm:max-w-none">
-                    {{ \App\Models\Setting::get('store_name', 'ATELIER') }} Studio
+                <a href="{{ route('admin.dashboard') }}" class="font-black text-sm sm:text-base tracking-tight uppercase hover:opacity-80 transition-opacity truncate max-w-[130px] sm:max-w-none">
+                    {{ \App\Models\Setting::get('store_name', 'ATELIER') }}
                 </a>
             </div>
         </div>
 
-        <!-- Center: Global Quick Search -->
+        <!-- Center: Global Quick Search (Desktop) -->
         <div class="hidden md:flex flex-1 max-w-md mx-2 relative" @click.away="searchOpen = false">
             <div class="relative flex items-center w-full">
                 <span class="absolute left-3 text-gray-400 text-xs">
@@ -270,10 +272,37 @@
             </div>
         </div>
 
-        <!-- Right: Storefront Link & Logout -->
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Right: Mobile Search Trigger + Notifications + Store + Logout -->
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            <!-- Mobile Search Icon Button -->
+            <button 
+                type="button" 
+                @click="mobileSearchOpen = !mobileSearchOpen"
+                class="md:hidden p-2 rounded-xl border border-black/15 bg-white text-gray-700 hover:text-black min-h-[40px] min-w-[40px] flex items-center justify-center transition-colors"
+                aria-label="Search"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            </button>
+
+            <!-- Notifications Shortcut Button with Unread Badge -->
+            @php 
+                $unreadNotifCount = \App\Models\AdminNotification::where('is_read', false)->count();
+            @endphp
+            <a 
+                href="{{ route('admin.notifications.index') }}" 
+                class="relative p-2 rounded-xl border border-black/15 bg-white hover:bg-black hover:text-white text-gray-800 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center shadow-xs"
+                title="Notifications"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                @if($unreadNotifCount > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black font-mono w-4 h-4 rounded-full flex items-center justify-center animate-pulse">
+                        {{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}
+                    </span>
+                @endif
+            </a>
+
             <!-- View Storefront -->
-            <a href="{{ route('home') }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-black border border-black/20 bg-white hover:bg-black hover:text-white px-2.5 py-1.5 rounded-lg transition-all shadow-xs min-h-[36px]">
+            <a href="{{ route('home') }}" target="_blank" class="hidden xs:inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-black border border-black/20 bg-white hover:bg-black hover:text-white px-2.5 py-1.5 rounded-xl transition-all shadow-xs min-h-[40px]">
                 <span>Store</span>
                 <span>↗</span>
             </a>
@@ -281,15 +310,52 @@
             <!-- Admin Logout -->
             <form action="{{ route('admin.logout') }}" method="POST" class="inline">
                 @csrf
-                <button type="submit" class="bg-black text-white hover:bg-neutral-800 rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider shadow-xs transition-colors min-h-[36px] cursor-pointer">
+                <button type="submit" class="bg-black text-white hover:bg-neutral-800 rounded-xl px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider shadow-xs transition-colors min-h-[40px] cursor-pointer">
                     Logout
                 </button>
             </form>
         </div>
+
+        <!-- Mobile Search Fullscreen Overlay / Bar -->
+        <div 
+            x-show="mobileSearchOpen" 
+            x-cloak 
+            class="md:hidden absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl p-3 shadow-2xl z-50 mx-2"
+        >
+            <div class="relative flex items-center">
+                <input 
+                    type="text" 
+                    x-model="searchQuery" 
+                    @input="onSearchInput()"
+                    placeholder="Search products, orders, customers..." 
+                    class="w-full border border-gray-300 rounded-lg pl-3 pr-8 py-2 text-xs bg-white focus:ring-2 focus:ring-black/10 focus:outline-none"
+                    autofocus
+                >
+                <button @click="mobileSearchOpen = false" class="absolute right-2.5 text-gray-400 text-xs font-bold">✕</button>
+            </div>
+            
+            <div x-show="searchOpen && (searchResults.products.length > 0 || searchResults.orders.length > 0 || searchResults.customers.length > 0)" class="mt-2 max-h-64 overflow-y-auto divide-y divide-gray-100">
+                <template x-for="p in searchResults.products" :key="'mp-' + p.id">
+                    <a :href="p.url" class="flex items-center justify-between p-2 hover:bg-gray-50 text-xs">
+                        <span class="font-bold truncate" x-text="p.label"></span>
+                        <span class="text-[10px] text-gray-500 font-mono" x-text="p.sub"></span>
+                    </a>
+                </template>
+                <template x-for="o in searchResults.orders" :key="'mo-' + o.id">
+                    <a :href="o.url" class="flex items-center justify-between p-2 hover:bg-gray-50 text-xs">
+                        <span class="font-bold" x-text="o.label"></span>
+                        <span class="text-[10px] text-gray-500 font-mono" x-text="o.sub"></span>
+                    </a>
+                </template>
+            </div>
+        </div>
     </header>
 
     <!-- App Body: Sidebar + Main Content -->
-    <div class="flex-1 flex max-w-[1600px] w-full mx-auto relative z-10">
+    <div 
+        class="flex-1 flex max-w-[1600px] w-full mx-auto relative z-10"
+        x-init="$watch('sidebarOpen', val => document.body.style.overflow = val ? 'hidden' : '')"
+    >
         
         <!-- Mobile Sidebar Backdrop Overlay -->
         <div 
@@ -308,16 +374,20 @@
         <!-- Sidebar Navigation Drawer (Desktop Sticky + Mobile Off-Canvas Drawer) -->
         <aside 
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-            class="fixed lg:sticky top-0 lg:top-[85px] left-0 h-full lg:h-[calc(100vh-105px)] w-72 lg:w-64 bg-white lg:glass-panel z-50 lg:z-20 flex flex-col justify-between transition-transform duration-300 ease-out overflow-y-auto shadow-2xl lg:shadow-sm border-r lg:border-r-0 lg:ml-3"
+            class="fixed lg:sticky top-0 lg:top-[85px] left-0 h-full lg:h-[calc(100vh-105px)] w-72 lg:w-64 bg-white lg:glass-panel z-50 lg:z-20 flex flex-col justify-between transition-transform duration-300 ease-out overflow-y-auto overscroll-y-contain shadow-2xl lg:shadow-sm border-r lg:border-r-0 lg:ml-3"
+            style="-webkit-overflow-scrolling: touch;"
         >
-            <div class="p-4 space-y-5">
+            <div class="p-4 space-y-5 pb-24 lg:pb-4">
                 <!-- Mobile Drawer Header with Close Button -->
                 <div class="flex lg:hidden items-center justify-between pb-3 border-b border-black/10">
-                    <span class="font-black text-sm uppercase tracking-wider text-black">Admin Menu</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="font-black text-sm uppercase tracking-wider text-black">Admin Panel</span>
+                    </div>
                     <button 
                         type="button" 
                         @click="sidebarOpen = false"
-                        class="w-8 h-8 rounded-lg border border-black/20 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
+                        class="w-9 h-9 rounded-xl border border-black/20 flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
                         aria-label="Close menu"
                     >
                         ✕
@@ -420,6 +490,16 @@
                             </div>
                         </a>
                         <a 
+                            href="{{ route('admin.abandoned-carts.index') }}" 
+                            @click="sidebarOpen = false"
+                            class="flex items-center justify-between px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.abandoned-carts.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
+                        >
+                            <div class="flex items-center gap-3">
+                                <span>🛒</span>
+                                <span>Abandoned Carts</span>
+                            </div>
+                        </a>
+                        <a 
                             href="{{ route('admin.reviews.index') }}" 
                             @click="sidebarOpen = false"
                             class="flex items-center justify-between px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.reviews.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
@@ -429,10 +509,63 @@
                                 <span>Reviews</span>
                             </div>
                         </a>
+                        <a 
+                            href="{{ route('admin.surveys.index') }}" 
+                            @click="sidebarOpen = false"
+                            class="flex items-center justify-between px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.surveys.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
+                        >
+                            <div class="flex items-center gap-3">
+                                <span>📝</span>
+                                <span>Surveys & Polls</span>
+                            </div>
+                        </a>
                     </nav>
                 </div>
 
-                <!-- Group 4: Settings & Integrations -->
+                <!-- Group 4: Automations & Bots (Highlighted) -->
+                @php 
+                    $hasTgBot = !empty(\App\Models\Setting::get('telegram_bot_token', config('services.telegram.bot_token', env('TELEGRAM_BOT_TOKEN'))));
+                    $isWaEnabled = \App\Models\Setting::get('whatsapp_enabled', '0') === '1';
+                @endphp
+                <div class="p-2.5 rounded-xl bg-gradient-to-br from-neutral-900 to-black text-white border border-neutral-700 shadow-md">
+                    <span class="block text-[10px] font-mono font-bold uppercase tracking-widest text-amber-400 mb-2 px-1 flex items-center justify-between">
+                        <span>🤖 Bots & Integrations</span>
+                        <span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-mono">LIVE</span>
+                    </span>
+                    <nav class="space-y-1">
+                        <!-- Telegram Bot -->
+                        <a 
+                            href="{{ route('admin.telegram.index') }}" 
+                            @click="sidebarOpen = false"
+                            class="flex items-center justify-between px-2.5 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.telegram.*') ? 'bg-blue-600 text-white border-blue-400' : 'text-neutral-200 border-transparent hover:bg-white/10' }} transition-colors"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-sm">✈️</span>
+                                <span class="text-[11px]">Telegram Bot</span>
+                            </div>
+                            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded {{ $hasTgBot ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/40' : 'bg-neutral-800 text-neutral-400' }}">
+                                {{ $hasTgBot ? 'Active' : 'Setup' }}
+                            </span>
+                        </a>
+
+                        <!-- WhatsApp Gateway -->
+                        <a 
+                            href="{{ route('admin.whatsapp.index') }}" 
+                            @click="sidebarOpen = false"
+                            class="flex items-center justify-between px-2.5 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.whatsapp.*') ? 'bg-emerald-600 text-white border-emerald-400' : 'text-neutral-200 border-transparent hover:bg-white/10' }} transition-colors"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-sm">💬</span>
+                                <span class="text-[11px]">WhatsApp Alerts</span>
+                            </div>
+                            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded {{ $isWaEnabled ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/40' : 'bg-neutral-800 text-neutral-400' }}">
+                                {{ $isWaEnabled ? 'Active' : 'Setup' }}
+                            </span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Group 5: Settings & Configuration -->
                 <div>
                     <span class="block text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400 mb-2 px-1">Settings</span>
                     <nav class="space-y-1">
@@ -442,7 +575,7 @@
                             class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.content.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
                         >
                             <span>⚙️</span>
-                            <span>Content & Banner</span>
+                            <span>Content & Banners</span>
                         </a>
                         <a 
                             href="{{ route('admin.shipping.index') }}" 
@@ -455,11 +588,36 @@
                         <a 
                             href="{{ route('admin.notifications.index') }}" 
                             @click="sidebarOpen = false"
-                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.notifications.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
+                            class="flex items-center justify-between px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.notifications.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
                         >
-                            <span>🔔</span>
-                            <span>Notifications</span>
+                            <div class="flex items-center gap-3">
+                                <span>🔔</span>
+                                <span>Notifications</span>
+                            </div>
+                            @if($unreadNotifCount > 0)
+                                <span class="bg-red-600 text-white text-[9px] font-mono font-black px-1.5 py-0.5 rounded-full">
+                                    {{ $unreadNotifCount }}
+                                </span>
+                            @endif
                         </a>
+                        <a 
+                            href="{{ route('admin.audit-log.index') }}" 
+                            @click="sidebarOpen = false"
+                            class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.audit-log.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
+                        >
+                            <span>📋</span>
+                            <span>Audit Log</span>
+                        </a>
+                        @if((auth()->user()->admin_role ?? '') === 'super_admin')
+                            <a 
+                                href="{{ route('admin.team.index') }}" 
+                                @click="sidebarOpen = false"
+                                class="flex items-center gap-3 px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border {{ request()->routeIs('admin.team.*') ? 'bg-black text-white border-black' : 'text-gray-800 border-transparent hover:bg-gray-100' }} transition-colors"
+                            >
+                                <span>👥</span>
+                                <span>Team & Access</span>
+                            </a>
+                        @endif
                     </nav>
                 </div>
             </div>
@@ -469,7 +627,7 @@
                 <a 
                     href="{{ route('home') }}" 
                     target="_blank" 
-                    class="w-full flex items-center justify-center gap-2 bg-black text-white hover:bg-neutral-800 py-2.5 px-3 rounded-lg text-xs font-bold uppercase tracking-wider shadow-xs transition-colors"
+                    class="w-full flex items-center justify-center gap-2 bg-black text-white hover:bg-neutral-800 py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-xs transition-colors"
                 >
                     <span>View Storefront ↗</span>
                 </a>
