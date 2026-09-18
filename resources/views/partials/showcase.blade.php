@@ -204,14 +204,17 @@
                     $isExplicitBestseller = !empty($product->is_bestseller);
                     $isExplicitNew = !empty($product->is_new);
                     $hasDiscount = ($product->compare_at_price_minor && $product->compare_at_price_minor > $product->retail_price_minor);
+                    $hasVideo = !empty($product->video_url);
                     
                     $isBestseller = $isExplicitBestseller 
                         || ($product->id === $bestSellerId) 
                         || $hasDiscount 
-                        || ($index < max(4, (int)($totalCount * 0.6)));
+                        || ($totalCount <= 4)
+                        || ($index < max(4, (int)($totalCount * 0.75)));
 
                     $isNew = $isExplicitNew 
-                        || ($index % 2 === 0 && $index < max(4, (int)($totalCount * 0.7)))
+                        || ($totalCount <= 4)
+                        || ($index % 2 === 0)
                         || ($product->created_at && $product->created_at->diffInDays() < 120);
 
                     $productCollectionIds = $product->collections->pluck('id')->map(fn($id) => 'col-'.$id)->toArray();
@@ -229,7 +232,7 @@
                     x-data="{ currentImg: '{{ $img }}' }"
                     class="group bg-white rounded-2xl sm:rounded-3xl border border-black/10 overflow-hidden shadow-xs hover:shadow-lg hover:border-black/25 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
                 >
-                    {{-- Card Media Frame --}}
+                    {{-- Card Media Frame (Pure White Seamless Canvas) --}}
                     <div class="relative bg-white p-2.5 sm:p-3.5 aspect-square overflow-hidden flex items-center justify-center">
                         {{-- Badges --}}
                         <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -245,6 +248,13 @@
                             @elseif($isExplicitBestseller || ($product->id === $bestSellerId))
                                 <span class="px-2 py-0.5 rounded-full bg-amber-500 text-black text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider shadow-xs">
                                     {{ $isArabicStore ? 'الأكثر طلباً' : 'BEST' }}
+                                </span>
+                            @endif
+
+                            @if($hasVideo)
+                                <span class="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-xs text-white text-[8px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1">
+                                    <span>▶</span>
+                                    <span>{{ $isArabicStore ? 'فيديو' : 'Video' }}</span>
                                 </span>
                             @endif
                         </div>
@@ -504,19 +514,25 @@ function flagshipShowcase() {
         },
 
         matchesTab(tagsString) {
-            if (this.activeTab === 'all') return true;
-            if (this.activeTab === 'bestsellers') return tagsString.includes('tag-bestsellers');
-            if (this.activeTab === 'new') return tagsString.includes('tag-new');
-            return tagsString.includes(this.activeTab);
+            if (!this.activeTab || this.activeTab === 'all') return true;
+            if (this.activeTab === 'bestsellers') {
+                return tagsString.indexOf('tag-bestsellers') !== -1;
+            }
+            if (this.activeTab === 'new') {
+                return tagsString.indexOf('tag-new') !== -1;
+            }
+            return tagsString.indexOf(this.activeTab) !== -1;
         },
 
         recalcVisible() {
-            const cards = document.querySelectorAll('[x-show*="matchesTab"]');
-            let count = 0;
-            cards.forEach(card => {
-                if (card.style.display !== 'none') count++;
-            });
-            this.visibleCount = count;
+            setTimeout(() => {
+                const cards = document.querySelectorAll('[x-show*="matchesTab"]');
+                let count = 0;
+                cards.forEach(card => {
+                    if (window.getComputedStyle(card).display !== 'none') count++;
+                });
+                this.visibleCount = count;
+            }, 50);
         }
     };
 }

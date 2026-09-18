@@ -119,8 +119,11 @@ function productDetailComponent() {
     const currentProdId = {{ (int)$product->id }};
     const currentProdTitle = @json($product->title);
     const currentProdUrl = @json(route('products.show', ['slug' => $product->slug]));
+    const productVideoUrl = @json($product->video_url);
 
     return {
+        activeMedia: 'image',
+        videoUrl: productVideoUrl,
         activeImage: (fallbackMainImg && fallbackMainImg.startsWith('http')) ? fallbackMainImg : (defaultGallery[0] || fallbackMainImg || ''),
         selectedImage: (fallbackMainImg && fallbackMainImg.startsWith('http')) ? fallbackMainImg : (defaultGallery[0] || fallbackMainImg || ''),
         activePrice: initialPrice,
@@ -163,6 +166,7 @@ function productDetailComponent() {
         },
         selectVariant(v) {
             if (!v) return;
+            this.activeMedia = 'image';
             this.selectedVariantId = String(v.id);
             this.selectedOptionTitle = v.title || '';
             this.activePrice = v.price;
@@ -361,8 +365,14 @@ function productDetailComponent() {
             <!-- Product Gallery Column -->
             <div class="lg:col-span-7 space-y-4 prod-anim-gallery">
                 <div class="relative w-full overflow-hidden border-2 border-black bg-white p-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+                    
+                    {{-- Main Video Player if active --}}
+                    <div x-show="activeMedia === 'video' && videoUrl" class="w-full aspect-square bg-black flex items-center justify-center relative overflow-hidden" style="display:none;">
+                        <video :src="videoUrl" controls autoplay loop playsinline class="w-full h-full object-contain"></video>
+                    </div>
+
                     <!-- Main Product Image — iOS-safe render via x-effect -->
-                    <div class="product-media-frame relative" id="prod-main-frame">
+                    <div x-show="activeMedia !== 'video'" class="product-media-frame relative" id="prod-main-frame">
                         <!-- Placeholder shown when no image URL exists -->
                         <div 
                             x-show="!activeImage"
@@ -410,17 +420,32 @@ function productDetailComponent() {
                     </div>
                 </div>
 
-                <!-- Thumbnails Rail — iOS-safe with direct DOM update -->
-                <div x-show="currentGallery.length > 1" style="display: none;" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <!-- Thumbnails Rail & Video Button -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    @if(!empty($product->video_url))
+                        <button 
+                            type="button" 
+                            @click="activeMedia = 'video'"
+                            class="relative w-[68px] h-[68px] sm:w-20 sm:h-20 border bg-black text-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden flex flex-col items-center justify-center gap-1 group shadow-xs active:scale-95"
+                            :class="activeMedia === 'video' ? 'border-2 border-amber-400 ring-2 ring-amber-400/50 scale-105 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)]' : 'border-black/20 opacity-80 hover:opacity-100 hover:border-black'"
+                            title="{{ $isArProd ? 'مشاهدة فيديو المنتج' : 'Watch Product Video' }}"
+                        >
+                            <span class="text-base text-amber-400 group-hover:scale-125 transition-transform">▶</span>
+                            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider font-mono text-white">{{ $isArProd ? 'فيديو' : 'Video' }}</span>
+                        </button>
+                    @endif
+
                     <template x-for="(thumb, idx) in currentGallery" :key="thumb">
                         <button 
                             type="button" 
                             @click="
+                                activeMedia = 'image';
                                 activeImage = thumb;
                                 selectedImage = thumb;
                                 if ($refs.mainProductImg && thumb) $refs.mainProductImg.src = thumb;
                             "
                             @mouseenter="
+                                activeMedia = 'image';
                                 activeImage = thumb;
                                 if ($refs.mainProductImg && thumb) $refs.mainProductImg.src = thumb;
                             "
@@ -429,7 +454,7 @@ function productDetailComponent() {
                                 if ($refs.mainProductImg && selectedImage) $refs.mainProductImg.src = selectedImage;
                             "
                             class="relative w-[68px] h-[68px] sm:w-20 sm:h-20 border bg-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden"
-                            :class="(activeImage === thumb || selectedImage === thumb) 
+                            :class="(activeMedia === 'image' && (activeImage === thumb || selectedImage === thumb)) 
                                 ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] scale-105' 
                                 : 'border-black/20 opacity-60 hover:opacity-100 hover:border-black/60'"
                         >
@@ -442,7 +467,7 @@ function productDetailComponent() {
                             >
                             <!-- Active indicator dot -->
                             <span 
-                                x-show="activeImage === thumb"
+                                x-show="activeMedia === 'image' && activeImage === thumb"
                                 class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-black"
                             ></span>
                         </button>

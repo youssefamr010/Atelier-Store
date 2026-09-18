@@ -227,24 +227,33 @@
                 </div>
             </div>
 
-            {{-- ── Badge Flags: New / Bestseller (Part 4) ── --}}
-            <div class="border-t border-gray-200 pt-4 mt-2">
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-2">Storefront Badge Flags</label>
-                <div class="flex flex-wrap gap-4">
-                    <label class="flex items-center gap-2.5 border-2 border-emerald-600 px-4 py-2.5 bg-emerald-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
-                        <input type="checkbox" name="is_new" value="1"
-                            {{ old('is_new', $product->is_new ?? false) ? 'checked' : '' }}
-                            class="w-4 h-4 accent-emerald-600">
-                        <span class="text-emerald-800 uppercase tracking-wider">🟢 NEW Badge</span>
-                        <span class="text-[10px] text-gray-500 font-normal ml-1">(shows green "NEW" ribbon)</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 border-2 border-amber-500 px-4 py-2.5 bg-amber-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
-                        <input type="checkbox" name="is_bestseller" value="1"
-                            {{ old('is_bestseller', $product->is_bestseller ?? false) ? 'checked' : '' }}
-                            class="w-4 h-4 accent-amber-500">
-                        <span class="text-amber-800 uppercase tracking-wider">⭐ BESTSELLER Badge</span>
-                        <span class="text-[10px] text-gray-500 font-normal ml-1">(shows amber "BEST" ribbon)</span>
-                    </label>
+            {{-- ── Badge Flags & Display Order ── --}}
+            <div class="border-t border-gray-200 pt-4 mt-2 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-2">Storefront Badge Flags</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center gap-2.5 border-2 border-emerald-600 px-4 py-2.5 bg-emerald-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
+                                <input type="checkbox" name="is_new" value="1"
+                                    {{ old('is_new', $product->is_new ?? false) ? 'checked' : '' }}
+                                    class="w-4 h-4 accent-emerald-600">
+                                <span class="text-emerald-800 uppercase tracking-wider">🟢 NEW Badge</span>
+                                <span class="text-[10px] text-gray-500 font-normal ml-1">(shows green "NEW" ribbon)</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 border-2 border-amber-500 px-4 py-2.5 bg-amber-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
+                                <input type="checkbox" name="is_bestseller" value="1"
+                                    {{ old('is_bestseller', $product->is_bestseller ?? false) ? 'checked' : '' }}
+                                    class="w-4 h-4 accent-amber-500">
+                                <span class="text-amber-800 uppercase tracking-wider">🔥 BESTSELLER Badge</span>
+                                <span class="text-[10px] text-gray-500 font-normal ml-1">(shows amber "BEST" ribbon)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Catalog Display Order</label>
+                        <input type="number" name="sort_order" value="{{ old('sort_order', $product->sort_order ?? 0) }}" placeholder="0" class="w-full border-2 border-black p-2.5 text-xs font-mono focus:outline-none">
+                        <span class="text-[9px] text-gray-500">Lower numbers appear first in catalog</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -462,6 +471,84 @@
                 <span class="text-[10px] text-gray-500 mt-1 block">Select multiple JPG, PNG, WebP files</span>
             </div>
 
+        </div>
+    </div>
+
+    <!-- 6.5 Dedicated Product Video Studio -->
+    @php
+        $existingVideoUrl = $product->video_url;
+    @endphp
+    <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-4">
+        <div class="border-b-2 border-black pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+            <div>
+                <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-500">CINEMATIC REEL</span>
+                <h2 class="text-xl font-black uppercase tracking-tight text-black flex items-center gap-2">
+                    <span>🎬 Product Video Reel</span>
+                    @if($existingVideoUrl)
+                        <span class="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-400">ACTIVE VIDEO ATTACHED</span>
+                    @endif
+                </h2>
+                <p class="text-xs text-gray-500 mt-0.5">High-definition product demonstration video displayed on product page and mobile quick-view.</p>
+            </div>
+            <span class="text-[10px] font-mono text-gray-400">MP4, WebM, MOV · Max 100MB</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {{-- Video Upload Dropzone Form --}}
+            <div class="lg:col-span-6 space-y-3">
+                <form action="{{ route('admin.products.upload-video', $product->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+                    @csrf
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700">
+                        Upload or Replace Video File
+                    </label>
+                    
+                    <div 
+                        onclick="document.getElementById('product-video-file-input').click()" 
+                        class="border-2 border-dashed border-black bg-gray-50 hover:bg-gray-100 p-6 rounded cursor-pointer text-center flex flex-col items-center justify-center min-h-[140px] transition-colors group"
+                    >
+                        <span class="text-3xl mb-1 group-hover:scale-110 transition-transform">📹</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-black">Click to Select or Drop Video</span>
+                        <span class="text-[10px] text-gray-500 mt-1">MP4, WebM, QuickTime (MOV) up to 100MB</span>
+                    </div>
+
+                    <input 
+                        type="file" 
+                        id="product-video-file-input" 
+                        name="video" 
+                        accept="video/mp4,video/webm,video/quicktime,video/ogg" 
+                        class="hidden"
+                        onchange="this.form.submit()"
+                    >
+                </form>
+            </div>
+
+            {{-- Video Player Preview --}}
+            <div class="lg:col-span-6">
+                @if($existingVideoUrl)
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono font-bold text-gray-700 uppercase">Live Player Preview:</span>
+                            <form action="{{ route('admin.products.delete-video', $product->id) }}" method="POST" class="inline" onsubmit="return confirm('Remove product video?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-bold uppercase underline">
+                                    Remove Video ✕
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="relative border-2 border-black rounded bg-black aspect-video overflow-hidden shadow-sm flex items-center justify-center">
+                            <video src="{{ $existingVideoUrl }}" controls class="w-full h-full object-contain"></video>
+                        </div>
+                    </div>
+                @else
+                    <div class="border-2 border-dashed border-gray-300 rounded p-6 text-center text-gray-400 aspect-video flex flex-col items-center justify-center">
+                        <span class="text-2xl mb-1">🎞️</span>
+                        <span class="text-xs font-bold uppercase tracking-wider">No Video Uploaded</span>
+                        <span class="text-[10px] mt-1 text-gray-400">Upload an MP4 to show a live video tab on the product page</span>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 

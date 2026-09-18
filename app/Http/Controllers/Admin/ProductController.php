@@ -81,8 +81,9 @@ class ProductController extends Controller
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
             'supplier_product_url' => 'nullable|url|max:2000',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:15360',
+            'cover_video' => 'nullable|file|mimes:mp4,webm,mov,ogg,avi,mkv|max:102400',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:15360',
             'collection_ids' => 'nullable|array',
             'collection_ids.*' => 'exists:collections,id',
             'variants' => 'nullable|array',
@@ -90,7 +91,7 @@ class ProductController extends Controller
             'variants.*.color_hex' => 'nullable|string|max:20',
             'variants.*.price_override' => 'nullable|numeric|min:0',
             'variants.*.inventory' => 'nullable|integer|min:0',
-            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:15360',
         ]);
 
         $slug = Str::slug($request->title);
@@ -139,6 +140,9 @@ class ProductController extends Controller
             'inventory' => (int) $request->inventory,
             'low_stock_threshold' => $request->filled('low_stock_threshold') ? (int) $request->low_stock_threshold : null,
             'status' => $request->status,
+            'is_new' => $request->boolean('is_new'),
+            'is_bestseller' => $request->boolean('is_bestseller'),
+            'sort_order' => $request->filled('sort_order') ? (int) $request->sort_order : 0,
             'currency' => 'EGP',
             'attributes_json' => array_filter([
                 'supplier_product_url' => $request->input('supplier_product_url'),
@@ -174,6 +178,29 @@ class ProductController extends Controller
 
                     $product->mediaAssets()->attach($asset->id, ['group' => 'gallery', 'sort_order' => $position++]);
                 }
+            }
+        }
+
+        // Upload Product Video (MP4 / WebM / QuickTime)
+        if ($request->hasFile('cover_video')) {
+            $vFile = $request->file('cover_video');
+            if ($vFile->isValid()) {
+                $vFilename = 'video-'.time().'-'.Str::random(8).'.'.$vFile->getClientOriginalExtension();
+                $vPath = $vFile->storeAs('media', $vFilename, 'public');
+                $videoUrl = '/storage/'.$vPath;
+
+                $videoAsset = MediaAsset::create([
+                    'type' => 'video',
+                    'url' => $videoUrl,
+                    'filename' => $vFilename,
+                    'mime_type' => $vFile->getClientMimeType(),
+                    'size_bytes' => $vFile->getSize(),
+                ]);
+
+                $product->mediaAssets()->attach($videoAsset->id, ['group' => 'video', 'sort_order' => 0]);
+                $attributes = $product->attributes_json ?? [];
+                $attributes['video_url'] = $videoUrl;
+                $product->update(['attributes_json' => $attributes]);
             }
         }
 
@@ -305,6 +332,7 @@ class ProductController extends Controller
             'catalog_display_mode' => $request->input('catalog_display_mode', $product->catalog_display_mode ?? 'separate_cards'),
             'is_new'         => $request->boolean('is_new'),
             'is_bestseller'  => $request->boolean('is_bestseller'),
+            'sort_order'     => $request->filled('sort_order') ? (int) $request->sort_order : 0,
             'pinned_related_ids' => $request->input('pinned_related_ids', []),
             'attributes_json' => $productAttributes,
         ]);
@@ -436,6 +464,74 @@ class ProductController extends Controller
         AuditLog::log('product.media_delete', 'product', $productId, "Removed media asset #{$assetId} from {$product->title}");
 
         return back()->with('success', 'Image removed from product gallery.');
+    }
+
+    // Video Upload
+    public function uploadVideo(Request $request, int $id)
+    {
+        $request->validate([
+            'video' => 'required|file|mimes:mp4,webm,mov,ogg,avi,mkv|max:102400',
+        ]);
+
+        $product = Product::findOrFail($id);
+        $file = $request->file('video');
+        $filename = 'video-'.time().'-'.Str::random(8).'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('media', $filename, 'public');
+        $videoUrl = '/storage/'.$path;
+
+        // Detach previous video assets if any
+        $oldVideos = $product->mediaAssets()->where('type', 'video')->get();
+        foreach ($oldVideos as $oldV) {
+            $product->mediaAssets()->detach($oldV->id);
+        }
+
+        $asset = MediaAsset::create([
+            'type' => 'video',
+            'url' => $videoUrl,
+            'filename' => $filename,
+            'mime_type' => $file->getClientMimeType(),
+            'size_bytes' => $file->getSize(),
+        ]);
+
+        $product->mediaAssets()->attach($asset->id, ['group' => 'video', 'sort_order' => 0]);
+
+        $attrs = $product->attributes_json ?? [];
+        $attrs['video_url'] = $videoUrl;
+        $product->update(['attributes_json' => $attrs]);
+
+        AuditLog::log('product.video_upload', 'product', $product->id, "Uploaded video for {$product->title}");
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'video_url' => $videoUrl, 'asset_id' => $asset->id]);
+        }
+
+        return back()->with('success', 'Product video uploaded successfully!');
+    }
+
+    // Video Delete
+    public function deleteVideo(Request $request, int $id)
+    {
+        $product = Product::findOrFail($id);
+        $oldVideos = $product->mediaAssets()->where('type', 'video')->get();
+        foreach ($oldVideos as $oldV) {
+            $product->mediaAssets()->detach($oldV->id);
+            if (Storage::disk('public')->exists('media/'.$oldV->filename)) {
+                Storage::disk('public')->delete('media/'.$oldV->filename);
+            }
+            $oldV->delete();
+        }
+
+        $attrs = $product->attributes_json ?? [];
+        unset($attrs['video_url']);
+        $product->update(['attributes_json' => $attrs]);
+
+        AuditLog::log('product.video_delete', 'product', $product->id, "Deleted video for {$product->title}");
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Product video deleted successfully.');
     }
 
     // Update Variant

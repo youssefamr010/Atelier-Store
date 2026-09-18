@@ -58,20 +58,37 @@
 
         <!-- 2. Product Images (Cover & Gallery) -->
         <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-6">
-            <div class="border-b pb-2 flex items-center justify-between">
-                <h2 class="text-sm font-mono font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
-                    <span><svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></span>
-                    <span>2. Product Images</span>
-                </h2>
-                <span class="text-[10px] font-mono text-gray-400">JPG, PNG, WebP · Max 5MB each</span>
+            <div class="border-b pb-2 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                    <h2 class="text-sm font-mono font-bold uppercase tracking-widest text-gray-500 flex items-center gap-2">
+                        <span><svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></span>
+                        <span>2. Product Images & Media</span>
+                    </h2>
+                    <span class="text-[10px] font-mono text-gray-400">JPG, PNG, WebP, SVG (Transparent supported) · Max 15MB each</span>
+                </div>
+
+                {{-- Transparency Checkerboard Toggle --}}
+                <button 
+                    type="button" 
+                    @click="transparentMode = !transparentMode" 
+                    class="px-2.5 py-1 rounded border text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                    :class="transparentMode ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-300 hover:border-black'"
+                    title="Toggle checkerboard background to test image transparency"
+                >
+                    <span>🏁</span>
+                    <span x-text="transparentMode ? 'Checkerboard: ON' : 'Test Transparency'"></span>
+                </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Cover Image -->
                 <div class="lg:col-span-5 space-y-2">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700">
-                        Primary Cover Image * (Main Catalog Thumbnail)
-                    </label>
+                    <div class="flex items-center justify-between">
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700">
+                            Primary Cover Image *
+                        </label>
+                        <span class="text-[9px] text-emerald-700 font-mono font-bold">PNG / WebP Transparent OK ✓</span>
+                    </div>
                     
                     <div 
                         tabindex="0"
@@ -83,16 +100,17 @@
                         @drop.prevent="setCoverFromDrop($event)"
                         @paste.prevent="handleCoverPaste($event)"
                         :class="draggingCover ? 'border-amber-500 bg-amber-50' : 'border-black bg-gray-50'" 
+                        :style="transparentMode ? 'background-image: repeating-linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5), repeating-linear-gradient(45deg, #e5e5e5 25%, #ffffff 25%, #ffffff 75%, #e5e5e5 75%, #e5e5e5); background-position: 0 0, 8px 8px; background-size: 16px 16px;' : ''"
                         class="border-2 border-dashed p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center relative aspect-square flex flex-col items-center justify-center group overflow-hidden shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
                     >
                         <template x-if="coverPreview">
-                            <img :src="coverPreview" alt="Cover Preview" class="w-full h-full object-cover absolute inset-0">
+                            <img :src="coverPreview" alt="Cover Preview" class="w-full h-full object-contain p-2 absolute inset-0">
                         </template>
 
                         <div x-show="!coverPreview" class="space-y-2">
                             <span class="text-3xl block group-hover:scale-110 transition-transform"><svg class="w-8 h-8 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg></span>
                             <span class="text-xs font-bold uppercase tracking-wider text-black block">Click to Upload, Drop, or Paste (Ctrl+V)</span>
-                            <span class="text-[10px] text-gray-500 block">Paste clipboard screenshot directly</span>
+                            <span class="text-[10px] text-gray-500 block">Transparent PNG, WebP or JPG</span>
                         </div>
 
                         <div x-show="coverPreview" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold uppercase tracking-wider">
@@ -105,7 +123,7 @@
                         name="cover_image" 
                         x-ref="coverInput" 
                         @change="previewCoverImage($event)" 
-                        accept="image/jpeg,image/png,image/webp,image/jpg" 
+                        accept="image/jpeg,image/png,image/webp,image/jpg,image/svg+xml" 
                         class="hidden"
                     >
                 </div>
@@ -139,7 +157,7 @@
                         x-ref="galleryInput" 
                         @change="setGalleryFiles($event.target.files)" 
                         multiple 
-                        accept="image/jpeg,image/png,image/webp,image/jpg" 
+                        accept="image/jpeg,image/png,image/webp,image/jpg,image/svg+xml" 
                         class="hidden"
                     >
 
@@ -152,8 +170,11 @@
                             </div>
                             <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
                                 <template x-for="(thumb, idx) in galleryPreviews" :key="idx">
-                                    <div class="relative aspect-square border border-black overflow-hidden bg-white group">
-                                        <img :src="thumb" class="w-full h-full object-cover">
+                                    <div 
+                                        :style="transparentMode ? 'background-image: repeating-linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5), repeating-linear-gradient(45deg, #e5e5e5 25%, #ffffff 25%, #ffffff 75%, #e5e5e5 75%, #e5e5e5); background-position: 0 0, 4px 4px; background-size: 8px 8px;' : ''"
+                                        class="relative aspect-square border border-black overflow-hidden bg-white group p-1 flex items-center justify-center"
+                                    >
+                                        <img :src="thumb" class="w-full h-full object-contain">
                                         <button 
                                             type="button" 
                                             @click="removeGalleryPreview(idx)" 
@@ -167,6 +188,58 @@
                             </div>
                         </div>
                     </template>
+                </div>
+            </div>
+
+            {{-- Product Video Dropzone --}}
+            <div class="border-t border-gray-200 pt-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+                            <span>🎥 Product Video Reel (Optional)</span>
+                        </label>
+                        <span class="text-[10px] text-gray-500">Upload high-definition product demonstration video (MP4, WebM, MOV up to 100MB)</span>
+                    </div>
+                    <span class="text-[9px] font-mono bg-gray-100 px-2 py-0.5 rounded border border-gray-300">Max 100MB</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                    <div class="sm:col-span-8">
+                        <div 
+                            tabindex="0"
+                            @click="$refs.videoInput.click()" 
+                            class="border-2 border-dashed border-gray-400 hover:border-black bg-gray-50 hover:bg-gray-100 p-4 rounded-lg cursor-pointer text-center flex flex-col items-center justify-center min-h-[90px] transition-colors focus:outline-none focus:ring-2 focus:ring-black"
+                        >
+                            <span class="text-xl mb-1">🎬</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-black" x-text="videoName ? 'Selected: ' + videoName : 'Click to Upload Product Video'"></span>
+                            <span class="text-[10px] text-gray-500 mt-0.5">MP4, WebM, QuickTime (MOV)</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            name="cover_video" 
+                            x-ref="videoInput" 
+                            @change="previewVideoFile($event)" 
+                            accept="video/mp4,video/webm,video/quicktime,video/ogg" 
+                            class="hidden"
+                        >
+                    </div>
+
+                    {{-- Live Video Player Preview --}}
+                    <div class="sm:col-span-4" x-show="videoPreview" x-cloak>
+                        <div class="relative border-2 border-black rounded-lg overflow-hidden bg-black aspect-video flex items-center justify-center shadow-sm">
+                            <video :src="videoPreview" controls class="w-full h-full object-contain"></video>
+                            <button 
+                                type="button" 
+                                @click="removeVideo()" 
+                                class="absolute top-1.5 right-1.5 bg-black/80 text-white hover:bg-red-600 rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold transition-colors"
+                                title="Remove video"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>
@@ -361,7 +434,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Low Stock Alert Threshold</label>
                     <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold') }}" placeholder="Leave blank to use global default (5)" class="w-full border-2 border-black p-2.5 text-xs font-mono focus:outline-none">
@@ -369,9 +442,28 @@
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Catalog Status *</label>
                     <select name="status" class="w-full border-2 border-black p-2.5 text-xs bg-white font-bold focus:outline-none">
-                        <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}><svg class="w-4 h-4 inline-block text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Active (Visible in Store Immediately)</option>
-                        <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}><svg class="w-4 h-4 inline-block text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg> Draft (Hidden)</option>
+                        <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>🟢 Active (Visible in Store Immediately)</option>
+                        <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>⚪ Draft (Hidden)</option>
                     </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Display Sort Order</label>
+                    <input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" placeholder="0" class="w-full border-2 border-black p-2.5 text-xs font-mono focus:outline-none">
+                </div>
+            </div>
+
+            {{-- Merchandising Badges Switches --}}
+            <div class="border-t border-gray-200 pt-4 mt-2">
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-2">Storefront Badges & Merchandising</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2.5 border-2 border-emerald-600 px-4 py-2.5 bg-emerald-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
+                        <input type="checkbox" name="is_new" value="1" {{ old('is_new') ? 'checked' : '' }} class="w-4 h-4 accent-emerald-600">
+                        <span class="text-emerald-800 uppercase tracking-wider">🟢 NEW Ribbon (وصل حديثاً)</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 border-2 border-amber-500 px-4 py-2.5 bg-amber-50 hover:bg-white cursor-pointer transition-colors text-xs font-bold">
+                        <input type="checkbox" name="is_bestseller" value="1" {{ old('is_bestseller') ? 'checked' : '' }} class="w-4 h-4 accent-amber-500">
+                        <span class="text-amber-800 uppercase tracking-wider">🔥 BESTSELLER Ribbon (الأكثر طلباً)</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -492,6 +584,9 @@ function createProductForm() {
         galleryFiles: [],
         draggingCover: false,
         draggingGallery: false,
+        transparentMode: false,
+        videoPreview: null,
+        videoName: '',
         activeZone: null,
         toastMessage: '',
         toastTimeout: null,
@@ -501,6 +596,20 @@ function createProductForm() {
             { title: 'Classic Black', color_hex: '#000000', price_override: '', inventory: 15, imageName: '', preview: '' },
             { title: 'Cognac Brown', color_hex: '#8B4513', price_override: '', inventory: 15, imageName: '', preview: '' }
         ],
+        previewVideoFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.videoName = file.name;
+                this.videoPreview = URL.createObjectURL(file);
+                this.showToast('✓ Video selected: ' + file.name);
+            }
+        },
+        removeVideo() {
+            this.videoPreview = null;
+            this.videoName = '';
+            if (this.$refs.videoInput) this.$refs.videoInput.value = '';
+            this.showToast('✓ Video removed');
+        },
         init() {
             window.addEventListener('paste', (e) => {
                 const items = e.clipboardData?.items;

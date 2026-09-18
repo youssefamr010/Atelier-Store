@@ -78,6 +78,22 @@ class Product extends Model
         return url('storage/media/' . ltrim($value, '/'));
     }
 
+    public function getVideoUrlAttribute(): ?string
+    {
+        $url = $this->attributes_json['video_url'] ?? null;
+        if (!empty($url)) {
+            if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+                return $url;
+            }
+            return url(ltrim($url, '/'));
+        }
+        $videoAsset = $this->mediaAssets()->where('type', 'video')->first();
+        if ($videoAsset) {
+            return $videoAsset->url;
+        }
+        return null;
+    }
+
     public function approvedReviews(): HasMany
     {
         return $this->reviews()->where('is_approved', true);

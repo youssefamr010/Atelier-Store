@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — Atelier Administrative Console</title>
     
@@ -41,7 +41,24 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #F2F1ED; margin: 0; padding: 0; letter-spacing: -0.01em; }
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #F2F1ED;
+            margin: 0;
+            padding: 0;
+            letter-spacing: -0.01em;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Responsive Mobile Table and Container Safeguards */
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
         /* ── SHARP HEADINGS using Space Grotesk ─────────────────────── */
         h1, h2, h3, h4, h5, h6,
