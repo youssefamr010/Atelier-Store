@@ -301,6 +301,7 @@
 
                     {{-- Card Details --}}
                     <div class="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2">
+                        <div>
                             {{-- Color Swatches --}}
                             @php
                                 $cardSwatches = collect();
@@ -331,7 +332,7 @@
                             @endphp
 
                             @if($cardSwatches->isNotEmpty())
-                            <div class="flex items-center gap-1.5 mb-1">
+                            <div class="flex items-center gap-1.5 mb-1.5">
                                 @foreach($cardSwatches->take(5) as $swatchItem)
                                     <span
                                         @if(!empty($swatchItem['image'])) @mouseenter="currentImg = '{{ $swatchItem['image'] }}'" @mouseleave="currentImg = '{{ $img }}'" @click="currentImg = '{{ $swatchItem['image'] }}'" @endif
