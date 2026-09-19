@@ -76,6 +76,32 @@
         'midnight blue' => '#191970',
     ];
 
+    // Ensure primary cover variant is always available in options if variants exist
+    $hasCoverVariant = $variants->contains(function($v) use ($product) {
+        return !empty($v->attributes_json['is_cover_variant']) 
+            || (isset($product->attributes_json['primary_color_name']) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$product->attributes_json['primary_color_name'])));
+    });
+
+    if (!$hasCoverVariant && $variants->isNotEmpty()) {
+        $pCoverName = $product->attributes_json['primary_color_name'] ?? ($isArProd ? 'لون الغلاف الأساسي' : 'Primary / Cover');
+        $pCoverHex = $product->attributes_json['primary_color_hex'] ?? '#D4AF37';
+        $coverVirtualVariant = (object) [
+            'id' => 'cover',
+            'title' => $pCoverName,
+            'attribute_name' => 'Color',
+            'effective_price_minor' => $product->retail_price_minor,
+            'inventory' => $product->inventory,
+            'image_url' => $mainImg,
+            'mediaAssets' => $product->mediaAssets,
+            'attributes_json' => [
+                'color' => $pCoverName,
+                'color_hex' => $pCoverHex,
+                'is_cover_variant' => true
+            ]
+        ];
+        $variants = collect([$coverVirtualVariant])->merge($variants);
+    }
+
     $variantsJson = $variants->map(function($v) use ($product, $mainImg, $colorMap) {
         $price = $v->effective_price_minor ? number_format($v->effective_price_minor / 100, 0) . ' EGP' : number_format($product->retail_price_minor / 100, 0) . ' EGP';
         $vImg = $v->image_url 

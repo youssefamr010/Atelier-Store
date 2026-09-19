@@ -67,7 +67,7 @@ class ProductCardService
             $displayMode = $product->catalog_display_mode ?: 'separate_cards';
 
             // Build rich swatches array for all active variants
-            $swatches = $activeVariants->map(function ($v) use ($product, $isArabic, $baseImg) {
+            $varSwatches = $activeVariants->map(function ($v) use ($product, $isArabic, $baseImg) {
                 $varImg = null;
                 $vMedia = $v->relationLoaded('mediaAssets') ? $v->mediaAssets : collect();
 
@@ -112,6 +112,30 @@ class ProductCardService
                     'url'             => route('products.show', ['slug' => $product->slug, 'variant' => $v->id]),
                 ];
             })->values()->all();
+
+            $pCoverHex = $product->attributes_json['primary_color_hex'] ?? null;
+            $pCoverName = $product->attributes_json['primary_color_name'] ?? null;
+            $hasCoverInVars = $activeVariants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName))));
+
+            $swatches = [];
+            if (!empty($pCoverHex) && !$hasCoverInVars) {
+                $basePriceMinor = (int) $product->retail_price_minor;
+                $swatches[] = [
+                    'variant_id'      => null,
+                    'title'           => $pCoverName ?: $product->title,
+                    'color_hex'       => $pCoverHex,
+                    'image'           => $baseImg,
+                    'hover_image'     => $baseImg,
+                    'price_formatted' => $basePriceMinor ? number_format($basePriceMinor / 100, 0) . ' ' . ($isArabic ? 'ج.م' : 'EGP') : '—',
+                    'price_minor'     => $basePriceMinor,
+                    'in_stock'        => (int) $product->inventory > 0,
+                    'inventory'       => (int) $product->inventory,
+                    'url'             => route('products.show', ['slug' => $product->slug]),
+                ];
+            }
+            foreach ($varSwatches as $vs) {
+                $swatches[] = $vs;
+            }
 
             if ($displayMode === 'single_card' || $activeVariants->isEmpty()) {
                 // SINGLE CARD MODE: Exactly 1 card per product with interactive live swatches

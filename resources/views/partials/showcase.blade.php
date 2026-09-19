@@ -301,24 +301,48 @@
 
                     {{-- Card Details --}}
                     <div class="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2">
-                        <div>
                             {{-- Color Swatches --}}
-                            @if($product->variants->isNotEmpty())
+                            @php
+                                $cardSwatches = collect();
+                                $pCoverHex = $product->attributes_json['primary_color_hex'] ?? null;
+                                $pCoverName = $product->attributes_json['primary_color_name'] ?? null;
+                                
+                                $hasCoverInVars = $product->variants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName))));
+                                
+                                if (!empty($pCoverHex) && !$hasCoverInVars) {
+                                    $cardSwatches->push([
+                                        'color' => $pCoverHex,
+                                        'title' => $pCoverName ?: $product->title,
+                                        'image' => $img,
+                                    ]);
+                                }
+
+                                foreach($product->variants as $variant) {
+                                    $vColor = $variant->attributes_json['color_hex'] ?? $variant->attributes_json['hex'] ?? null;
+                                    $vImg = $variant->image_url ? (str_starts_with($variant->image_url, 'http') ? $variant->image_url : url($variant->image_url)) : $img;
+                                    if ($vColor) {
+                                        $cardSwatches->push([
+                                            'color' => $vColor,
+                                            'title' => $variant->title,
+                                            'image' => $vImg,
+                                        ]);
+                                    }
+                                }
+                            @endphp
+
+                            @if($cardSwatches->isNotEmpty())
                             <div class="flex items-center gap-1.5 mb-1">
-                                @foreach($product->variants->take(4) as $variant)
-                                    @php
-                                        $vColor = $variant->attributes_json['color_hex'] ?? $variant->attributes_json['hex'] ?? null;
-                                        $vImg = $variant->image_url ? (str_starts_with($variant->image_url, 'http') ? $variant->image_url : url($variant->image_url)) : null;
-                                    @endphp
-                                    @if($vColor)
+                                @foreach($cardSwatches->take(5) as $swatchItem)
                                     <span
-                                        @if($vImg) @mouseenter="currentImg = '{{ $vImg }}'" @mouseleave="currentImg = '{{ $img }}'" @click="currentImg = '{{ $vImg }}'" @endif
-                                        class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
-                                        style="background-color: {{ $vColor }};"
-                                        title="{{ $variant->title }}">
+                                        @if(!empty($swatchItem['image'])) @mouseenter="currentImg = '{{ $swatchItem['image'] }}'" @mouseleave="currentImg = '{{ $img }}'" @click="currentImg = '{{ $swatchItem['image'] }}'" @endif
+                                        class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
+                                        style="background-color: {{ $swatchItem['color'] }};"
+                                        title="{{ $swatchItem['title'] }}">
                                     </span>
-                                    @endif
                                 @endforeach
+                                @if($cardSwatches->count() > 5)
+                                    <span class="text-[8px] font-mono text-black/50">+{{ $cardSwatches->count() - 5 }}</span>
+                                @endif
                             </div>
                             @endif
 

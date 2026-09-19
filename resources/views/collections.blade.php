@@ -313,25 +313,47 @@
                         <div class="space-y-1.5 flex-1 flex flex-col justify-between">
                             
                             {{-- Row 1: Swatches + Stock --}}
+                            @php
+                                $colCardSwatches = collect();
+                                $pCoverHexCol = $product->attributes_json['primary_color_hex'] ?? null;
+                                $pCoverNameCol = $product->attributes_json['primary_color_name'] ?? null;
+                                
+                                $hasCoverInColVars = $product->variants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverNameCol) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverNameCol))));
+                                
+                                if (!empty($pCoverHexCol) && !$hasCoverInColVars) {
+                                    $colCardSwatches->push([
+                                        'color' => $pCoverHexCol,
+                                        'title' => $pCoverNameCol ?: $product->title,
+                                        'image' => $img,
+                                    ]);
+                                }
+
+                                foreach($product->variants as $variant) {
+                                    $vColor = $variant->attributes_json['color_hex'] ?? $variant->attributes_json['hex'] ?? null;
+                                    $vImg = $variant->image_url ? (str_starts_with($variant->image_url, 'http') ? $variant->image_url : url($variant->image_url)) : $img;
+                                    if (is_string($vColor) && preg_match('/^#[0-9a-fA-F]{6}$/', $vColor)) {
+                                        $colCardSwatches->push([
+                                            'color' => strtoupper($vColor),
+                                            'title' => $variant->title,
+                                            'image' => $vImg,
+                                        ]);
+                                    }
+                                }
+                            @endphp
+
                             <div class="flex items-center justify-between min-h-[14px]">
-                                @if($colorSwatches->isNotEmpty())
+                                @if($colCardSwatches->isNotEmpty())
                                     <div class="flex items-center gap-1" aria-label="{{ $isArCol ? 'الألوان المتاحة' : 'Available colors' }}">
-                                        @foreach($product->variants as $variant)
-                                            @php
-                                                $variantColor = $variant->attributes_json['color_hex'] ?? null;
-                                                $variantImage = $variant->image_url ? (str_starts_with($variant->image_url, 'http') ? $variant->image_url : url($variant->image_url)) : null;
-                                            @endphp
-                                            @if(is_string($variantColor) && preg_match('/^#[0-9a-fA-F]{6}$/', $variantColor))
-                                                <i
-                                                    @if($variantImage) @mouseenter="current = '{{ $variantImage }}'" @mouseleave="current = '{{ $img }}'" @endif
-                                                    class="shrink-0 border border-black/20 hover:border-black cursor-pointer transition-transform hover:scale-125 inline-block rounded-full"
-                                                    style="background-color:{{ $variantColor }};width:8px;height:8px;"
-                                                    title="{{ $variant->title }}"
-                                                ></i>
-                                            @endif
+                                        @foreach($colCardSwatches->take(5) as $swItem)
+                                            <i
+                                                @if(!empty($swItem['image'])) @mouseenter="current = '{{ $swItem['image'] }}'" @mouseleave="current = '{{ $img }}'" @endif
+                                                class="shrink-0 border border-black/20 hover:border-black cursor-pointer transition-transform hover:scale-125 inline-block rounded-full"
+                                                style="background-color:{{ $swItem['color'] }};width:8px;height:8px;"
+                                                title="{{ $swItem['title'] }}"
+                                            ></i>
                                         @endforeach
-                                        @if($product->variants->count() > $colorSwatches->count())
-                                            <span class="text-[8px] font-mono text-black/40">+{{ $product->variants->count() - $colorSwatches->count() }}</span>
+                                        @if($colCardSwatches->count() > 5)
+                                            <span class="text-[8px] font-mono text-black/40">+{{ $colCardSwatches->count() - 5 }}</span>
                                         @endif
                                     </div>
                                 @else

@@ -369,16 +369,51 @@ class ProductController extends Controller
             $productAttributes['primary_color_name'] = $pName;
             $productAttributes['primary_color_hex'] = $pHex;
 
-            $coverVariant = $product->variants()->where('attributes_json->is_cover_variant', true)->first();
-            if ($coverVariant) {
-                $vAttrs = $coverVariant->attributes_json ?? [];
-                $vAttrs['color'] = $pName;
-                $vAttrs['color_hex'] = $pHex;
-                $coverVariant->update([
-                    'title' => $pName,
-                    'attribute_value' => $pName,
-                    'attributes_json' => $vAttrs,
-                ]);
+            if ($product->variants()->exists()) {
+                $coverVariant = $product->variants()->where('attributes_json->is_cover_variant', true)->first();
+                if (!$coverVariant) {
+                    $coverVariant = $product->variants()->where('title', $pName)->first();
+                }
+
+                if ($coverVariant) {
+                    $vAttrs = $coverVariant->attributes_json ?? [];
+                    $vAttrs['color'] = $pName;
+                    $vAttrs['color_hex'] = $pHex;
+                    $vAttrs['is_cover_variant'] = true;
+                    if (empty($coverVariant->image_url) && !empty($product->image_url)) {
+                        $coverVariant->image_url = $product->image_url;
+                    }
+                    $coverVariant->update([
+                        'title' => $pName,
+                        'attribute_value' => $pName,
+                        'attributes_json' => $vAttrs,
+                    ]);
+                } else {
+                    $slug1 = Str::slug($pName);
+                    $primaryVarSku = strtoupper($product->sku . '-' . ($slug1 ?: 'MAIN'));
+                    $c = 1;
+                    while (ProductVariant::where('sku', $primaryVarSku)->exists()) {
+                        $primaryVarSku = strtoupper($product->sku . '-' . ($slug1 ?: 'MAIN') . '-' . $c++);
+                    }
+
+                    ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $primaryVarSku,
+                        'title' => $pName,
+                        'attribute_name' => 'Color',
+                        'attribute_value' => $pName,
+                        'price_override_minor' => null,
+                        'inventory' => (int) $product->inventory,
+                        'image_url' => $product->image_url,
+                        'attributes_json' => [
+                            'color' => $pName,
+                            'color_hex' => $pHex,
+                            'image_url' => $product->image_url,
+                            'is_cover_variant' => true,
+                        ],
+                        'status' => 'published',
+                    ]);
+                }
             }
         }
 
