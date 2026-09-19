@@ -264,7 +264,7 @@
                             <a
                                 href="{{ route('admin.products.edit', $product->id) }}"
                                 @click.stop
-                                class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/90 text-amber-300 border border-amber-400 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider hover:bg-black hover:scale-105 transition-all shadow-md z-20"
+                                class="absolute top-2 left-2 px-2.5 py-1 rounded-full bg-black text-white border border-white/30 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider hover:bg-neutral-800 hover:scale-105 transition-all shadow-md z-20 cursor-pointer"
                                 title="Edit product in Admin Panel"
                             >
                                 <span>✏️</span>
@@ -272,14 +272,19 @@
                             </a>
                         @endif
 
-                        {{-- Wishlist Button --}}
+                        {{-- Wishlist Heart Button (Frameless, clean, immediate red) --}}
                         <button
                             type="button"
                             @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                            class="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/85 backdrop-blur-sm border border-black/10 flex items-center justify-center text-black/50 hover:text-black hover:bg-white transition-all shadow-xs z-10"
-                            :class="$store.wishlist.has({{ $product->id }}) ? 'text-black bg-white ring-1 ring-black' : ''"
-                            title="{{ $isArabicStore ? 'إضافة للمفضلة' : 'Wishlist' }}">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            class="absolute top-2 right-2 p-1 text-black/35 hover:text-black hover:scale-110 active:scale-90 transition-all cursor-pointer z-20 focus:outline-none"
+                            :class="$store.wishlist.has({{ $product->id }}) ? '!text-red-600 scale-105' : 'text-black/35'"
+                            title="{{ $isArabicStore ? 'إضافة للمفضلة' : 'Wishlist' }}"
+                        >
+                            <svg 
+                                class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-all duration-200" 
+                                :class="$store.wishlist.has({{ $product->id }}) ? 'fill-red-600 stroke-red-600 drop-shadow-xs' : 'fill-none stroke-current stroke-[2]'" 
+                                viewBox="0 0 24 24"
+                            >
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                             </svg>
                         </button>

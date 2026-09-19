@@ -4,7 +4,7 @@
 
 @section('content')
 @php $isArAccount = ($settings['storefront_lang'] ?? 'en') === 'ar'; @endphp
-<div class="bg-[#F5F5F0] min-h-screen py-6 sm:py-10 lg:py-16" x-data="{ activeTab: 'orders', showAddAddress: false, editingAddressId: null }">
+<div class="bg-[#F5F5F0] min-h-screen py-6 sm:py-10 lg:py-16" x-data="{ activeTab: (new URLSearchParams(window.location.search).get('tab') || (window.location.hash ? window.location.hash.replace('#', '') : 'orders')), showAddAddress: false, editingAddressId: null }" x-init="window.addEventListener('hashchange', () => { if(window.location.hash) activeTab = window.location.hash.replace('#', ''); })">
     <div class="max-w-5xl mx-auto px-4 sm:px-6">
         
         @if(session('success'))

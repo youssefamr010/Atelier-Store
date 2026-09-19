@@ -480,6 +480,27 @@
                             <span class="text-xs font-bold text-black/40 group-hover:text-black {{ $isAr ? 'rotate-180' : '' }} transition-colors">→</span>
                         </a>
 
+                        <!-- My Wishlist / Favorites -->
+                        <a href="{{ route('account') }}#wishlist" 
+                           @click="mobileMenuOpen = false"
+                           class="flex items-center justify-between p-3 bg-white rounded-xl border border-black/8 hover:border-black/20 hover:shadow-sm transition-all group active:scale-98">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4 fill-current stroke-current" viewBox="0 0 24 24">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-wider text-black">{{ $isAr ? 'المفضلات' : 'My Wishlist' }}</p>
+                                    <p class="text-[9.5px] text-black/50 font-sans">{{ $isAr ? 'القطع المحفوظة في قائمتك' : 'Saved favorite pieces' }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-mono font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full" x-show="$store.wishlist && $store.wishlist.items && $store.wishlist.items.length > 0" x-text="$store.wishlist.items.length"></span>
+                                <span class="text-xs font-bold text-black/40 group-hover:text-black {{ $isAr ? 'rotate-180' : '' }} transition-colors">→</span>
+                            </div>
+                        </a>
+
                         <!-- VIP WhatsApp Concierge -->
                         @php
                             $drawerWaNum = preg_replace('/[^0-9]/', '', $settings['social_whatsapp'] ?? '201000000000');

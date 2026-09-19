@@ -300,7 +300,7 @@
                                 <a
                                     href="{{ route('admin.products.edit', $product->id) }}"
                                     onclick="event.stopPropagation();"
-                                    class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/90 text-amber-300 border border-amber-400 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider hover:bg-black hover:scale-105 transition-all shadow-md z-20"
+                                    class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-black text-white border border-white/30 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider hover:bg-neutral-800 hover:scale-105 transition-all shadow-md z-20 cursor-pointer"
                                     title="Edit product in Admin Panel"
                                 >
                                     <span>✏️</span>
@@ -352,7 +352,7 @@
                                 @endif
                             </div>
 
-                            {{-- Row 2: Title + Wishlist Heart (inline, 2-lines readable) --}}
+                            {{-- Row 2: Title + Wishlist Heart (frameless, clean, immediate red) --}}
                             <div class="flex items-start justify-between gap-1.5 min-h-[2.4rem] sm:min-h-[2.6rem]">
                                 <h3 class="font-editorial font-bold text-xs sm:text-sm text-black group-hover:underline line-clamp-2 leading-tight flex-1 min-w-0" title="{{ $product->title }}">
                                     {{ $product->title }}
@@ -361,13 +361,17 @@
                                 <button
                                     type="button"
                                     @click.stop.prevent="$store.wishlist.toggle({{ $product->id }})"
-                                    class="atelier-wishlist-btn shrink-0 flex items-center justify-center w-6 h-6 -mt-0.5 text-black/40 hover:text-black touch-manipulation outline-none"
-                                    :class="$store.wishlist.has({{ $product->id }}) ? 'is-wishlisted' : ''"
+                                    class="shrink-0 flex items-center justify-center p-1 -mt-0.5 text-black/35 hover:text-black hover:scale-110 active:scale-90 transition-all cursor-pointer focus:outline-none"
+                                    :class="$store.wishlist.has({{ $product->id }}) ? '!text-red-600 scale-105' : 'text-black/35'"
                                     title="{{ $isArCol ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
                                     aria-label="{{ $isArCol ? 'حفظ في المفضلة' : 'Save to Wishlist' }}"
                                 >
-                                    <svg class="atelier-heart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path class="atelier-heart-path" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                    <svg 
+                                        class="w-4 h-4 transition-all duration-200" 
+                                        :class="$store.wishlist.has({{ $product->id }}) ? 'fill-red-600 stroke-red-600 drop-shadow-xs' : 'fill-none stroke-current stroke-[2]'" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                                     </svg>
                                 </button>
                             </div>
