@@ -84,6 +84,14 @@
         <form action="{{ route('checkout.place') }}" method="POST" id="checkoutForm" @submit="submitting = true">
         @csrf
 
+        @if(!empty($cartItems['direct']['product_id']) || request()->filled('product_id'))
+            <input type="hidden" name="product_id" value="{{ $cartItems['direct']['product_id'] ?? request('product_id') }}">
+            @if(!empty($cartItems['direct']['variant_id']) || request()->filled('variant_id'))
+                <input type="hidden" name="variant_id" value="{{ $cartItems['direct']['variant_id'] ?? request('variant_id') }}">
+            @endif
+            <input type="hidden" name="qty" value="{{ $cartItems['direct']['qty'] ?? request('qty', 1) }}">
+        @endif
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {{-- ════ LEFT COLUMN: STEPS (7 cols) ════ --}}

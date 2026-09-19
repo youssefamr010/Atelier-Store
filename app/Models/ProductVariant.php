@@ -41,16 +41,26 @@ class ProductVariant extends Model
 
     public function getEffectivePriceMinorAttribute(): int
     {
+        // 1. Use variant-specific price override if set
         if ($this->price_override_minor !== null && $this->price_override_minor > 0) {
             return (int) $this->price_override_minor;
         }
 
+        // 2. Use variant's own retail price if set
         if ($this->retail_price_minor !== null && $this->retail_price_minor > 0) {
             return (int) $this->retail_price_minor;
         }
 
+        // 3. Fall back to parent product price — load from DB if relation not eager-loaded
         if ($this->relationLoaded('product') && $this->product) {
             return (int) ($this->product->retail_price_minor ?? 0);
+        }
+
+        // Always query parent product price — prevents 0-price orders when relation not loaded
+        if ($this->product_id) {
+            $productPrice = Product::where('id', $this->product_id)
+                ->value('retail_price_minor');
+            return (int) ($productPrice ?? 0);
         }
 
         return 0;

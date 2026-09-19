@@ -39,10 +39,13 @@ class WebCheckoutController extends Controller
         $subtotal = 0;
 
         if ($request->filled('product_id')) {
-            $directProduct = Product::with(['mediaAssets', 'variants'])->find($request->input('product_id'));
+            // Load with 'product' on variants so effective_price_minor inherits correctly
+            $directProduct = Product::with(['mediaAssets', 'variants.product'])->find($request->input('product_id'));
             if ($directProduct) {
                 $vId = $request->input('variant_id');
-                $priceMinor = $directProduct->retail_price_minor ?? 0;
+                $qty = max(1, min(20, (int) $request->input('qty', 1)));
+                // Default price from product itself
+                $priceMinor = (int) ($directProduct->retail_price_minor ?? 0);
                 $vLabel = null;
                 $variantImage = null;
                 $colorHex = null;
@@ -50,7 +53,9 @@ class WebCheckoutController extends Controller
                     $variant = $directProduct->variants->firstWhere('id', $vId);
                     if ($variant) {
                         $vLabel = $variant->title ?: $variant->attribute_value;
-                        $priceMinor = $variant->effective_price_minor;
+                        // effective_price_minor now correctly inherits from product
+                        $effectivePrice = $variant->effective_price_minor;
+                        $priceMinor = $effectivePrice > 0 ? $effectivePrice : (int) ($directProduct->retail_price_minor ?? 0);
                         $variantImage = $variant->image_url ?: ($variant->attributes_json['image_url'] ?? null);
                         $colorHex = $variant->attributes_json['color_hex'] ?? null;
                     }
@@ -58,17 +63,18 @@ class WebCheckoutController extends Controller
                 $cover = $directProduct->mediaAssets->first();
                 $coverImage = $variantImage ?: ($cover?->url ?: $directProduct->image_url);
 
+                $unitPrice = (int) round($priceMinor / 100);
                 $cartItems['direct'] = [
                     'product_id' => $directProduct->id,
                     'variant_id' => $vId,
                     'name'       => $directProduct->title,
                     'variant'    => $vLabel,
                     'color_hex'  => $colorHex,
-                    'price'      => (int) round($priceMinor / 100),
+                    'price'      => $unitPrice,
                     'image'      => $coverImage,
-                    'qty'        => 1,
+                    'qty'        => $qty,
                 ];
-                $subtotal = $cartItems['direct']['price'];
+                $subtotal = $unitPrice * $qty;
             }
         } else {
             $activeCart = app(CartController::class)->getCartItems();
@@ -77,22 +83,8 @@ class WebCheckoutController extends Controller
                 foreach ($cartItems as $item) {
                     $subtotal += ($item['price'] ?? 0) * ($item['qty'] ?? 1);
                 }
-            } else {
-                // Default active piece preview
-                $fallback = Product::active()->first();
-                if ($fallback) {
-                    $cartItems['fallback'] = [
-                        'product_id' => $fallback->id,
-                        'variant_id' => null,
-                        'name'       => $fallback->title,
-                        'variant'    => null,
-                        'price'      => (int) round(($fallback->retail_price_minor ?? 250000) / 100),
-                        'image'      => $fallback->image_url ?? null,
-                        'qty'        => 1,
-                    ];
-                    $subtotal = $cartItems['fallback']['price'];
-                }
             }
+            // NO silent fallback product — empty cart stays empty, user sees empty checkout
         }
 
         $defaultRate = (float) Setting::get('default_shipping_rate', 75);
@@ -151,6 +143,7 @@ class WebCheckoutController extends Controller
             'payment_method'          => 'required|in:cod,paymob,stripe',
             'product_id'              => 'nullable|integer|exists:products,id',
             'variant_id'              => 'nullable|integer|exists:product_variants,id',
+            'qty'                     => 'nullable|integer|min:1|max:20',
         ]);
 
         if ($validated['payment_method'] === 'paymob' && (blank(config('payment.paymob.secret_key')) || blank(config('payment.paymob.public_key')) || empty(array_filter(config('payment.paymob.integration_ids', []))))) {
@@ -223,13 +216,20 @@ class WebCheckoutController extends Controller
 
             if (!empty($validated['product_id'])) {
                 // Direct product checkout
-                $product = Product::with(['variants', 'mediaAssets'])->find($validated['product_id']);
+                $product = Product::with(['variants.product', 'mediaAssets'])->find($validated['product_id']);
                 if ($product) {
                     $variant = !empty($validated['variant_id']) ? $product->variants->firstWhere('id', $validated['variant_id']) : null;
                     abort_if(!empty($validated['variant_id']) && ! $variant, 422, 'Selected product option is unavailable.');
                     $attrs = $variant?->attributes_json ?? [];
                     $cover = $product->mediaAssets->first();
                     $unitMinor = $variant ? $variant->effective_price_minor : (int)($product->retail_price_minor ?? 0);
+
+                    // PRICE GUARD: block checkout if product has no price set
+                    abort_if($unitMinor <= 0, 422, "لا يمكن إتمام الطلب: سعر المنتج ({$product->title}) غير محدد. يرجى التواصل مع المتجر.");
+
+                    $directQty = max(1, min(20, (int) ($validated['qty'] ?? 1)));
+                    $lineTotalMinor = $unitMinor * $directQty;
+
                     $itemsToProcess[] = [
                         'product'       => $product,
                         'variant_id'    => $variant?->id,
@@ -237,17 +237,17 @@ class WebCheckoutController extends Controller
                         'color_hex'     => $attrs['color_hex'] ?? null,
                         'image'         => $variant?->image_url ?: ($attrs['image_url'] ?? ($cover?->url ?: $product->image_url)),
                         'title'         => $product->title,
-                        'sku'           => $product->sku ?: ('SKU-' . $product->id),
+                        'sku'           => $variant?->sku ?: ($product->sku ?: ('SKU-' . $product->id)),
                         'unit_minor'    => $unitMinor,
-                        'qty'           => 1,
-                        'total_minor'   => $unitMinor,
+                        'qty'           => $directQty,
+                        'total_minor'   => $lineTotalMinor,
                     ];
-                    $subtotalMinor += $unitMinor;
+                    $subtotalMinor += $lineTotalMinor;
                 }
             } elseif (!empty($activeCart)) {
                 // Multi-item shopping bag checkout — Strictly database-verified pricing
                 foreach ($activeCart as $cartItem) {
-                    $p = Product::with(['variants'])->find($cartItem['product_id']);
+                    $p = Product::with(['variants.product'])->find($cartItem['product_id']);
                     if ($p && $p->status === 'active') {
                         $qty = max(1, min(20, (int) ($cartItem['qty'] ?? 1)));
                         $unitMinor = (int) ($p->retail_price_minor ?? 0);
@@ -256,6 +256,12 @@ class WebCheckoutController extends Controller
                             $var = $p->variants->firstWhere('id', $cartItem['variant_id']);
                             if ($var) $unitMinor = $var->effective_price_minor;
                         }
+
+                        // PRICE GUARD: skip items with no price — don't allow free products
+                        if ($unitMinor <= 0) {
+                            continue; // skip this item silently (will be caught by subtotal guard below)
+                        }
+
                         $lineTotalMinor = $unitMinor * $qty;
                         $itemsToProcess[] = [
                             'product'       => $p,
@@ -264,7 +270,7 @@ class WebCheckoutController extends Controller
                             'color_hex'     => $var?->attributes_json['color_hex'] ?? ($cartItem['color_hex'] ?? null),
                             'image'         => $var?->image_url ?: ($var?->attributes_json['image_url'] ?? ($cartItem['image'] ?? $p->image_url)),
                             'title'         => $p->title,
-                            'sku'           => $p->sku ?: ('SKU-' . $p->id),
+                            'sku'           => $var?->sku ?: ($p->sku ?: ('SKU-' . $p->id)),
                             'unit_minor'    => $unitMinor,
                             'qty'           => $qty,
                             'total_minor'   => $lineTotalMinor,
@@ -275,20 +281,13 @@ class WebCheckoutController extends Controller
             }
 
             if (empty($itemsToProcess)) {
-                $fallback = Product::where('status', 'active')->first() ?? Product::first();
-                if ($fallback) {
-                    $unitMinor = (int)($fallback->retail_price_minor ?? 250000);
-                    $itemsToProcess[] = [
-                        'product'     => $fallback,
-                        'variant_id'  => null,
-                        'title'       => $fallback->title,
-                        'sku'         => $fallback->sku ?: ('SKU-' . $fallback->id),
-                        'unit_minor'  => $unitMinor,
-                        'qty'         => 1,
-                        'total_minor' => $unitMinor,
-                    ];
-                    $subtotalMinor += $unitMinor;
-                }
+                // SECURITY: never allow an order with no items
+                abort(422, 'سلة التسوق فارغة. يرجى اختيار منتج قبل إتمام الطلب.');
+            }
+
+            // PRICE GUARD: block order if all items somehow have 0 subtotal
+            if ($subtotalMinor <= 0) {
+                abort(422, 'لا يمكن إتمام الطلب: بعض المنتجات ليس لها سعر محدد. يرجى تحديث سعر المنتج أولاً من لوحة التحكم.');
             }
 
             // 2. Resolve dynamic shipping zone and fee
@@ -373,13 +372,17 @@ class WebCheckoutController extends Controller
                 'shipping_status'     => 'pending',
                 'notes'               => "Delivery to: {$streetAddress}, {$city}. Phone: {$phone}",
                 'metadata_json'       => [
-                    'shipping_zone'     => $zone ? $zone->name : 'Standard Default',
-                    'delivery_estimate' => 'Usually delivers from 3 to 5 business days (Maximum 4 days from order date)',
-                    'points_redeemed'   => $pointsRedeemed,
-                    'coupon_code'       => $appliedCouponCode,
-                    'customer_name'     => $fullName,
-                    'customer_phone'    => $phone,
-                    'shipping_address'  => [
+                    'shipping_zone'           => $zone ? $zone->name : 'Standard Default',
+                    'delivery_estimate'       => 'Usually delivers from 3 to 5 business days (Maximum 4 days from order date)',
+                    'delivery_instructions'   => $validated['delivery_instructions'] ?? null,
+                    'preferred_delivery_time' => $validated['preferred_delivery_time'] ?? null,
+                    'gift_wrap'               => !empty($validated['gift_wrap']),
+                    'gift_message'            => $validated['gift_message'] ?? null,
+                    'points_redeemed'         => $pointsRedeemed,
+                    'coupon_code'             => $appliedCouponCode,
+                    'customer_name'           => $fullName,
+                    'customer_phone'          => $phone,
+                    'shipping_address'        => [
                         'name'      => $fullName,
                         'phone'     => $phone,
                         'street'    => $streetAddress,

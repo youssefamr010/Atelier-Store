@@ -287,72 +287,148 @@ class TelegramNotificationService
             $order->loadMissing(['items.product', 'items.variant']);
         }
 
+        // ── Build order items section ───────────────────────────────────
         $itemLines = '';
-        foreach ($order->items as $item) {
-            $priceEgp = number_format($item->total_price_minor / 100, 2);
-            $skuBadge = $item->sku ? " [<code>{$item->sku}</code>]" : '';
-            $supplierUrl = $item->metadata_json['supplier_product_url'] ?? $item->product?->attributes_json['supplier_product_url'] ?? null;
-            $supplierLink = filter_var($supplierUrl, FILTER_VALIDATE_URL)
-                ? "\n     🔗 <a href=\"" . e($supplierUrl) . "\">فتح رابط المورد</a>"
-                : '';
+        $itemCount = $order->items->count();
+        foreach ($order->items as $i => $item) {
+            $num       = $i + 1;
+            $priceEgp  = number_format($item->total_price_minor / 100, 2);
+            $unitEgp   = number_format($item->unit_price_minor / 100, 2);
+
+            // Product title (use stored product_title, never fall back to wrong product)
+            $title = e($item->product_title ?: ($item->product?->title ?? 'منتج غير محدد'));
+
+            // SKU
+            $skuLine = $item->sku ? "\n     🔖 <code>{$item->sku}</code>" : '';
+
+            // Variant / color choice
             $variantTitle = $item->metadata_json['variant_title'] ?? $item->variant?->title ?? null;
-            $colorHex = $item->metadata_json['color_hex'] ?? $item->variant?->attributes_json['color_hex'] ?? null;
-            $choiceLine = $variantTitle ? "\n     🎨 <b>اللون / الاختيار:</b> " . e($variantTitle) . ($colorHex ? " (<code>" . e($colorHex) . "</code>)" : '') : '';
-            $itemLines .= "  ▫️ <b>{$item->product_title}</b>{$skuBadge} × {$item->quantity} — <b>{$priceEgp} EGP</b>{$choiceLine}{$supplierLink}\n";
-        }
-        if (empty($itemLines)) {
-            $itemLines = "  ▫️ (قطع حصرية)\n";
+            $colorHex     = $item->metadata_json['color_hex'] ?? $item->variant?->attributes_json['color_hex'] ?? null;
+            $variantLine  = $variantTitle
+                ? "\n     🎨 <b>اللون / الخيار:</b> " . e($variantTitle) . ($colorHex ? " (<code>" . e($colorHex) . "</code>)" : '')
+                : '';
+
+            // Supplier link
+            $supplierUrl  = $item->metadata_json['supplier_product_url'] ?? $item->product?->attributes_json['supplier_product_url'] ?? null;
+            $supplierLine = filter_var($supplierUrl, FILTER_VALIDATE_URL)
+                ? "\n     🔗 <a href=\"" . e($supplierUrl) . "\">فتح رابط المورد / المصدر</a>"
+                : '';
+
+            $itemLines .= "  <b>القطعة {$num}:</b> <b>{$title}</b>{$skuLine}\n"
+                        . "     • الكمية: <b>{$item->quantity}</b> قطعة × {$unitEgp} EGP = <b>{$priceEgp} EGP</b>"
+                        . $variantLine
+                        . $supplierLine
+                        . "\n\n";
         }
 
-        $totalEgp     = number_format($order->total_amount_minor / 100, 2);
-        $shippingEgp  = number_format(($order->shipping_minor ?? 0) / 100, 2);
-        $subtotalEgp  = number_format(($order->subtotal_minor ?? 0) / 100, 2);
-        $meta         = $order->metadata_json ?? [];
-        $addr         = $meta['shipping_address'] ?? [];
-        $addrLine     = trim(implode(', ', array_filter([
-            $addr['street']  ?? '',
-            $addr['city']    ?? '',
-            $addr['state']   ?? '',
-            $addr['country'] ?? 'EG',
-        ])));
+        if (empty(trim($itemLines))) {
+            $itemLines = "  ▫️ (لم يتم تحديد قطع)\n\n";
+        }
 
-        $customerName  = $order->customer_name  ?: ($addr['name']  ?? 'عميل زائر');
-        $customerPhone = $order->customer_phone ?: ($addr['phone'] ?? 'N/A');
+        // ── Financial summary ────────────────────────────────────────────
+        $subtotalEgp      = number_format(($order->subtotal_minor ?? 0) / 100, 2);
+        $shippingEgp      = number_format(($order->shipping_minor ?? 0) / 100, 2);
+        $taxEgp           = number_format(($order->tax_minor ?? 0) / 100, 2);
+        $discountEgp      = number_format(($order->discount_minor ?? 0) / 100, 2);
+        $codSurchargeEgp  = number_format(($order->cod_surcharge_minor ?? 0) / 100, 2);
+        $totalEgp         = number_format($order->total_amount_minor / 100, 2);
+
+        // ── Shipping address ─────────────────────────────────────────────
+        $meta   = $order->metadata_json ?? [];
+        $addr   = $meta['shipping_address'] ?? [];
+        $street = trim((string)($addr['street'] ?? ''));
+        $city   = trim((string)($addr['city'] ?? ''));
+        $state  = trim((string)($addr['state'] ?? ''));
+        $addrLine = implode(' — ', array_filter([$street, $city, $state])) ?: 'عنوان غير مكتمل';
+
+        $customerName  = $order->customer_name ?: ($addr['name'] ?? 'عميل زائر');
+        $customerPhone = $order->customer_phone ?: ($addr['phone'] ?? 'غير مسجل');
+        $customerEmail = $order->customer_email ?: '—';
+
         $paymentMethod = match ($order->payment_method) {
-            'cod'     => 'الدفع عند الاستلام (COD) 💵',
-            'paymob'  => 'مدفوع إلكترونياً (Paymob) 💳',
-            'stripe'  => 'بطاقة بنكية (Stripe) 💳',
-            default   => ucfirst($order->payment_method ?? 'COD'),
+            'cod'    => '💵 الدفع عند الاستلام (COD)',
+            'paymob' => '💳 مدفوع إلكترونياً (Paymob)',
+            'stripe' => '💳 بطاقة بنكية (Stripe)',
+            default  => ucfirst($order->payment_method ?? 'COD'),
         };
 
-        // Customer loyalty status (Repeat vs New)
-        $orderCount = Order::where('customer_email', $order->customer_email)->count();
-        $customerTier = $orderCount > 1 ? "⭐️ عميل متكرر VIP (الطلب رقم {$orderCount})" : "✨ عميل جديد";
+        // Customer loyalty status
+        $orderCount   = Order::where('customer_email', $order->customer_email)->count();
+        $customerTier = $orderCount > 1
+            ? "⭐️ عميل متكرر — الطلب رقم ({$orderCount}) له"
+            : "✨ عميل جديد — أول طلب له";
 
-        $zone = !empty($meta['shipping_zone']) ? "🌐 <b>منطقة الشحن:</b> {$meta['shipping_zone']}\n" : '';
-        
-        $coordsInfo = '';
-        if (!empty($addr['latitude']) && !empty($addr['longitude'])) {
-            $coordsInfo = "📍 <b>إحداثيات GPS:</b> <code>{$addr['latitude']}, {$addr['longitude']}</code>\n";
+        // Coordinates
+        $lat = $addr['latitude'] ?? null;
+        $lng = $addr['longitude'] ?? null;
+        $coordsInfo = ($lat && $lng)
+            ? "📍 <b>GPS:</b> <code>{$lat}, {$lng}</code>\n"
+            : '';
+
+        $zone = !empty($meta['shipping_zone'])
+            ? "🌐 <b>منطقة الشحن:</b> {$meta['shipping_zone']}\n"
+            : '';
+
+        // Financial detail lines (only non-zero)
+        $financialLines = "💰 <b>قيمة المنتجات (Subtotal):</b> {$subtotalEgp} EGP\n";
+        if (!empty($meta['coupon_code'])) {
+            $financialLines .= "🎟️ <b>كود الخصم المستخدم:</b> <code>" . e($meta['coupon_code']) . "</code>\n";
+        }
+        if (!empty($meta['points_redeemed'])) {
+            $financialLines .= "✨ <b>نقاط VIP مستبدلة:</b> " . number_format((int)$meta['points_redeemed']) . " نقطة\n";
+        }
+        if (($order->discount_minor ?? 0) > 0) {
+            $financialLines .= "🏷️ <b>إجمالي الخصم:</b> - {$discountEgp} EGP\n";
+        }
+        $financialLines .= "🚚 <b>الشحن والتوصيل:</b> " . (($order->shipping_minor ?? 0) == 0 ? '<b>مجاني (Free)</b>' : "{$shippingEgp} EGP") . "\n";
+        if (($order->tax_minor ?? 0) > 0) {
+            $financialLines .= "📊 <b>ضريبة:</b> {$taxEgp} EGP\n";
+        }
+        if (($order->cod_surcharge_minor ?? 0) > 0) {
+            $financialLines .= "💵 <b>رسوم الدفع عند الاستلام:</b> {$codSurchargeEgp} EGP\n";
+        }
+
+        // Additional Delivery & Gift Info
+        $extraDeliveryInfo = '';
+        if (!empty($meta['preferred_delivery_time'])) {
+            $extraDeliveryInfo .= "⏰ <b>الوقت المفضل للاستلام:</b> " . e($meta['preferred_delivery_time']) . "\n";
+        }
+        if (!empty($meta['delivery_instructions'])) {
+            $extraDeliveryInfo .= "📝 <b>تعليمات التوصيل:</b> " . e($meta['delivery_instructions']) . "\n";
+        }
+        if (!empty($meta['gift_wrap'])) {
+            $extraDeliveryInfo .= "🎁 <b>تغليف هدايا ملكي:</b> نعم (مطلوب)\n";
+            if (!empty($meta['gift_message'])) {
+                $extraDeliveryInfo .= "💌 <b>رسالة الإهداء:</b> <i>" . e($meta['gift_message']) . "</i>\n";
+            }
         }
 
         return <<<MSG
-👑 <b>طلب شراء فاخر جديد — {$storeName}</b>
-━━━━━━━━━━━━━━━━━━━
-🏷️ <b>رقم الطلب:</b> <code>#{$order->order_number}</code>
-👤 <b>العميل:</b> <b>{$customerName}</b> ({$customerTier})
-📞 <b>الهاتف:</b> <code>{$customerPhone}</code>
-📧 <b>الإيميل:</b> {$order->customer_email}
+👑 <b>🛍️ طلب شراء جديد — {$storeName}</b>
+━━━━━━━━━━━━━━━━━━━━━
 
-📦 <b>القطع المطلوبة:</b>
-{$itemLines}
-💵 <b>قيمة المنتجات:</b> {$subtotalEgp} EGP
-🚚 <b>الشحن:</b> {$shippingEgp} EGP
-💰 <b>الإجمالي النهائي:</b> <b>{$totalEgp} EGP</b>
-💳 <b>طريقة السداد:</b> {$paymentMethod}
-━━━━━━━━━━━━━━━━━━━
-📍 <b>عنوان التوصيل:</b> {$addrLine}
-{$coordsInfo}{$zone}
+🏷️ <b>رقم الطلب:</b> <code>#{$order->order_number}</code>
+📅 <b>التاريخ:</b> {$order->created_at->format('Y-m-d — h:i A')}
+
+━━━━━━━━━━━━━━━━━━━━━
+👤 <b>بيانات العميل:</b>
+• الاسم:  <b>{$customerName}</b>
+• الهاتف: <code>{$customerPhone}</code>
+• الإيميل: {$customerEmail}
+• {$customerTier}
+
+━━━━━━━━━━━━━━━━━━━━━
+📦 <b>القطع المطلوبة ({$itemCount} منتج):</b>
+
+{$itemLines}━━━━━━━━━━━━━━━━━━━━━
+💳 <b>ملخص الفاتورة:</b>
+{$financialLines}🔑 <b>الإجمالي النهائي: <u>{$totalEgp} EGP</u></b>
+💳 <b>طريقة الدفع:</b> {$paymentMethod}
+
+━━━━━━━━━━━━━━━━━━━━━
+📍 <b>عنوان التوصيل:</b>
+{$addrLine}
+{$coordsInfo}{$zone}{$extraDeliveryInfo}
 MSG;
     }
 }

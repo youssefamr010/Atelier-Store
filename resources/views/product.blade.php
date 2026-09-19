@@ -758,7 +758,7 @@ function productDetailComponent() {
                     </div>
 
                     <!-- Secondary CTA: Buy Now -->
-                    <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId ? '&variant_id=' + selectedVariantId : '')"
+                    <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId ? '&variant_id=' + selectedVariantId : '') + (qty > 1 ? '&qty=' + qty : '')"
                        class="btn-buy-now"
                        id="product-buy-now-btn"
                     >
