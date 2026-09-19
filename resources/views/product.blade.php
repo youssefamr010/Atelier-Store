@@ -77,24 +77,27 @@
     ];
 
     // Ensure primary cover variant is always available in options if variants exist
-    $hasCoverVariant = $variants->contains(function($v) use ($product) {
+    $pCoverName = $product->attributes_json['primary_color_name'] ?? null;
+    $pCoverHex = $product->attributes_json['primary_color_hex'] ?? null;
+
+    $hasCoverVariant = $variants->contains(function($v) use ($product, $pCoverName, $pCoverHex) {
+        $vHex = $v->attributes_json['color_hex'] ?? $v->attributes_json['hex'] ?? null;
         return !empty($v->attributes_json['is_cover_variant']) 
-            || (isset($product->attributes_json['primary_color_name']) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$product->attributes_json['primary_color_name'])));
+            || (!empty($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName)))
+            || (!empty($pCoverHex) && !empty($vHex) && strtolower(trim((string)$vHex)) === strtolower(trim((string)$pCoverHex)));
     });
 
-    if (!$hasCoverVariant && $variants->isNotEmpty()) {
-        $pCoverName = $product->attributes_json['primary_color_name'] ?? ($isArProd ? 'لون الغلاف الأساسي' : 'Primary / Cover');
-        $pCoverHex = $product->attributes_json['primary_color_hex'] ?? '#D4AF37';
+    if (!$hasCoverVariant && $variants->isNotEmpty() && !empty($pCoverHex)) {
         $coverVirtualVariant = (object) [
             'id' => 'cover',
-            'title' => $pCoverName,
+            'title' => $pCoverName ?: ($isArProd ? 'لون الغلاف الأساسي' : 'Primary / Cover'),
             'attribute_name' => 'Color',
             'effective_price_minor' => $product->retail_price_minor,
             'inventory' => $product->inventory,
             'image_url' => $mainImg,
             'mediaAssets' => $product->mediaAssets,
             'attributes_json' => [
-                'color' => $pCoverName,
+                'color' => $pCoverName ?: 'Primary Cover',
                 'color_hex' => $pCoverHex,
                 'is_cover_variant' => true
             ]
@@ -123,9 +126,11 @@
             'price'          => $price,
             'inventory'      => $v->inventory,
             'image'          => $vImg,
-            'color_hex'      => $colorHex,
+            'color_hex'      => strtoupper($colorHex),
             'gallery'        => count($variantMedia) > 0 ? $variantMedia : [],
         ];
+    })->unique(function($v) {
+        return strtolower(trim($v['color_hex']));
     })->values();
 
     $allThumbAssets = collect($mediaAssets)->filter(fn($a) => !empty($a->url));

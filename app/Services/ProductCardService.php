@@ -115,7 +115,12 @@ class ProductCardService
 
             $pCoverHex = $product->attributes_json['primary_color_hex'] ?? null;
             $pCoverName = $product->attributes_json['primary_color_name'] ?? null;
-            $hasCoverInVars = $activeVariants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName))));
+            $hasCoverInVars = $activeVariants->contains(function($v) use ($pCoverName, $pCoverHex) {
+                $vHex = $v->attributes_json['color_hex'] ?? $v->attributes_json['hex'] ?? null;
+                return !empty($v->attributes_json['is_cover_variant'])
+                    || (!empty($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName)))
+                    || (!empty($pCoverHex) && !empty($vHex) && strtolower(trim((string)$vHex)) === strtolower(trim((string)$pCoverHex)));
+            });
 
             $swatches = [];
             if (!empty($pCoverHex) && !$hasCoverInVars) {
@@ -123,7 +128,7 @@ class ProductCardService
                 $swatches[] = [
                     'variant_id'      => null,
                     'title'           => $pCoverName ?: $product->title,
-                    'color_hex'       => $pCoverHex,
+                    'color_hex'       => strtoupper($pCoverHex),
                     'image'           => $baseImg,
                     'hover_image'     => $baseImg,
                     'price_formatted' => $basePriceMinor ? number_format($basePriceMinor / 100, 0) . ' ' . ($isArabic ? 'ج.م' : 'EGP') : '—',
@@ -136,6 +141,11 @@ class ProductCardService
             foreach ($varSwatches as $vs) {
                 $swatches[] = $vs;
             }
+
+            // Strictly deduplicate swatches by color_hex
+            $swatches = collect($swatches)->unique(function($item) {
+                return strtolower(trim($item['color_hex']));
+            })->values()->all();
 
             if ($displayMode === 'single_card' || $activeVariants->isEmpty()) {
                 // SINGLE CARD MODE: Exactly 1 card per product with interactive live swatches

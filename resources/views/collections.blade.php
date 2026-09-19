@@ -318,11 +318,16 @@
                                 $pCoverHexCol = $product->attributes_json['primary_color_hex'] ?? null;
                                 $pCoverNameCol = $product->attributes_json['primary_color_name'] ?? null;
                                 
-                                $hasCoverInColVars = $product->variants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverNameCol) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverNameCol))));
+                                $hasCoverInColVars = $product->variants->contains(function($v) use ($pCoverNameCol, $pCoverHexCol) {
+                                    $vHex = $v->attributes_json['color_hex'] ?? $v->attributes_json['hex'] ?? null;
+                                    return !empty($v->attributes_json['is_cover_variant']) 
+                                        || (!empty($pCoverNameCol) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverNameCol)))
+                                        || (!empty($pCoverHexCol) && !empty($vHex) && strtolower(trim((string)$vHex)) === strtolower(trim((string)$pCoverHexCol)));
+                                });
                                 
                                 if (!empty($pCoverHexCol) && !$hasCoverInColVars) {
                                     $colCardSwatches->push([
-                                        'color' => $pCoverHexCol,
+                                        'color' => strtoupper($pCoverHexCol),
                                         'title' => $pCoverNameCol ?: $product->title,
                                         'image' => $img,
                                     ]);
@@ -339,6 +344,11 @@
                                         ]);
                                     }
                                 }
+
+                                // Strictly deduplicate swatches by color hex
+                                $colCardSwatches = $colCardSwatches->unique(function($item) {
+                                    return strtolower(trim($item['color']));
+                                })->values();
                             @endphp
 
                             <div class="flex items-center justify-between min-h-[14px]">

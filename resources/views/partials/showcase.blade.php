@@ -308,11 +308,16 @@
                                 $pCoverHex = $product->attributes_json['primary_color_hex'] ?? null;
                                 $pCoverName = $product->attributes_json['primary_color_name'] ?? null;
                                 
-                                $hasCoverInVars = $product->variants->contains(fn($v) => !empty($v->attributes_json['is_cover_variant']) || (isset($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName))));
+                                $hasCoverInVars = $product->variants->contains(function($v) use ($pCoverName, $pCoverHex) {
+                                    $vHex = $v->attributes_json['color_hex'] ?? $v->attributes_json['hex'] ?? null;
+                                    return !empty($v->attributes_json['is_cover_variant']) 
+                                        || (!empty($pCoverName) && strtolower(trim((string)$v->title)) === strtolower(trim((string)$pCoverName)))
+                                        || (!empty($pCoverHex) && !empty($vHex) && strtolower(trim((string)$vHex)) === strtolower(trim((string)$pCoverHex)));
+                                });
                                 
                                 if (!empty($pCoverHex) && !$hasCoverInVars) {
                                     $cardSwatches->push([
-                                        'color' => $pCoverHex,
+                                        'color' => strtoupper($pCoverHex),
                                         'title' => $pCoverName ?: $product->title,
                                         'image' => $img,
                                     ]);
@@ -321,14 +326,19 @@
                                 foreach($product->variants as $variant) {
                                     $vColor = $variant->attributes_json['color_hex'] ?? $variant->attributes_json['hex'] ?? null;
                                     $vImg = $variant->image_url ? (str_starts_with($variant->image_url, 'http') ? $variant->image_url : url($variant->image_url)) : $img;
-                                    if ($vColor) {
+                                    if ($vColor && is_string($vColor)) {
                                         $cardSwatches->push([
-                                            'color' => $vColor,
+                                            'color' => strtoupper(trim($vColor)),
                                             'title' => $variant->title,
                                             'image' => $vImg,
                                         ]);
                                     }
                                 }
+
+                                // Strictly deduplicate swatches by color hex
+                                $cardSwatches = $cardSwatches->unique(function($item) {
+                                    return strtolower(trim($item['color']));
+                                })->values();
                             @endphp
 
                             @if($cardSwatches->isNotEmpty())
