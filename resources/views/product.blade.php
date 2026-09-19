@@ -388,13 +388,13 @@ function productDetailComponent() {
 
 <div 
     x-data="productDetailComponent()"
-    class="bg-[#F5F5F0] min-h-screen py-5 sm:py-8 lg:py-20"
+    class="bg-[#F8F7F3] min-h-screen pt-4 sm:pt-8 pb-36 sm:pb-24"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
 
         {{-- ── ADMIN DIRECT QUICK-EDIT BANNER ── --}}
         @if(auth()->check() && auth()->user()->isAdmin())
-            <div class="mb-6 bg-black border-2 border-white/20 p-3.5 sm:p-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl">
+            <div class="mb-6 bg-black border border-white/20 p-3.5 sm:p-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg rounded-2xl">
                 <div class="flex items-center gap-3">
                     <span class="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black text-sm font-black shrink-0">⚡</span>
                     <div>
@@ -411,7 +411,7 @@ function productDetailComponent() {
                 <div class="flex items-center gap-2 shrink-0">
                     <a 
                         href="{{ route('admin.products.edit', $product->id) }}" 
-                        class="inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-5 py-2.5 font-black uppercase text-xs tracking-wider border border-black transition-all active:translate-y-0.5 shadow-sm rounded-lg"
+                        class="inline-flex items-center gap-2 bg-white hover:bg-gray-100 text-black px-5 py-2.5 font-bold uppercase text-xs tracking-wider transition-all active:translate-y-0.5 shadow-sm rounded-xl"
                         title="Open product editor in Admin Panel"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
@@ -421,10 +421,10 @@ function productDetailComponent() {
             </div>
 
             {{-- Floating Quick Edit Button (Black, positioned low down) --}}
-            <div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+            <div class="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50">
                 <a 
                     href="{{ route('admin.products.edit', $product->id) }}" 
-                    class="flex items-center gap-2 bg-black text-white hover:bg-neutral-900 border-2 border-white/30 hover:border-white px-4 py-2.5 rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.6)] hover:scale-105 active:scale-95 transition-all text-xs font-black uppercase tracking-wider group cursor-pointer"
+                    class="flex items-center gap-2 bg-black text-white hover:bg-neutral-900 border border-white/30 hover:border-white px-4 py-2.5 rounded-full shadow-[0_8px_25px_rgba(0,0,0,0.6)] hover:scale-105 active:scale-95 transition-all text-xs font-bold uppercase tracking-wider group cursor-pointer"
                     title="Quick Edit Product"
                 >
                     <span class="text-sm group-hover:rotate-12 transition-transform">✏️</span>
@@ -433,29 +433,38 @@ function productDetailComponent() {
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        {{-- ── BREADCRUMBS ── --}}
+        <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-black/50 mb-4 sm:mb-6">
+            <a href="{{ route('home') }}" class="hover:text-black transition-colors">{{ $isArProd ? 'الرئيسية' : 'Home' }}</a>
+            <span>/</span>
+            <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="hover:text-black transition-colors">{{ $isArProd ? 'المتجر' : 'Shop' }}</a>
+            <span>/</span>
+            <span class="text-black truncate max-w-[180px] sm:max-w-xs">{{ $product->title }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
             
-            <!-- Product Gallery Column -->
-            <div class="lg:col-span-7 space-y-4 prod-anim-gallery">
-                <div class="relative w-full overflow-hidden border-2 border-black bg-white p-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+            <!-- ════ LEFT COLUMN: Product Gallery ════ -->
+            <div class="lg:col-span-7 space-y-3.5 prod-anim-gallery">
+                <div class="relative w-full overflow-hidden rounded-2xl border border-black/10 bg-white p-2.5 sm:p-4 shadow-sm">
                     
                     {{-- Main Video Player if active --}}
-                    <div x-show="activeMedia === 'video' && videoUrl" class="w-full aspect-square bg-black flex items-center justify-center relative overflow-hidden" style="display:none;">
+                    <div x-show="activeMedia === 'video' && videoUrl" class="w-full aspect-square bg-black rounded-xl flex items-center justify-center relative overflow-hidden" style="display:none;">
                         <video :src="videoUrl" controls autoplay loop playsinline class="w-full h-full object-contain"></video>
                     </div>
 
-                    <!-- Main Product Image — iOS-safe render via x-effect -->
-                    <div x-show="activeMedia !== 'video'" class="product-media-frame relative" id="prod-main-frame">
+                    <!-- Main Product Image -->
+                    <div x-show="activeMedia !== 'video'" class="product-media-frame relative aspect-square rounded-xl overflow-hidden bg-[#FAF9F5] flex items-center justify-center" id="prod-main-frame">
                         <!-- Placeholder shown when no image URL exists -->
                         <div 
                             x-show="!activeImage"
-                            class="absolute inset-0 flex flex-col items-center justify-center bg-[#F5F5F0] text-black/20 gap-3"
+                            class="absolute inset-0 flex flex-col items-center justify-center bg-[#FAF9F5] text-black/20 gap-3"
                             style="display:none;"
                         >
-                            <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
                             </svg>
-                            <span class="text-xs font-bold uppercase tracking-widest">No image</span>
+                            <span class="text-[11px] font-bold uppercase tracking-widest">No image</span>
                         </div>
 
                         <!-- Image loading shimmer -->
@@ -465,7 +474,7 @@ function productDetailComponent() {
                             style="display:none;"
                         ></div>
 
-                        <!-- Main Image: x-ref + x-effect avoids iOS Safari :src hydration bug -->
+                        <!-- Main Image -->
                         <img 
                             x-ref="mainProductImg"
                             x-effect="
@@ -477,7 +486,7 @@ function productDetailComponent() {
                             "
                             src="{{ $mainImg }}"
                             alt="{{ $product->title }}" 
-                            class="w-full h-full object-contain object-center transition-opacity duration-400 ease-out"
+                            class="w-full h-full object-contain object-center transition-all duration-300 ease-out"
                             fetchpriority="high"
                             onerror="
                                 handleMainImgError();
@@ -494,13 +503,13 @@ function productDetailComponent() {
                 </div>
 
                 <!-- Thumbnails Rail & Video Button -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div class="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
                     @if(!empty($product->video_url))
                         <button 
                             type="button" 
                             @click="activeMedia = 'video'"
-                            class="relative w-[68px] h-[68px] sm:w-20 sm:h-20 border bg-black text-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden flex flex-col items-center justify-center gap-1 group shadow-xs active:scale-95"
-                            :class="activeMedia === 'video' ? 'border-2 border-amber-400 ring-2 ring-amber-400/50 scale-105 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)]' : 'border-black/20 opacity-80 hover:opacity-100 hover:border-black'"
+                            class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl border bg-black text-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden flex flex-col items-center justify-center gap-1 group shadow-xs active:scale-95"
+                            :class="activeMedia === 'video' ? 'border-2 border-amber-400 ring-2 ring-amber-400/50 scale-105' : 'border-black/15 opacity-80 hover:opacity-100 hover:border-black'"
                             title="{{ $isArProd ? 'مشاهدة فيديو المنتج' : 'Watch Product Video' }}"
                         >
                             <span class="text-base text-amber-400 group-hover:scale-125 transition-transform">▶</span>
@@ -526,10 +535,10 @@ function productDetailComponent() {
                                 restoreSelectedImage();
                                 if ($refs.mainProductImg && selectedImage) $refs.mainProductImg.src = selectedImage;
                             "
-                            class="relative w-[68px] h-[68px] sm:w-20 sm:h-20 border bg-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden"
+                            class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl border bg-white shrink-0 cursor-pointer transition-all duration-200 overflow-hidden p-1"
                             :class="(activeMedia === 'image' && (activeImage === thumb || selectedImage === thumb)) 
-                                ? 'border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,0.8)] scale-105' 
-                                : 'border-black/20 opacity-60 hover:opacity-100 hover:border-black/60'"
+                                ? 'border-2 border-black shadow-md ring-2 ring-black/10 scale-105' 
+                                : 'border-black/15 opacity-60 hover:opacity-100 hover:border-black/50'"
                         >
                             <img 
                                 :src="thumb" 
@@ -546,139 +555,107 @@ function productDetailComponent() {
                         </button>
                     </template>
                 </div>
-
-                @if(count($variantsJson) > 0)
-                    <div class="mt-4 rounded-xl border border-black/10 bg-white/70 p-3 sm:p-4">
-                        <div class="flex items-center justify-between gap-3 mb-3">
-                            <span class="font-editorial font-bold text-[10px] uppercase tracking-[.16em] text-black/55">{{ ($settings['storefront_lang'] ?? 'en') === 'ar' ? 'اختر اللون' : 'Choose color' }}</span>
-                            <span class="text-xs text-black/65" x-text="selectedOptionTitle"></span>
-                        </div>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            @foreach($variantsJson as $vItem)
-                                <button type="button" @click="selectVariantById('{{ $vItem['id'] }}')" @mouseenter="previewVariantById('{{ $vItem['id'] }}')" @mouseleave="restoreSelectedImage()" class="group flex flex-col items-center gap-1.5" :aria-label="'{{ addslashes($vItem['title']) }}'">
-                                    <span class="w-9 h-9 rounded-full border-2 transition-all shadow-sm" style="background-color: {{ $vItem['color_hex'] }}" :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'ring-2 ring-black ring-offset-2 border-black scale-110' : 'border-black/20 hover:scale-105'"></span>
-                                    <span class="max-w-[68px] truncate text-[9px] font-semibold text-black/60 group-hover:text-black">{{ $vItem['title'] }}</span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
             </div>
 
-            <!-- Product Specs & Action Column -->
+            <!-- ════ RIGHT COLUMN: Product Details & Purchase ════ -->
             <div class="lg:col-span-5 space-y-5">
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <template x-if="activeStock > 0">
-                            <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.25em] text-black">
-                                IN STOCK · 24H EXPRESS DISPATCH
-                            </span>
-                        </template>
-                        <template x-if="activeStock <= 0">
-                            <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.25em] text-red-600">
-                                CURRENTLY OUT OF STOCK
-                            </span>
-                        </template>
-                        
-                        <div class="flex items-center gap-3">
-                            <!-- Wishlist Toggle -->
-                            <button 
-                                type="button" 
-                                @click="$store.wishlist.toggle({{ $product->id }})"
-                                class="flex items-center gap-1.5 text-xs font-editorial font-bold uppercase tracking-wider transition-all cursor-pointer select-none active:scale-95 group focus:outline-none"
-                                :class="$store.wishlist.has({{ $product->id }}) ? '!text-red-600 font-extrabold' : 'text-black/60 hover:text-black'"
-                                title="{{ $isArProd ? 'إضافة للمفضلة' : 'Add to Wishlist' }}"
-                            >
-                                <svg 
-                                    class="w-4 h-4 transition-all duration-200" 
-                                    :class="$store.wishlist.has({{ $product->id }}) ? 'fill-red-600 stroke-red-600 drop-shadow-xs scale-110' : 'fill-none stroke-current stroke-[2] group-hover:scale-110'" 
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                </svg>
-                                <span x-text="$store.wishlist.has({{ $product->id }}) ? '{{ $isArProd ? 'في المفضلة' : 'Saved' }}' : '{{ $isArProd ? 'المفضلة' : 'Wishlist' }}'"></span>
-                            </button>
-
-                            <button @click="shareProduct()" type="button" class="text-xs font-editorial font-bold uppercase tracking-wider text-black hover:underline cursor-pointer">
-                                ↗ Share
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Low Stock Urgency Indicator -->
-                    @php
-                        $urgencyEnabled = ($settings['urgency_indicator_enabled'] ?? '1') === '1';
-                        $threshold = (int)($settings['urgency_stock_threshold'] ?? 5);
-                    @endphp
-                    @if($urgencyEnabled)
-                    <template x-if="activeStock > 0 && activeStock <= {{ $threshold }}">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-300 text-amber-900 rounded text-xs font-bold animate-pulse">
-                            <x-icon name="flame" class="w-4 h-4 text-amber-600 shrink-0" />
-                            <span>
-                                {{ $isArProd ? 'عاجل: متبقي ' : 'Only ' }}
-                                <span x-text="activeStock" class="font-mono font-black"></span>
-                                {{ $isArProd ? ' قطع فقط في المخزون — اطلب الآن!' : ' left in stock — order soon!' }}
-                            </span>
-                        </div>
+                
+                {{-- Top Status Row: Stock badge + Wishlist + Share --}}
+                <div class="flex items-center justify-between gap-3">
+                    <template x-if="activeStock > 0">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold uppercase tracking-wider">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                            <span>{{ $isArProd ? 'متوفر وجاهز للشحن الفوري' : 'IN STOCK · EXPRESS DISPATCH' }}</span>
+                        </span>
                     </template>
-                    @endif
+                    <template x-if="activeStock <= 0">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                            <span>{{ $isArProd ? 'غير متوفر حالياً' : 'OUT OF STOCK' }}</span>
+                        </span>
+                    </template>
+                    
+                    <div class="flex items-center gap-2.5">
+                        <!-- Wishlist Button -->
+                        <button 
+                            type="button" 
+                            @click="$store.wishlist.toggle({{ $product->id }})"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all cursor-pointer select-none text-xs font-bold uppercase tracking-wider"
+                            :class="$store.wishlist.has({{ $product->id }}) ? 'border-red-200 bg-red-50 text-red-600 shadow-xs' : 'border-black/15 bg-white text-black/70 hover:text-black hover:border-black/40'"
+                            title="{{ $isArProd ? 'إضافة للمفضلة' : 'Add to Wishlist' }}"
+                        >
+                            <svg 
+                                class="w-4 h-4 transition-all duration-200" 
+                                :class="$store.wishlist.has({{ $product->id }}) ? 'fill-red-600 stroke-red-600' : 'fill-none stroke-current stroke-[2]'" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                            <span x-text="$store.wishlist.has({{ $product->id }}) ? '{{ $isArProd ? 'في المفضلة' : 'Saved' }}' : '{{ $isArProd ? 'المفضلة' : 'Wishlist' }}'"></span>
+                        </button>
 
-                    <h1 class="prod-anim-title font-sans font-extrabold text-[clamp(1.75rem,4vw,3.25rem)] tracking-[-0.04em] text-black leading-[1.06]"
+                        <!-- Share Button -->
+                        <button @click="shareProduct()" type="button" class="p-1.5 rounded-full border border-black/15 bg-white text-black/70 hover:text-black hover:border-black/40 transition-all cursor-pointer" title="{{ $isArProd ? 'مشاركة' : 'Share' }}">
+                            <svg class="w-4 h-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Title (Optimized for both mobile and desktop) -->
+                <div class="space-y-2">
+                    <h1 class="prod-anim-title font-display font-extrabold text-lg sm:text-2xl lg:text-3xl text-black leading-snug tracking-tight"
                         style="word-break: break-word; overflow-wrap: break-word;">
                         {{ $product->title }}
                     </h1>
 
-                    <!-- Star Rating summary under title -->
+                    <!-- Rating summary -->
                     @php
                         $avgRating = $product->averageRating();
                         $reviewsCount = $product->reviewsCount();
                     @endphp
-                    <div class="flex items-center gap-2 pt-1">
+                    <div class="flex items-center gap-2 pt-0.5">
                         <div class="flex items-center text-amber-500">
                             @for($i = 1; $i <= 5; $i++)
-                                <svg class="w-4 h-4 {{ $i <= round($avgRating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 20 20">
+                                <svg class="w-3.5 h-3.5 {{ $i <= round($avgRating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200' }}" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                             @endfor
                         </div>
-                        <a href="#reviews-section" class="text-xs font-mono font-bold text-gray-600 hover:text-black hover:underline">
-                            {{ $avgRating > 0 ? number_format($avgRating, 1) : '5.0' }} ({{ $reviewsCount }} {{ $isArProd ? 'تقييم موثق' : 'reviews' }})
+                        <a href="#reviews-section" class="text-[11px] font-mono font-bold text-gray-600 hover:text-black hover:underline">
+                            {{ $avgRating > 0 ? number_format($avgRating, 1) : '5.0' }} ({{ $reviewsCount }} {{ $isArProd ? 'تقييم' : 'reviews' }})
                         </a>
                     </div>
+                </div>
 
-                    <div class="prod-anim-price pt-2 flex items-baseline gap-3 flex-wrap">
-                        @php
-                            $isArProd = ($settings['storefront_lang'] ?? 'en') === 'ar';
-                        @endphp
-                        <span class="font-editorial font-black text-[2rem] text-black leading-none" x-text="activePrice"></span>
+                <!-- Price Block -->
+                <div class="bg-white rounded-2xl border border-black/10 p-4 sm:p-5 shadow-xs">
+                    <div class="flex items-baseline gap-3 flex-wrap">
+                        <span class="font-display font-black text-2xl sm:text-3xl text-black leading-none" x-text="activePrice"></span>
                         @if($product->compare_at_price_minor)
-                            <span class="text-sm text-gray-400 line-through font-editorial">
+                            <span class="text-sm text-gray-400 line-through font-sans">
                                 {{ number_format($product->compare_at_price_minor / 100, 0) }} {{ $isArProd ? 'ج.م' : 'EGP' }}
                             </span>
-                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold bg-black text-white uppercase tracking-wider">
+                            <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold bg-black text-white rounded-md uppercase tracking-wider">
                                 @php $discountPct = round((1 - ($product->retail_price_minor / $product->compare_at_price_minor)) * 100); @endphp
                                 {{ $discountPct }}% OFF
                             </span>
                         @endif
-                        <span class="text-[10px] text-black/55 font-editorial font-bold uppercase tracking-widest block w-full mt-0.5">
-                            {{ $isArProd ? 'الضريبة والتوصيل يُحسبان عند إتمام الطلب' : 'Taxes and delivery calculated at checkout' }}
-                        </span>
                     </div>
+                    <span class="text-[10px] text-black/55 font-bold uppercase tracking-wider block mt-1.5">
+                        {{ $isArProd ? 'الضريبة والتوصيل يُحسبان عند إتمام الطلب' : 'Taxes and delivery calculated at checkout' }}
+                    </span>
                 </div>
 
-                <!-- Rich Description -->
-                <div class="prod-anim-desc border-t border-b border-black/10 py-4 font-sans text-xs sm:text-sm text-black/80 leading-relaxed prose prose-sm max-w-none">
-                    {!! $product->description !!}
-                </div>
-
-                <!-- Color & Option Selection -->
+                <!-- Single Unified Color & Option Selection -->
                 @if(count($variantsJson) > 0)
-                    <div class="prod-anim-variants space-y-3">
+                    <div class="bg-white rounded-2xl border border-black/10 p-4 sm:p-5 shadow-xs space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="font-editorial font-bold text-[10px] uppercase tracking-[0.18em] text-black/60">
-                                {{ $isArProd ? 'الخيار المختار:' : 'Select Finish:' }}
+                            <span class="font-bold text-xs uppercase tracking-wider text-black/70">
+                                {{ $isArProd ? 'اختر اللون / الخيار:' : 'Select Finish / Color:' }}
                             </span>
-                            <span class="text-xs font-sans font-semibold text-black" x-text="selectedOptionTitle"></span>
+                            <span class="text-xs font-bold text-black bg-black/5 px-2.5 py-0.5 rounded-full" x-text="selectedOptionTitle"></span>
                         </div>
                         <div class="flex items-center gap-2.5 flex-wrap">
                             @foreach($variantsJson as $vItem)
@@ -687,10 +664,10 @@ function productDetailComponent() {
                                     @click="selectVariantById('{{ $vItem['id'] }}')"
                                     @mouseenter="previewVariantById('{{ $vItem['id'] }}')"
                                     @mouseleave="restoreSelectedImage()"
-                                    class="group flex items-center gap-2 border-2 px-3 py-2 text-[11px] font-sans font-semibold uppercase tracking-wider transition-all duration-200 min-h-[40px] cursor-pointer"
-                                    :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'border-black bg-black text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,0.7)]' : 'border-black/15 bg-white text-black hover:border-black/60 hover:shadow-sm'"
+                                    class="group flex items-center gap-2.5 border-2 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer select-none"
+                                    :class="selectedVariantId === '{{ $vItem['id'] }}' ? 'border-black bg-black text-white shadow-md ring-2 ring-black/10 scale-102' : 'border-black/15 bg-white text-black hover:border-black/40'"
                                 >
-                                    <span class="w-3 h-3 rounded-full border border-black/20 shrink-0 shadow-xs" style="background-color: {{ $vItem['color_hex'] }};"></span>
+                                    <span class="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0 shadow-xs" style="background-color: {{ $vItem['color_hex'] }};"></span>
                                     <span>{{ $vItem['title'] }}</span>
                                 </button>
                             @endforeach
@@ -698,40 +675,8 @@ function productDetailComponent() {
                     </div>
                 @endif
 
-                <!-- Technical Specifications (Dimensions & Materials) -->
-                @if($product->material || $product->dimensions || $product->weight)
-                    <div class="border-2 border-black p-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-2 text-xs">
-                        <h3 class="font-editorial font-bold uppercase text-[11px] tracking-wider text-black border-b border-black/10 pb-1.5 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
-                            <span>{{ $isArProd ? 'المواصفات الفنية والخامات' : 'Technical Specifications' }}</span>
-                        </h3>
-                        <dl class="space-y-1.5 font-sans">
-                            @if($product->material)
-                                <div class="flex justify-between gap-4">
-                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الخامة' : 'Material' }}</dt>
-                                    <dd class="text-black font-semibold text-right">{{ $product->material }}</dd>
-                                </div>
-                            @endif
-                            @if($product->dimensions)
-                                <div class="flex justify-between gap-4">
-                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الأبعاد' : 'Dimensions' }}</dt>
-                                    <dd class="text-black font-mono font-semibold text-right">{{ $product->dimensions }}</dd>
-                                </div>
-                            @endif
-                            @if($product->weight)
-                                <div class="flex justify-between gap-4">
-                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الوزن' : 'Weight' }}</dt>
-                                    <dd class="text-black font-mono font-semibold text-right">{{ $product->weight }}</dd>
-                                </div>
-                            @endif
-                        </dl>
-                    </div>
-                @endif
-
-                <!-- Quantity & Purchase Actions -->
-                <form method="POST" action="{{ route('cart.add') }}" class="prod-anim-actions space-y-4">
+                <!-- Purchase Action Form -->
+                <form method="POST" action="{{ route('cart.add') }}" class="space-y-3.5">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="variant_id" :value="selectedVariantId && selectedVariantId !== 'null' && Number(selectedVariantId) > 0 ? selectedVariantId : ''">
@@ -740,8 +685,8 @@ function productDetailComponent() {
                     <div class="flex items-stretch gap-3">
                         <!-- Quantity Stepper -->
                         <div class="flex flex-col justify-center">
-                            <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-black/45 mb-1.5 text-center">{{ $isArProd ? 'الكمية' : 'QTY' }}</span>
-                            <div class="qty-stepper">
+                            <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-black/45 mb-1 text-center">{{ $isArProd ? 'الكمية' : 'QTY' }}</span>
+                            <div class="qty-stepper rounded-xl overflow-hidden border border-black/20 bg-white">
                                 <button type="button" @click="qty = Math.max(1, qty - 1)" class="qty-btn">−</button>
                                 <input type="number" name="qty" x-model="qty" min="1" max="20" class="qty-input" readonly>
                                 <button type="button" @click="qty = Math.min(20, qty + 1)" class="qty-btn">+</button>
@@ -749,59 +694,101 @@ function productDetailComponent() {
                         </div>
 
                         <!-- Primary CTA: Add to Cart -->
-                        <button type="submit" class="btn-add-cart flex-1" id="product-add-cart-btn">
-                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                        <button type="submit" class="btn-add-cart flex-1 rounded-xl shadow-md" id="product-add-cart-btn">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M5 8h14l-1 12H6L5 8Zm4 1V6a3 3 0 0 1 6 0v3" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span>{{ $isArProd ? 'إضافة إلى السلة' : 'Add to Cart' }}</span>
+                            <span>{{ $isArProd ? 'إضافة إلى السلة' : 'Add to Bag' }}</span>
                         </button>
                     </div>
 
                     <!-- Secondary CTA: Buy Now -->
                     <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId && selectedVariantId !== 'null' && Number(selectedVariantId) > 0 ? '&variant_id=' + selectedVariantId : '') + (qty > 1 ? '&qty=' + qty : '')"
-                       class="btn-buy-now"
+                       class="btn-buy-now rounded-xl shadow-xs"
                        id="product-buy-now-btn"
                     >
-                        <span>{{ $isArProd ? 'شراء فوري' : 'Buy Now' }}</span>
-                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <span>{{ $isArProd ? 'شراء فوري الآن ←' : 'Buy Now Instantly →' }}</span>
                     </a>
                 </form>
 
-                <!-- Trust strip -->
-                <div class="prod-anim-trust flex items-center justify-between pt-1 border-t border-black/8">
-                    <div class="flex items-center gap-1.5 text-[10px] text-black/50 font-sans">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round"/></svg>
-                        {{ $isArProd ? 'دفع آمن' : 'Secure Checkout' }}
+                <!-- Trust Strip -->
+                <div class="flex items-center justify-between pt-3 border-t border-black/10 text-[11px] text-black/60 font-sans">
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round"/></svg>
+                        <span>{{ $isArProd ? 'دفع آمن 100%' : '100% Secure' }}</span>
                     </div>
-                    <div class="flex items-center gap-1.5 text-[10px] text-black/50 font-sans">
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 5h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        {{ $isArProd ? 'توصيل سريع' : 'Fast Delivery' }}
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 5h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>{{ $isArProd ? 'توصيل سريع' : 'Fast Delivery' }}</span>
                     </div>
-                    <a href="{{ route('collections.show', ['slug' => 'all']) }}" class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/45 hover:text-black transition-colors">
-                        {{ $isArProd ? '← تسوق المزيد' : '← Shop More' }}
-                    </a>
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                        <span>{{ $isArProd ? 'ضمان استبدال' : 'Guarantee' }}</span>
+                    </div>
                 </div>
+
+                <!-- Rich Description -->
+                @if(!empty(trim(strip_tags($product->description ?? ''))))
+                <div class="bg-white rounded-2xl border border-black/10 p-4 sm:p-5 shadow-xs">
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-black mb-2.5">
+                        {{ $isArProd ? 'عن هذه القطعة' : 'About this piece' }}
+                    </h3>
+                    <div class="font-sans text-xs sm:text-sm text-black/80 leading-relaxed prose prose-sm max-w-none">
+                        {!! $product->description !!}
+                    </div>
+                </div>
+                @endif
+
+                <!-- Technical Specifications (Single unified box) -->
+                @if($product->material || $product->dimensions || $product->weight)
+                    <div class="bg-white rounded-2xl border border-black/10 p-4 sm:p-5 shadow-xs space-y-2.5 text-xs">
+                        <h3 class="font-bold uppercase text-xs tracking-wider text-black border-b border-black/10 pb-2 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            <span>{{ $isArProd ? 'المواصفات الفنية والخامات' : 'Technical Specifications' }}</span>
+                        </h3>
+                        <dl class="space-y-2 font-sans pt-1">
+                            @if($product->material)
+                                <div class="flex justify-between items-center gap-4">
+                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الخامة' : 'Material' }}</dt>
+                                    <dd class="text-black font-semibold text-right">{{ $product->material }}</dd>
+                                </div>
+                            @endif
+                            @if($product->dimensions)
+                                <div class="flex justify-between items-center gap-4">
+                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الأبعاد' : 'Dimensions' }}</dt>
+                                    <dd class="text-black font-mono font-semibold text-right">{{ $product->dimensions }}</dd>
+                                </div>
+                            @endif
+                            @if($product->weight)
+                                <div class="flex justify-between items-center gap-4">
+                                    <dt class="text-gray-500 font-bold uppercase text-[10px]">{{ $isArProd ? 'الوزن' : 'Weight' }}</dt>
+                                    <dd class="text-black font-mono font-semibold text-right">{{ $product->weight }}</dd>
+                                </div>
+                            @endif
+                        </dl>
+                    </div>
+                @endif
 
                 <!-- Amazon Product Link — Admin Only -->
                 @auth
                 @if(auth()->user()->is_admin && !empty($product->attributes_json['supplier_product_url']))
-                    <div class="border-2 border-black bg-[#FFFBEB] p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="border border-amber-300 bg-amber-50/80 rounded-2xl p-4 shadow-xs">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                                    <span class="font-editorial font-bold text-xs uppercase tracking-wider text-black">
+                                    <span class="font-bold text-xs uppercase tracking-wider text-amber-950">
                                         Admin: Amazon.eg Source Link
                                     </span>
                                 </div>
-                                <p class="text-[11px] text-black/70 mt-0.5">
+                                <p class="text-[11px] text-amber-900/80 mt-0.5">
                                     This link is only visible to admin users
                                 </p>
                             </div>
                             <a href="{{ $product->attributes_json['supplier_product_url'] }}" target="_blank" rel="noopener noreferrer" 
-                               class="bg-black text-white text-[10px] font-editorial font-bold uppercase tracking-wider px-3 py-2 shrink-0 hover:bg-neutral-800 transition-colors flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                               class="bg-black text-white text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl hover:bg-neutral-800 transition-colors flex items-center gap-1 shadow-sm">
                                 <span>Amazon.eg</span>
                                 <span>↗</span>
                             </a>
@@ -810,36 +797,7 @@ function productDetailComponent() {
                 @endif
                 @endauth
 
-                <!-- Product Specifications -->
-                @if($product->material || $product->dimensions || $product->weight)
-                    <div class="border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        <span class="font-editorial font-bold text-xs uppercase tracking-wider text-black block border-b border-black/10 pb-2 mb-3">
-                            {{ $isArProd ? 'المواصفات الفنية' : 'Technical Specifications' }}
-                        </span>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            @if($product->material)
-                                <div>
-                                    <span class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/50 block">Material</span>
-                                    <span class="font-sans font-medium text-black">{{ $product->material }}</span>
-                                </div>
-                            @endif
-                            @if($product->dimensions)
-                                <div>
-                                    <span class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/50 block">Dimensions</span>
-                                    <span class="font-sans font-medium text-black">{{ $product->dimensions }}</span>
-                                </div>
-                            @endif
-                            @if($product->weight)
-                                <div>
-                                    <span class="text-[10px] font-editorial font-bold uppercase tracking-wider text-black/50 block">Weight</span>
-                                    <span class="font-sans font-medium text-black">{{ $product->weight }}</span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Trust Badges & Guarantee Strip -->
+                <!-- Trust Badges Strip -->
                 @include('partials.trust-badges')
 
             </div>
