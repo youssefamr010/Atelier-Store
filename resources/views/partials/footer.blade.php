@@ -17,7 +17,7 @@
             <div class="col-span-2 md:col-span-1">
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5 group mb-4">
                     <img 
-                        src="{{ asset('favicon.png') }}?v=4" 
+                        src="{{ asset('apple-touch-icon.png') }}?v=5" 
                         alt="ATELIER" 
                         class="w-9 h-9 rounded-full object-cover border border-white/20 transition-transform group-hover:scale-110 shrink-0"
                         onerror="this.style.display='none'"

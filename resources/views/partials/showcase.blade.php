@@ -19,7 +19,7 @@
                 {{-- All Pieces Story Ring --}}
                 <button
                     type="button"
-                    @click="activeTab = 'all'"
+                    @click="setTab('all')"
                     class="group flex flex-col items-center gap-1.5 shrink-0 focus:outline-none cursor-pointer select-none active:scale-95 transition-transform"
                 >
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 p-0.5 bg-white flex items-center justify-center aspect-square shrink-0 transition-all duration-300"
@@ -41,7 +41,7 @@
                 @endphp
                 <button
                     type="button"
-                    @click="activeTab = 'col-{{ $cItem->id }}'"
+                    @click="setTab('col-{{ $cItem->id }}')"
                     class="group flex flex-col items-center gap-1.5 shrink-0 focus:outline-none cursor-pointer select-none active:scale-95 transition-transform"
                 >
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 p-0.5 bg-white flex items-center justify-center aspect-square shrink-0 transition-all duration-300"
@@ -208,10 +208,14 @@
                     
                     $isBestseller = $isExplicitBestseller 
                         || ($product->id === $bestSellerId) 
-                        || ($hasDiscount && $index % 3 === 0);
+                        || $hasDiscount
+                        || ($totalCount <= 3)
+                        || ($index % 2 === 0);
 
                     $isNew = $isExplicitNew 
-                        || ($product->created_at && $product->created_at->diffInDays() <= 14);
+                        || ($totalCount <= 3)
+                        || ($product->created_at && $product->created_at->diffInDays() <= 45)
+                        || ($index % 2 === 1);
 
                     $productCollectionIds = $product->collections->pluck('id')->map(fn($id) => 'col-'.$id)->toArray();
                     $tagClasses = implode(' ', $productCollectionIds);
@@ -222,11 +226,11 @@
 
                 <div
                     x-data="{ currentImg: '{{ addslashes($img) }}', tags: '{{ $tagClasses }}' }"
-                    x-show="$root.matchesTab(tags)"
+                    x-show="matchesTab(tags)"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100"
-                    class="group bg-white rounded-2xl sm:rounded-3xl border border-black/10 overflow-hidden shadow-xs hover:shadow-lg hover:border-black/25 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
+                    class="product-showcase-card group bg-white rounded-2xl sm:rounded-3xl border border-black/10 overflow-hidden shadow-xs hover:shadow-lg hover:border-black/25 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
                 >
                     {{-- Card Media Frame (Pure White Seamless Canvas) --}}
                     <div class="relative bg-white p-2.5 sm:p-3.5 aspect-square overflow-hidden flex items-center justify-center">
@@ -522,10 +526,10 @@ function flagshipShowcase() {
 
         recalcVisible() {
             setTimeout(() => {
-                const cards = document.querySelectorAll('[x-show]');
+                const cards = document.querySelectorAll('.product-showcase-card');
                 let count = 0;
                 cards.forEach(card => {
-                    if (card.hasAttribute('x-data') && card.getAttribute('x-data').includes('tags:') && window.getComputedStyle(card).display !== 'none') count++;
+                    if (window.getComputedStyle(card).display !== 'none') count++;
                 });
                 this.visibleCount = count;
             }, 80);

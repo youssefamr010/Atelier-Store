@@ -289,7 +289,7 @@
             <div class="shrink-0 px-5 py-4 border-b border-black/10 flex items-center justify-between bg-white/90 backdrop-blur-md">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 min-w-0 group" @click="mobileMenuOpen = false">
                     <img 
-                        src="{{ asset('favicon.png') }}?v=4" 
+                        src="{{ asset('apple-touch-icon.png') }}?v=5" 
                         alt="ATELIER" 
                         class="w-10 h-10 rounded-full object-cover shrink-0 shadow-md ring-1 ring-black/10 transition-transform group-hover:scale-105"
                         onerror="this.outerHTML='<div class=&quot;w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-black text-base shrink-0 shadow-md&quot;>A</div>'"
