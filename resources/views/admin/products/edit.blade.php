@@ -355,31 +355,38 @@
     </form>
 
     <!-- 6. Smart Image Management & Bulk Multi-Upload -->
-    <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-6">
-        <div class="border-b-2 border-black pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+    <div class="bg-white border-2 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] space-y-6" id="product-media-studio">
+        <div class="border-b-2 border-black pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
                 <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-500">MEDIA STUDIO</span>
                 <h2 class="text-xl font-black uppercase tracking-tight text-black">Product Images & Multi-Upload</h2>
+                <p class="text-xs text-gray-500 mt-0.5">Manage product cover, rearrange gallery photos, upload in bulk, or import from URL.</p>
             </div>
-            <button type="button" onclick="document.getElementById('bulk-gallery-input').click()" class="bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg> Bulk Upload Photos
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="document.getElementById('bulk-gallery-input').click()" class="bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-gray-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-transform active:translate-y-0.5 flex items-center gap-1.5 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                    <span>Bulk Upload Photos</span>
+                </button>
+            </div>
         </div>
 
         <!-- Hidden Bulk Form -->
         <form id="bulk-gallery-form" action="{{ route('admin.products.bulk-gallery', $product->id) }}" method="POST" enctype="multipart/form-data" class="hidden">
             @csrf
-            <input type="file" id="bulk-gallery-input" name="images[]" multiple accept="image/jpeg,image/png,image/webp" onchange="document.getElementById('bulk-gallery-form').submit()">
+            <input type="file" id="bulk-gallery-input" name="images[]" multiple accept="image/jpeg,image/png,image/webp" onchange="submitBulkGallery(this)">
         </form>
 
-        <!-- Grid of Images -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- Grid of Images (Cover + Gallery Items + Dropzone) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="media-cards-grid">
             
             <!-- Primary Cover Image Card -->
-            <div class="border-2 border-black p-3 bg-gray-50 flex flex-col justify-between">
+            <div class="border-2 border-black p-3 bg-amber-50/40 flex flex-col justify-between relative shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]" id="primary-cover-card">
                 <div>
-                    <span class="inline-block bg-black text-white px-1.5 py-0.5 text-[9px] font-bold uppercase mb-2">PRIMARY COVER</span>
-                    <div class="text-xs font-bold text-gray-900 mb-2 truncate">Cover Image — {{ $product->title }}</div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-block bg-black text-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">PRIMARY COVER</span>
+                        <span class="text-[10px] text-amber-700 font-bold">★ Main Storefront</span>
+                    </div>
+                    <div class="text-xs font-bold text-gray-900 mb-2 truncate" title="{{ $product->title }}">{{ $product->title }}</div>
                 </div>
 
                 @php
@@ -388,20 +395,21 @@
                 @endphp
 
                 <div 
-                    class="relative aspect-square border border-black bg-white overflow-hidden cursor-pointer group hover:opacity-90 transition-all"
+                    class="relative aspect-square border-2 border-black bg-white overflow-hidden cursor-pointer group hover:opacity-95 transition-all shadow-inner"
                     onclick="document.getElementById('cover-file-input').click()"
-                    title="Click to replace Cover Image for {{ $product->title }}"
+                    title="Click to replace Primary Cover Image"
                 >
                     <img id="cover-preview" src="{{ $coverUrl }}" alt="Cover Image — {{ $product->title }}" class="w-full h-full object-cover">
                     
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2 text-center">
-                        <span class="text-base mb-1"><svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></span>
-                        <span class="text-[10px] font-bold uppercase">Click to Replace</span>
+                        <svg class="w-6 h-6 mb-1 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                        <span class="text-[11px] font-black uppercase tracking-wider">Click to Replace</span>
+                        <span class="text-[9px] text-gray-300 mt-0.5">JPG, PNG, WebP (Max 5MB)</span>
                     </div>
 
-                    <div id="cover-loader" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-white" style="display: none;">
-                        <div class="spinner mb-1"></div>
-                        <span class="text-[9px] font-bold uppercase">Uploading...</span>
+                    <div id="cover-loader" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white" style="display: none;">
+                        <svg class="animate-spin h-6 w-6 text-amber-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        <span class="text-[10px] font-bold uppercase tracking-wider">Uploading Cover...</span>
                     </div>
                 </div>
 
@@ -410,67 +418,118 @@
                     <input type="file" id="cover-file-input" name="image" accept="image/jpeg,image/png,image/webp" onchange="uploadCoverImage(this)">
                 </form>
 
-                <div class="mt-2 text-[10px] text-gray-600 text-center font-bold uppercase">
-                    Image for: {{ $product->title }}
+                <div class="mt-2.5 flex items-center justify-between gap-1">
+                    <button type="button" onclick="document.getElementById('cover-file-input').click()" class="w-full bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase py-1.5 px-2 border border-black transition-all text-center cursor-pointer">
+                        Replace Cover
+                    </button>
                 </div>
             </div>
 
-            <!-- Gallery Images -->
-            @foreach($product->mediaAssets as $index => $asset)
-                @php
-                    $assetSrc = $asset->url ?: ('/storage/media/' . $asset->filename);
-                    $assetUrl = str_starts_with($assetSrc, 'http') ? $assetSrc : url($assetSrc);
-                    $slotNum = $index + 1;
-                @endphp
-                <div class="border border-black p-3 bg-white flex flex-col justify-between group">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[9px] font-bold uppercase bg-gray-100 px-1 py-0.5">GALLERY #{{ $slotNum }}</span>
-                        <form action="{{ route('admin.products.delete-media', ['productId' => $product->id, 'assetId' => $asset->id]) }}" method="POST" class="inline" onsubmit="return confirm('Remove gallery image #{{ $slotNum }}?')">
+            <!-- Gallery Images (Sortable & Manageable) -->
+            <div id="gallery-sortable-container" class="contents">
+                @foreach($product->mediaAssets as $index => $asset)
+                    @php
+                        $assetSrc = $asset->url ?: ('/storage/media/' . $asset->filename);
+                        $assetUrl = str_starts_with($assetSrc, 'http') ? $assetSrc : url($assetSrc);
+                        $slotNum = $index + 1;
+                    @endphp
+                    <div class="gallery-card border-2 border-black p-3 bg-white flex flex-col justify-between group relative shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5" data-asset-id="{{ $asset->id }}" id="gallery-card-{{ $asset->id }}">
+                        
+                        <!-- Top Bar: Slot Index & Actions -->
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-1">
+                                <span class="gallery-slot-badge text-[9px] font-bold uppercase bg-gray-100 border border-black/20 px-1.5 py-0.5">GALLERY #{{ $slotNum }}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                {{-- Make Cover Button --}}
+                                <button type="button" onclick="makeCoverAjax({{ $product->id }}, {{ $asset->id }})" class="text-[9px] font-bold uppercase px-1.5 py-0.5 border border-amber-400 bg-amber-50 hover:bg-amber-500 hover:text-white transition-colors cursor-pointer" title="Set this photo as primary cover">
+                                    ★ Cover
+                                </button>
+                                {{-- Delete Button --}}
+                                <button type="button" onclick="deleteProductMediaAjax({{ $product->id }}, {{ $asset->id }})" class="w-5 h-5 flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white border border-red-200 transition-colors text-xs font-bold cursor-pointer" title="Delete image">✕</button>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-bold text-gray-900 mb-2 truncate" title="{{ $asset->filename }}">{{ $asset->filename }}</div>
+
+                        <!-- Image Preview & Click-to-Replace -->
+                        <div 
+                            class="relative aspect-square border border-black bg-gray-50 overflow-hidden cursor-pointer hover:opacity-95 transition-all"
+                            onclick="document.getElementById('gallery-file-{{ $asset->id }}').click()"
+                            title="Click to replace Gallery Image #{{ $slotNum }}"
+                        >
+                            <img id="gallery-preview-{{ $asset->id }}" src="{{ $assetUrl }}" alt="Gallery Image {{ $slotNum }}" class="w-full h-full object-cover">
+
+                            <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2 text-center">
+                                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
+                                <span class="text-[10px] font-bold uppercase">Click to Replace</span>
+                            </div>
+
+                            <div id="gallery-loader-{{ $asset->id }}" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white" style="display: none;">
+                                <svg class="animate-spin h-5 w-5 text-white mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                <span class="text-[9px] font-bold uppercase">Updating...</span>
+                            </div>
+                        </div>
+
+                        <form id="gallery-form-{{ $asset->id }}" action="{{ route('admin.media.replace', $asset->id) }}" method="POST" enctype="multipart/form-data" class="hidden">
                             @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 text-[10px] font-bold" title="Delete image">✕</button>
+                            <input type="file" id="gallery-file-{{ $asset->id }}" name="image" accept="image/jpeg,image/png,image/webp" onchange="uploadGalleryReplace(this, {{ $asset->id }})">
                         </form>
-                    </div>
 
-                    <div class="text-xs font-bold text-gray-900 mb-2 truncate">Gallery Image {{ $slotNum }} — {{ $product->title }}</div>
-
-                    <div 
-                        class="relative aspect-square border border-black bg-gray-50 overflow-hidden cursor-pointer hover:opacity-90 transition-all"
-                        onclick="document.getElementById('gallery-file-{{ $asset->id }}').click()"
-                        title="Click to replace Gallery Image {{ $slotNum }}"
-                    >
-                        <img id="gallery-preview-{{ $asset->id }}" src="{{ $assetUrl }}" alt="Gallery Image {{ $slotNum }} — {{ $product->title }}" class="w-full h-full object-cover">
-
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2 text-center">
-                            <span class="text-base mb-1"><svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg></span>
-                            <span class="text-[10px] font-bold uppercase">Click to Replace</span>
+                        <!-- Bottom Controls: Reorder Left / Right + Replace -->
+                        <div class="mt-2.5 flex items-center justify-between gap-1">
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="moveGalleryCard({{ $asset->id }}, -1)" class="w-7 h-6 bg-gray-100 hover:bg-black hover:text-white border border-black flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Move Left (Earlier in gallery)">
+                                    ←
+                                </button>
+                                <button type="button" onclick="moveGalleryCard({{ $asset->id }}, 1)" class="w-7 h-6 bg-gray-100 hover:bg-black hover:text-white border border-black flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Move Right (Later in gallery)">
+                                    →
+                                </button>
+                            </div>
+                            <button type="button" onclick="document.getElementById('gallery-file-{{ $asset->id }}').click()" class="text-[9px] font-bold uppercase px-2 py-1 bg-white hover:bg-gray-100 border border-black transition-colors cursor-pointer">
+                                Replace
+                            </button>
                         </div>
                     </div>
-
-                    <form id="gallery-form-{{ $asset->id }}" action="{{ route('admin.media.replace', $asset->id) }}" method="POST" enctype="multipart/form-data" class="hidden">
-                        @csrf
-                        <input type="file" id="gallery-file-{{ $asset->id }}" name="image" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()">
-                    </form>
-
-                    <div class="mt-2 text-[10px] text-gray-500 text-center font-mono truncate">
-                        {{ $asset->filename }}
-                    </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
 
             <!-- Drag & Drop Multi-Upload Box -->
             <div 
-                class="border-2 border-dashed border-black p-4 flex flex-col items-center justify-center text-center bg-gray-50 hover:bg-gray-100 cursor-pointer min-h-[220px]" 
+                id="media-dropzone"
+                class="border-2 border-dashed border-black p-5 flex flex-col items-center justify-center text-center bg-gray-50 hover:bg-amber-50/50 cursor-pointer min-h-[220px] transition-all relative shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]" 
                 onclick="document.getElementById('bulk-gallery-input').click()"
-                ondragover="event.preventDefault(); this.classList.add('border-amber-500','bg-amber-50')"
-                ondragleave="this.classList.remove('border-amber-500','bg-amber-50')"
-                ondrop="event.preventDefault(); this.classList.remove('border-amber-500','bg-amber-50'); const d=new DataTransfer(); [...event.dataTransfer.files].filter(f=>f.type.startsWith('image/')).forEach(f=>d.items.add(f)); const i=document.getElementById('bulk-gallery-input'); i.files=d.files; if(i.files.length)i.form.submit();"
+                ondragover="event.preventDefault(); this.classList.add('border-amber-500','bg-amber-100')"
+                ondragleave="this.classList.remove('border-amber-500','bg-amber-100')"
+                ondrop="handleMediaDrop(event)"
             >
-                <span class="text-3xl block mb-2"><svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg></span>
-                <span class="text-xs font-black uppercase tracking-wider block">+ Drag & Drop Photos</span>
-                <span class="text-[10px] text-gray-500 mt-1 block">Select multiple JPG, PNG, WebP files</span>
+                <div id="dropzone-default">
+                    <span class="text-3xl block mb-2 text-black">
+                        <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    </span>
+                    <span class="text-xs font-black uppercase tracking-wider block text-black">+ Add & Drag Photos</span>
+                    <span class="text-[10px] text-gray-500 mt-1 block">JPG, PNG, WebP (Select multiple)</span>
+                </div>
+                <div id="dropzone-loader" class="hidden flex flex-col items-center justify-center">
+                    <svg class="animate-spin h-7 w-7 text-black mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Uploading Photos...</span>
+                </div>
             </div>
 
+        </div>
+
+        <!-- Import from URL Sub-Bar -->
+        <div class="bg-gray-50 border border-black/20 p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-black uppercase">🔗 Import Image from URL:</span>
+                <span class="text-[10px] text-gray-500">(Amazon, Pinterest, CDN)</span>
+            </div>
+            <div class="flex items-center gap-2 flex-1 max-w-xl">
+                <input type="url" id="import-image-url-input" placeholder="https://m.media-amazon.com/images/I/..." class="flex-1 border-2 border-black p-1.5 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-black">
+                <button type="button" onclick="importImageFromUrl({{ $product->id }})" class="bg-black text-white px-3 py-1.5 text-xs font-bold uppercase hover:bg-gray-800 shrink-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer">
+                    Import to Gallery
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1438,8 +1497,285 @@ function productEditor() {
 
 function uploadCoverImage(input) {
     if (!input.files || !input.files[0]) return;
-    document.getElementById('cover-loader').style.display = 'flex';
-    document.getElementById('cover-form').submit();
+    const loader = document.getElementById('cover-loader');
+    if (loader) loader.style.display = 'flex';
+
+    const file = input.files[0];
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('_token', token);
+
+    fetch(`/admin/products/{{ $product->id }}/replace-image`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (loader) loader.style.display = 'none';
+        if (data.success && data.image_url) {
+            const preview = document.getElementById('cover-preview');
+            if (preview) preview.src = data.image_url;
+            showMediaToast('✓ Cover image updated successfully');
+        } else {
+            document.getElementById('cover-form').submit();
+        }
+    })
+    .catch(err => {
+        console.warn('Cover upload AJAX failed, submitting form normally:', err);
+        document.getElementById('cover-form').submit();
+    });
+}
+
+function uploadGalleryReplace(input, assetId) {
+    if (!input.files || !input.files[0]) return;
+    const loader = document.getElementById(`gallery-loader-${assetId}`);
+    if (loader) loader.style.display = 'flex';
+
+    const file = input.files[0];
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('_token', token);
+
+    fetch(`/admin/media/${assetId}/replace`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (loader) loader.style.display = 'none';
+        if (data.success && data.image_url) {
+            const preview = document.getElementById(`gallery-preview-${assetId}`);
+            if (preview) preview.src = data.image_url;
+            showMediaToast('✓ Gallery photo updated');
+        } else {
+            input.form.submit();
+        }
+    })
+    .catch(err => {
+        console.warn('Gallery replace AJAX failed, submitting form:', err);
+        input.form.submit();
+    });
+}
+
+function submitBulkGallery(input) {
+    if (!input.files || input.files.length === 0) return;
+    const dropDefault = document.getElementById('dropzone-default');
+    const dropLoader = document.getElementById('dropzone-loader');
+    if (dropDefault) dropDefault.classList.add('hidden');
+    if (dropLoader) dropLoader.classList.remove('hidden');
+    document.getElementById('bulk-gallery-form').submit();
+}
+
+function handleMediaDrop(event) {
+    event.preventDefault();
+    const zone = document.getElementById('media-dropzone');
+    if (zone) zone.classList.remove('border-amber-500', 'bg-amber-100');
+    const dt = new DataTransfer();
+    [...event.dataTransfer.files].filter(f => f.type.startsWith('image/')).forEach(f => dt.items.add(f));
+    const input = document.getElementById('bulk-gallery-input');
+    if (input && dt.files.length > 0) {
+        input.files = dt.files;
+        submitBulkGallery(input);
+    }
+}
+
+async function makeCoverAjax(productId, assetId) {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+
+    showMediaToast('Setting as primary cover...');
+    try {
+        const response = await fetch(`/admin/products/${productId}/media/${assetId}/make-cover`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            }
+        });
+        const data = await response.json();
+        if (data.success && data.image_url) {
+            const coverPreview = document.getElementById('cover-preview');
+            if (coverPreview) coverPreview.src = data.image_url;
+            showMediaToast('★ Primary cover updated successfully!');
+        } else {
+            location.reload();
+        }
+    } catch (err) {
+        location.reload();
+    }
+}
+
+async function deleteProductMediaAjax(productId, assetId) {
+    if (!confirm('Are you sure you want to remove this gallery photo?')) return;
+    const card = document.getElementById(`gallery-card-${assetId}`);
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+
+    try {
+        const response = await fetch(`/admin/products/${productId}/media/${assetId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            }
+        });
+        if (card) {
+            card.remove();
+            renumberGallerySlots();
+            showMediaToast('✓ Gallery photo deleted');
+        } else {
+            location.reload();
+        }
+    } catch (err) {
+        location.reload();
+    }
+}
+
+function moveGalleryCard(assetId, direction) {
+    const container = document.getElementById('gallery-sortable-container');
+    const card = document.getElementById(`gallery-card-${assetId}`);
+    if (!container || !card) return;
+
+    const cards = Array.from(container.querySelectorAll('.gallery-card'));
+    const currentIndex = cards.indexOf(card);
+    if (currentIndex === -1) return;
+
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= cards.length) return;
+
+    if (direction === -1) {
+        container.insertBefore(card, cards[targetIndex]);
+    } else {
+        container.insertBefore(card, cards[targetIndex].nextSibling);
+    }
+
+    renumberGallerySlots();
+    saveGalleryOrder({{ $product->id }});
+}
+
+function renumberGallerySlots() {
+    const cards = document.querySelectorAll('#gallery-sortable-container .gallery-card');
+    cards.forEach((c, idx) => {
+        const badge = c.querySelector('.gallery-slot-badge');
+        if (badge) badge.textContent = `GALLERY #${idx + 1}`;
+    });
+}
+
+async function saveGalleryOrder(productId) {
+    const cards = Array.from(document.querySelectorAll('#gallery-sortable-container .gallery-card'));
+    const orderedIds = cards.map(c => parseInt(c.getAttribute('data-asset-id'))).filter(Boolean);
+    if (orderedIds.length === 0) return;
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+
+    try {
+        await fetch(`/admin/products/${productId}/media/reorder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ ordered_ids: orderedIds })
+        });
+        showMediaToast('✓ Gallery order saved');
+    } catch (e) {
+        console.error('Failed to save gallery order', e);
+    }
+}
+
+async function importImageFromUrl(productId) {
+    const input = document.getElementById('import-image-url-input');
+    if (!input || !input.value.trim()) {
+        alert('Please enter a valid image URL');
+        return;
+    }
+    const url = input.value.trim();
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="_token"]')?.value;
+    input.disabled = true;
+    showMediaToast('Fetching external image...');
+
+    try {
+        const fetchRes = await fetch('/admin/images/fetch-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ url: url })
+        });
+        const data = await fetchRes.json();
+        if (!data.success || !data.data_url) {
+            alert(data.message || 'Failed to fetch image from URL');
+            input.disabled = false;
+            return;
+        }
+
+        const blob = await (await fetch(data.data_url)).blob();
+        const file = new File([blob], data.filename || 'imported-image.jpg', { type: data.mime || 'image/jpeg' });
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('_token', token);
+
+        const uploadRes = await fetch(`/admin/products/${productId}/upload-gallery`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success) {
+            input.value = '';
+            location.reload();
+        } else {
+            alert('Failed to attach imported image.');
+            input.disabled = false;
+        }
+    } catch (err) {
+        alert('Error importing image from URL');
+        input.disabled = false;
+    }
+}
+
+function showMediaToast(message) {
+    let toast = document.getElementById('media-studio-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'media-studio-toast';
+        toast.className = 'fixed bottom-6 right-6 z-50 bg-black text-white text-xs font-bold uppercase tracking-wider px-4 py-2.5 rounded shadow-2xl border border-white/20 transition-opacity duration-300';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => { toast.style.display = 'none'; }, 300);
+    }, 3000);
 }
 
 // ─── STICKY MINI SAVE BAR ───────────────────────────────────────────────────
@@ -1840,6 +2176,8 @@ async function saveVariantAjax(event, variantId) {
             btn.innerHTML = origBtnHtml;
         }
     }
+}
+
 // ─── VARIANT PUBLISH & BULK STATUS MANAGEMENT (PART 2) ─────────────────────
 
 async function toggleVariantPublish(variantId, requestedAction) {

@@ -463,7 +463,62 @@ class ProductController extends Controller
 
         AuditLog::log('product.media_delete', 'product', $productId, "Removed media asset #{$assetId} from {$product->title}");
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Image removed from product gallery.']);
+        }
+
         return back()->with('success', 'Image removed from product gallery.');
+    }
+
+    // Reorder Product Media Assets
+    public function reorderMedia(Request $request, int $id)
+    {
+        $product = Product::findOrFail($id);
+        $validated = $request->validate([
+            'ordered_ids'   => 'required|array',
+            'ordered_ids.*' => 'integer|exists:media_assets,id',
+        ]);
+
+        foreach ($validated['ordered_ids'] as $index => $assetId) {
+            $product->mediaAssets()->updateExistingPivot($assetId, ['sort_order' => $index + 1]);
+        }
+
+        AuditLog::log('product.media_reorder', 'product', $product->id, "Reordered gallery images for {$product->title}");
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Media order updated successfully.']);
+        }
+
+        return back()->with('success', 'Media order updated successfully.');
+    }
+
+    // Set a Gallery Asset as Primary Cover
+    public function makeCover(Request $request, int $productId, int $assetId)
+    {
+        $product = Product::findOrFail($productId);
+        $asset = MediaAsset::findOrFail($assetId);
+
+        $product->update(['image_url' => $asset->url]);
+
+        $oldCoverIds = $product->mediaAssets()->wherePivot('group', 'cover')->pluck('media_assets.id')->toArray();
+        if (!empty($oldCoverIds)) {
+            $product->mediaAssets()->detach($oldCoverIds);
+        }
+        $product->mediaAssets()->syncWithoutDetaching([
+            $asset->id => ['group' => 'cover', 'sort_order' => 0]
+        ]);
+
+        AuditLog::log('product.make_cover', 'product', $product->id, "Set asset #{$assetId} as primary cover for {$product->title}");
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cover image updated to selected photo.',
+                'image_url' => $asset->url,
+            ]);
+        }
+
+        return back()->with('success', 'Cover image updated to selected photo.');
     }
 
     // Video Upload

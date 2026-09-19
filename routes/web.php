@@ -1007,6 +1007,10 @@ Route::middleware(['admin'])->group(function () {
         ->name('admin.products.delete-video');
     Route::delete('/admin/products/{productId}/media/{assetId}', [ProductController::class, 'deleteMedia'])
         ->name('admin.products.delete-media');
+    Route::post('/admin/products/{id}/media/reorder', [ProductController::class, 'reorderMedia'])
+        ->name('admin.products.media.reorder');
+    Route::post('/admin/products/{productId}/media/{assetId}/make-cover', [ProductController::class, 'makeCover'])
+        ->name('admin.products.media.make-cover');
     Route::post('/admin/products/{id}/variants', [ProductController::class, 'addVariant'])
         ->name('admin.products.add-variant');
     Route::post('/admin/variants/{id}/update', [ProductController::class, 'updateVariant'])
