@@ -126,10 +126,10 @@
     </div>
 
     <!-- Products Table -->
-    <div class="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+    <div class="bg-white border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-lg overflow-hidden">
         @if($products->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+            <div class="table-responsive overflow-x-auto w-full">
+                <table class="w-full text-left text-xs min-w-[800px]">
                     <thead>
                         <tr class="border-b-2 border-black bg-gray-50 text-[10px] font-bold uppercase tracking-wider text-gray-600">
                             <th class="p-3 w-8 text-center">

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — Atelier Administrative Console</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
     
     <!-- Sharp Admin Typography: Space Grotesk + Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -179,13 +181,21 @@
                 </svg>
             </button>
 
-            <div class="flex items-center gap-2">
-                <span class="bg-black text-white px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold tracking-widest uppercase rounded">
-                    {{ strtoupper(auth()->user()->admin_role ?? 'ADMIN') }}
-                </span>
-                <a href="{{ route('admin.dashboard') }}" class="font-black text-sm sm:text-base tracking-tight uppercase hover:opacity-80 transition-opacity truncate max-w-[130px] sm:max-w-none">
-                    {{ \App\Models\Setting::get('store_name', 'ATELIER') }}
-                </a>
+            <div class="flex items-center gap-2.5">
+                <img 
+                    src="{{ asset('favicon.png') }}?v=4" 
+                    alt="ATELIER" 
+                    class="w-8 h-8 rounded-full object-cover border border-black/10 shadow-sm shrink-0"
+                    onerror="this.style.display='none'"
+                >
+                <div class="flex items-center gap-1.5">
+                    <span class="bg-black text-white px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold tracking-widest uppercase rounded">
+                        {{ strtoupper(auth()->user()->admin_role ?? 'ADMIN') }}
+                    </span>
+                    <a href="{{ route('admin.dashboard') }}" class="font-black text-sm sm:text-base tracking-tight uppercase hover:opacity-80 transition-opacity truncate max-w-[100px] sm:max-w-none">
+                        {{ \App\Models\Setting::get('store_name', 'ATELIER') }}
+                    </a>
+                </div>
             </div>
         </div>
 

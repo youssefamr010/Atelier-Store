@@ -647,6 +647,64 @@ Route::get('/pages/{slug}', function (string $slug) {
 ",
         ],
 
+        'about' => [
+            'title' => 'Our Story — ATELIER Studio Egypt',
+            'content' => "
+<div style='text-align:center;padding:2rem 0;'>
+    <img src='/favicon.png' alt='ATELIER' style='width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;border:3px solid #000;'>
+</div>
+
+<h2 style='font-family:serif;font-size:1.1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem;'>Founded in Cairo. Crafted for the World.</h2>
+<p>ATELIER is an Egyptian luxury lifestyle studio born from a singular obsession: the belief that everyday objects deserve to be extraordinary. We create handcrafted leather goods, precision-machined titanium EDC tools, and bespoke home accessories that transcend function and become objects of quiet pride.</p>
+
+<h2 style='font-family:serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:1.5rem 0 .75rem;'>Our Philosophy</h2>
+<p>Every piece that leaves our studio is a deliberate act of craftsmanship. We use only full-grain Italian Tuscan leather — the finest available — aged and treated for longevity. Our titanium hardware is aerospace-grade, machined to tolerances most consumer goods never see.</p>
+<p style='margin-top:.75rem;'>We believe luxury is not about logos or price tags. It is about the quiet confidence of owning something that was made with exceptional care, by hands that take pride in their work.</p>
+
+<h2 style='font-family:serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:1.5rem 0 .75rem;'>Made in Egypt. Inspired by the World.</h2>
+<p>Our studio is based in Cairo, Egypt. We are proud to represent Egyptian craftsmanship on a global stage. Each piece is hand-assembled, quality-inspected, and packaged in our signature ATELIER luxury box — because the unboxing experience is part of the gift.</p>
+
+<h2 style='font-family:serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:1.5rem 0 .75rem;'>Our Commitment</h2>
+<p>We stand behind every piece we create. If you are not completely satisfied, contact us — we will make it right. This is not just a policy. It is a promise.</p>
+
+<div style='background:#000;color:#fff;padding:1.5rem;margin-top:2rem;text-align:center;'>
+    <p style='font-family:serif;font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.2em;margin:0;'>\"Excellence is not an act. It is a habit.\"</p>
+    <p style='font-size:.75rem;opacity:.6;margin:.5rem 0 0;'>— The ATELIER Standard</p>
+</div>
+",
+        ],
+
+        'contact' => [
+            'title' => 'Contact ATELIER — We Respond Within 24 Hours',
+            'content' => "
+<p>We would love to hear from you. Whether you have a question about a product, need help with an order, or want to arrange a bespoke commission — our team is here for you.</p>
+
+<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin:2rem 0;'>
+    <div style='border:2px solid #000;padding:1.25rem;'>
+        <p style='font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.15em;margin:0 0 .5rem;'>💬 WhatsApp</p>
+        <p style='font-size:.85rem;'>Fastest response — usually within minutes.</p>
+        <a href='https://wa.me/{$waNum}' target='_blank' style='display:inline-block;margin-top:.75rem;background:#000;color:#fff;padding:.5rem 1rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;'>Chat Now →</a>
+    </div>
+    <div style='border:2px solid #000;padding:1.25rem;'>
+        <p style='font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.15em;margin:0 0 .5rem;'>📧 Email</p>
+        <p style='font-size:.85rem;'>For detailed inquiries and order support.</p>
+        <a href='mailto:{$storeEmail}' style='display:inline-block;margin-top:.75rem;background:#000;color:#fff;padding:.5rem 1rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;'>Send Email →</a>
+    </div>
+    <div style='border:2px solid #000;padding:1.25rem;'>
+        <p style='font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.15em;margin:0 0 .5rem;'>📱 Instagram</p>
+        <p style='font-size:.85rem;'>Follow our studio for new arrivals & stories.</p>
+        <a href='https://www.instagram.com/atelier_store404' target='_blank' style='display:inline-block;margin-top:.75rem;background:#000;color:#fff;padding:.5rem 1rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-decoration:none;'>@atelier_store404 →</a>
+    </div>
+</div>
+
+<div style='border:1px solid #e0e0da;padding:1.5rem;background:#F8F7F3;margin-top:1rem;'>
+    <p style='font-weight:800;font-size:.85rem;text-transform:uppercase;letter-spacing:.15em;margin:0 0 .75rem;'>Business Hours</p>
+    <p style='font-size:.85rem;'>Saturday – Thursday: 10:00 AM – 9:00 PM (Cairo Time, EET)</p>
+    <p style='font-size:.85rem;margin-top:.25rem;'>Friday: 2:00 PM – 9:00 PM</p>
+    <p style='font-size:.8rem;color:#666;margin-top:.75rem;'>We aim to respond to all inquiries within 24 hours.</p>
+</div>
+",
+        ],
         'faq' => [
             'title' => 'Frequently Asked Questions',
             'content' => "
@@ -665,11 +723,17 @@ Route::get('/pages/{slug}', function (string $slug) {
 <h2 style='font-family:Cinzel,serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:.75rem 0;'>How do I track my order?</h2>
 <p>Visit the <a href='/track-order' style='font-weight:700;text-decoration:underline;'>Track Order</a> page and enter your order number. You will also receive WhatsApp updates automatically.</p>
 
+<h2 style='font-family:Cinzel,serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:.75rem 0;'>Can I return or exchange my order?</h2>
+<p>We accept exchanges within 48 hours of delivery for defective or incorrectly dispatched items. Items must be in original condition with packaging intact. Contact us with your order number and photos.</p>
+
 <h2 style='font-family:Cinzel,serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;margin:.75rem 0;'>How do I contact you?</h2>
-<p>Email us at <a href='mailto:{$storeEmail}' style='font-weight:700;'>{$storeEmail}</a> — we respond within 24 hours, 7 days a week.</p>
+<p>WhatsApp is the fastest way. You can also email us at <a href='mailto:{$storeEmail}' style='font-weight:700;'>{$storeEmail}</a> — we respond within 24 hours, 7 days a week.</p>
 ",
         ],
+
     ];
+
+    $waNum = $settings['social_whatsapp'] ?? '201000000000';
 
     if (! isset($pages[$slug])) {
         abort(404);
@@ -678,8 +742,22 @@ Route::get('/pages/{slug}', function (string $slug) {
     $pageTitle = $pages[$slug]['title'];
     $pageContent = $pages[$slug]['content'];
 
+    // Replace placeholders for contact page
+    $pageContent = str_replace('{$waNum}', $waNum, $pageContent);
+    $pageContent = str_replace('{$storeEmail}', $storeEmail, $pageContent);
+    $pageContent = str_replace('{$storeName}', $storeName, $pageContent);
+
     return view('page', compact('pageTitle', 'pageContent', 'settings'));
 })->name('pages.show');
+
+// Short URL aliases for common pages
+Route::get('/about', fn() => redirect()->route('pages.show', ['slug' => 'about']))->name('about');
+Route::get('/contact', fn() => redirect()->route('pages.show', ['slug' => 'contact']))->name('contact');
+Route::get('/faq', fn() => redirect()->route('pages.show', ['slug' => 'faq']))->name('faq');
+Route::get('/privacy', fn() => redirect()->route('pages.show', ['slug' => 'privacy']))->name('privacy');
+Route::get('/terms', fn() => redirect()->route('pages.show', ['slug' => 'terms']))->name('terms');
+Route::get('/returns', fn() => redirect()->route('pages.show', ['slug' => 'returns']))->name('returns');
+Route::get('/shipping', fn() => redirect()->route('pages.show', ['slug' => 'shipping']))->name('shipping-policy');
 
 /*
 |--------------------------------------------------------------------------

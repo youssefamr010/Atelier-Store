@@ -240,8 +240,6 @@
                     </div>
                 </div>
             </div>
-                </div>
-            </div>
         </div>
 
         <!-- 3. Color Variants with Per-Color Images -->

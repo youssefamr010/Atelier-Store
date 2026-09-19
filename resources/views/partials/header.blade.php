@@ -110,14 +110,22 @@
                     <span class="hidden sm:inline">{{ $isAr ? 'القائمة' : 'MENU' }}</span>
                 </button>
 
-                <!-- Brand Wordmark -->
-                <a href="{{ route('home') }}" class="group flex flex-col items-start focus:outline-none pl-1">
-                    <span class="font-editorial font-black text-xl sm:text-2xl lg:text-3xl text-black uppercase leading-none tracking-tight transition-transform group-hover:scale-[1.02]">
-                        {{ $settings['store_name'] ?? ($settings['storeName'] ?? 'ATELIER') }}
-                    </span>
-                    <span class="font-editorial font-bold text-[7px] sm:text-[8px] tracking-[0.32em] text-black/60 uppercase mt-0.5 whitespace-nowrap">
-                        STUDIO EGYPT · 2026
-                    </span>
+                <!-- Brand Logo + Wordmark -->
+                <a href="{{ route('home') }}" class="group flex items-center gap-2 focus:outline-none pl-1" title="{{ $settings['store_name'] ?? 'ATELIER' }}">
+                    <img 
+                        src="{{ asset('favicon.png') }}?v=4" 
+                        alt="ATELIER Logo" 
+                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover transition-transform group-hover:scale-110 shadow-md border border-black/10"
+                        onerror="this.style.display='none'"
+                    >
+                    <div class="flex flex-col items-start">
+                        <span class="font-editorial font-black text-xl sm:text-2xl lg:text-3xl text-black uppercase leading-none tracking-tight transition-transform group-hover:scale-[1.02]">
+                            {{ $settings['store_name'] ?? ($settings['storeName'] ?? 'ATELIER') }}
+                        </span>
+                        <span class="font-editorial font-bold text-[7px] sm:text-[8px] tracking-[0.32em] text-black/60 uppercase mt-0.5 whitespace-nowrap">
+                            STUDIO EGYPT · 2026
+                        </span>
+                    </div>
                 </a>
             </div>
 
@@ -280,9 +288,12 @@
             <!-- Drawer Top Bar (Sleek Glassmorphic Header) -->
             <div class="shrink-0 px-5 py-4 border-b border-black/10 flex items-center justify-between bg-white/90 backdrop-blur-md">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 min-w-0 group" @click="mobileMenuOpen = false">
-                    <div class="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-display font-black text-base shrink-0 shadow-md ring-1 ring-black/10 transition-transform group-hover:scale-105">
-                        A
-                    </div>
+                    <img 
+                        src="{{ asset('favicon.png') }}?v=4" 
+                        alt="ATELIER" 
+                        class="w-10 h-10 rounded-full object-cover shrink-0 shadow-md ring-1 ring-black/10 transition-transform group-hover:scale-105"
+                        onerror="this.outerHTML='<div class=&quot;w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center font-black text-base shrink-0 shadow-md&quot;>A</div>'"
+                    >
                     <div class="min-w-0">
                         <h3 class="font-display font-bold text-sm tracking-wider uppercase text-black leading-tight truncate">
                             {{ $settings['store_name'] ?? ($settings['storeName'] ?? 'ATELIER') }}
