@@ -125,6 +125,57 @@
                 <p class="mt-2 text-[10px] text-gray-600">Hidden from customers. Sent in the Telegram order notification for fast purchasing from your supplier.</p>
             </div>
 
+            <!-- Primary Cover Color / Finish Definition -->
+            <div class="rounded-xl border-2 border-emerald-600/40 bg-emerald-50/50 p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-950 flex items-center gap-1.5">
+                        <span>🎨 Primary Product Color (لون الغلاف الأساسي)</span>
+                        <span class="text-[9px] font-mono bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-bold uppercase">Auto Cover Finish</span>
+                    </label>
+                    <span class="text-[10px] text-emerald-800">يظهر كخيار لون تلقائي للغلاف بدون تكرار البطاقات</span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                    <div class="sm:col-span-6">
+                        <input 
+                            type="text" 
+                            name="primary_color_name" 
+                            id="edit-primary-color-name"
+                            value="{{ old('primary_color_name', $product->attributes_json['primary_color_name'] ?? '') }}"
+                            placeholder="e.g. Tuscan Tan / Midnight Black" 
+                            class="w-full border-2 border-black p-2.5 text-xs font-bold bg-white focus:outline-none"
+                        >
+                    </div>
+                    <div class="sm:col-span-6 flex items-center gap-2">
+                        <input 
+                            type="color" 
+                            id="edit-primary-color-picker"
+                            value="{{ old('primary_color_hex', $product->attributes_json['primary_color_hex'] ?? '#1A1A1A') }}" 
+                            oninput="document.getElementById('edit-primary-color-hex').value = this.value.toUpperCase()"
+                            class="w-10 h-10 border-2 border-black cursor-pointer bg-white p-0.5 shrink-0"
+                            title="Choose color swatch"
+                        >
+                        <input 
+                            type="text" 
+                            name="primary_color_hex" 
+                            id="edit-primary-color-hex"
+                            value="{{ old('primary_color_hex', $product->attributes_json['primary_color_hex'] ?? '#1A1A1A') }}" 
+                            oninput="document.getElementById('edit-primary-color-picker').value = this.value"
+                            class="w-28 border-2 border-black p-2 text-xs font-mono uppercase bg-white text-center font-bold"
+                        >
+                        <button 
+                            type="button" 
+                            onclick="pickCoverColorInEditMode()" 
+                            class="px-3 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all shrink-0 cursor-pointer shadow-xs flex items-center gap-1.5"
+                            title="Pick exact color by clicking on cover image pixels"
+                        >
+                            <span>🎨</span>
+                            <span>Pick Pixels</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Rich Text Description (Quill.js) -->
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">Description & Craftsmanship Story (Rich Text)</label>
@@ -418,9 +469,13 @@
                     <input type="file" id="cover-file-input" name="image" accept="image/jpeg,image/png,image/webp" onchange="uploadCoverImage(this)">
                 </form>
 
-                <div class="mt-2.5 flex items-center justify-between gap-1">
-                    <button type="button" onclick="document.getElementById('cover-file-input').click()" class="w-full bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase py-1.5 px-2 border border-black transition-all text-center cursor-pointer">
+                <div class="mt-2.5 flex items-center justify-between gap-1.5">
+                    <button type="button" onclick="document.getElementById('cover-file-input').click()" class="flex-1 bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase py-1.5 px-2 border border-black transition-all text-center cursor-pointer">
                         Replace Cover
+                    </button>
+                    <button type="button" onclick="pickCoverColorInEditMode()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-black text-[10px] font-bold uppercase py-1.5 px-2 transition-all cursor-pointer flex items-center gap-1 shrink-0" title="Pick color directly from cover pixels">
+                        <span>🎨</span>
+                        <span>Pick Color</span>
                     </button>
                 </div>
             </div>
@@ -2934,6 +2989,38 @@ function closeCanvasColorPickerModal() {
     const modal = document.getElementById('canvas-color-picker-modal');
     if (modal) modal.classList.add('hidden');
     activeColorCallback = null;
+}
+
+async function pickCoverColorInEditMode() {
+    if (window.EyeDropper) {
+        try {
+            const eyeDropper = new EyeDropper();
+            const result = await eyeDropper.open();
+            if (result && result.sRGBHex) {
+                const hex = result.sRGBHex.toUpperCase();
+                const hexInput = document.getElementById('edit-primary-color-hex');
+                const pickerInput = document.getElementById('edit-primary-color-picker');
+                if (hexInput) hexInput.value = hex;
+                if (pickerInput) pickerInput.value = hex;
+                if (typeof showToastMessage === 'function') showToastMessage('✓ Picked cover color: ' + hex);
+                return;
+            }
+        } catch (e) {
+            // User canceled EyeDropper, fall through to modal
+        }
+    }
+    const coverImg = document.getElementById('cover-preview');
+    if (coverImg && coverImg.src) {
+        openCanvasColorPickerModal(coverImg.src, function(hex) {
+            const hexInput = document.getElementById('edit-primary-color-hex');
+            const pickerInput = document.getElementById('edit-primary-color-picker');
+            if (hexInput) hexInput.value = hex;
+            if (pickerInput) pickerInput.value = hex;
+            if (typeof showToastMessage === 'function') showToastMessage('✓ Picked cover color: ' + hex);
+        });
+    } else {
+        alert('Please upload a cover image first.');
+    }
 }
 </script>
 @endpush

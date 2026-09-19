@@ -104,7 +104,13 @@
                         class="border-2 border-dashed p-4 hover:bg-gray-100 transition-colors cursor-pointer text-center relative aspect-square flex flex-col items-center justify-center group overflow-hidden shadow-sm focus:outline-none focus:ring-2 focus:ring-black"
                     >
                         <template x-if="coverPreview">
-                            <img :src="coverPreview" alt="Cover Preview" class="w-full h-full object-contain p-2 absolute inset-0">
+                            <img 
+                                :src="coverPreview" 
+                                @click.stop="sampleCoverPixel($event)" 
+                                alt="Cover Preview" 
+                                title="Click any pixel on this image to pick its exact color"
+                                class="w-full h-full object-contain p-2 absolute inset-0 cursor-crosshair z-10"
+                            >
                         </template>
 
                         <div x-show="!coverPreview" class="space-y-2">
@@ -113,7 +119,7 @@
                             <span class="text-[10px] text-gray-500 block">Transparent PNG, WebP or JPG</span>
                         </div>
 
-                        <div x-show="coverPreview" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold uppercase tracking-wider">
+                        <div x-show="coverPreview" class="absolute bottom-2 left-2 right-2 bg-black/75 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-2 text-center rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
                             Change / Paste New Cover (Ctrl+V)
                         </div>
                     </div>
@@ -126,6 +132,52 @@
                         accept="image/jpeg,image/png,image/webp,image/jpg,image/svg+xml" 
                         class="hidden"
                     >
+
+                    <!-- Primary Product Color / Finish Definition (Cover Color) -->
+                    <div class="border-2 border-black p-3.5 bg-white space-y-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] mt-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-black uppercase tracking-wider text-black flex items-center gap-1.5">
+                                <span>🎨 Primary Cover Color (لون الغلاف)</span>
+                                <span class="text-[9px] text-emerald-800 bg-emerald-100 px-1.5 py-0.5 font-bold uppercase rounded">★ Auto Cover Finish</span>
+                            </label>
+                            <span class="text-[9px] text-gray-500 hidden sm:inline">Click pixels on cover to sample</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                            <div class="sm:col-span-7">
+                                <input 
+                                    type="text" 
+                                    name="primary_color_name" 
+                                    x-model="primaryColorName" 
+                                    @input="suggestPrimaryColorHex()"
+                                    placeholder="e.g. Tuscan Brown / Midnight Black" 
+                                    class="w-full border-2 border-black p-2 text-xs font-bold bg-white focus:outline-none"
+                                >
+                            </div>
+                            <div class="sm:col-span-5 flex items-center gap-1.5">
+                                <input 
+                                    type="color" 
+                                    x-model="primaryColorHex" 
+                                    class="w-8 h-8 border border-black cursor-pointer bg-white p-0.5 shrink-0"
+                                    title="Choose color swatch"
+                                >
+                                <input 
+                                    type="text" 
+                                    name="primary_color_hex" 
+                                    x-model="primaryColorHex" 
+                                    class="w-full border border-black p-1 text-[11px] font-mono uppercase bg-white text-center font-bold"
+                                >
+                                <button 
+                                    type="button" 
+                                    @click="pickColorFromCoverImage($event)" 
+                                    class="px-2.5 py-1.5 bg-black text-white text-[10px] font-bold uppercase tracking-wider hover:bg-neutral-800 transition-all shrink-0 cursor-pointer shadow-xs flex items-center gap-1"
+                                    title="Pick exact color by clicking on cover image pixels"
+                                >
+                                    <span>🎨</span>
+                                    <span class="hidden sm:inline">Pick Pixels</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Gallery Images (Multiple) -->
@@ -270,6 +322,33 @@
                 <div class="flex gap-2 rounded-xl bg-amber-50 border border-amber-300 p-3">
                     <input type="text" x-model="quickColors" @keydown.enter.prevent="addColorsFromText()" placeholder="Type colors: Black, Cognac, Navy — press Enter" class="min-w-0 flex-1 border border-black/30 bg-white px-3 py-2 text-xs">
                     <button type="button" @click="addColorsFromText()" class="bg-black text-white px-3 text-[10px] font-bold uppercase">Add</button>
+                </div>
+
+                <!-- Primary Cover Finish Preview Card (Auto Synced) -->
+                <div class="border-2 border-emerald-600 bg-emerald-50/70 p-4 relative space-y-2 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-emerald-200 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase bg-emerald-600 text-white px-2 py-0.5 rounded">
+                                ★ Finish #1: Cover Finish (تلقائي من الغلاف)
+                            </span>
+                            <span class="text-[11px] text-emerald-800 font-semibold hidden sm:inline">Auto-synced with Primary Cover Photo & Base Price</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-emerald-700 font-bold">Primary Variant</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-1">
+                        <div class="sm:col-span-4 flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-700">Finish Name:</span>
+                            <span class="text-xs font-mono font-black text-black" x-text="primaryColorName || '(Uses Product Title)'"></span>
+                        </div>
+                        <div class="sm:col-span-4 flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-700">Swatch:</span>
+                            <span class="w-5 h-5 rounded-full border border-black shadow-xs inline-block shrink-0" :style="'background-color: ' + primaryColorHex"></span>
+                            <span class="text-xs font-mono font-bold uppercase" x-text="primaryColorHex"></span>
+                        </div>
+                        <div class="sm:col-span-4 text-left sm:text-right">
+                            <span class="text-[11px] text-emerald-700 font-medium italic">✓ No duplicate card needed!</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
@@ -590,10 +669,57 @@ function createProductForm() {
         toastTimeout: null,
         quickColors: '',
         hasVariants: false,
+        primaryColorName: '{{ old('primary_color_name', '') }}',
+        primaryColorHex: '{{ old('primary_color_hex', '#1A1A1A') }}',
         variants: [
             { title: 'Classic Black', color_hex: '#000000', price_override: '', inventory: 15, imageName: '', preview: '' },
             { title: 'Cognac Brown', color_hex: '#8B4513', price_override: '', inventory: 15, imageName: '', preview: '' }
         ],
+        suggestPrimaryColorHex() {
+            const colors = { black:'#000000', white:'#FFFFFF', brown:'#8B4513', cognac:'#9A4F20', tan:'#C19A6B', navy:'#14213D', blue:'#2563EB', green:'#2F5D50', red:'#B91C1C', grey:'#6B7280', gray:'#6B7280', silver:'#B8BDC5', gold:'#C9A227', 'اسود':'#000000', 'ابيض':'#FFFFFF', 'بني':'#8B4513', 'كحلي':'#14213D', 'ازرق':'#2563EB', 'اخضر':'#2F5D50', 'احمر':'#B91C1C', 'ذهبي':'#C9A227' };
+            const name = (this.primaryColorName || '').toLowerCase();
+            const match = Object.keys(colors).find(key => name.includes(key));
+            if (match) this.primaryColorHex = colors[match];
+        },
+        async pickColorFromCoverImage(event) {
+            if (window.EyeDropper) {
+                try {
+                    const eyeDropper = new EyeDropper();
+                    const result = await eyeDropper.open();
+                    if (result && result.sRGBHex) {
+                        this.primaryColorHex = result.sRGBHex.toUpperCase();
+                        this.showToast('✓ Picked color: ' + this.primaryColorHex);
+                        return;
+                    }
+                } catch (e) {
+                    // Canceled or not available
+                }
+            }
+            if (this.coverPreview) {
+                this.showToast('ℹ Click anywhere on the cover image above to pick its exact pixel color');
+            } else {
+                this.showToast('⚠️ Please upload or paste a cover image first to pick colors from it');
+            }
+        },
+        sampleCoverPixel(event) {
+            const image = event.currentTarget;
+            if (!image || !image.naturalWidth || !image.naturalHeight) return;
+            try {
+                const rect = image.getBoundingClientRect();
+                const canvas = document.createElement('canvas');
+                canvas.width = image.naturalWidth;
+                canvas.height = image.naturalHeight;
+                const context = canvas.getContext('2d');
+                context.drawImage(image, 0, 0);
+                const x = Math.min(canvas.width - 1, Math.max(0, Math.floor((event.clientX - rect.left) / rect.width * canvas.width)));
+                const y = Math.min(canvas.height - 1, Math.max(0, Math.floor((event.clientY - rect.top) / rect.height * canvas.height)));
+                const pixel = context.getImageData(x, y, 1, 1).data;
+                this.primaryColorHex = '#' + [...pixel].slice(0, 3).map(value => value.toString(16).padStart(2, '0')).join('').toUpperCase();
+                this.showToast('✓ Picked pixel color: ' + this.primaryColorHex);
+            } catch (err) {
+                this.showToast('⚠️ Could not sample pixel: ' + err.message);
+            }
+        },
         previewVideoFile(event) {
             const file = event.target.files[0];
             if (file) {

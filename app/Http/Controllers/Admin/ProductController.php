@@ -204,61 +204,115 @@ class ProductController extends Controller
             }
         }
 
-        // Create Color Variants
-        if ($request->filled('has_color_variants') && $request->filled('variants')) {
-            foreach ($request->input('variants', []) as $index => $varData) {
-                $colorName = trim((string) ($varData['title'] ?? ''));
-                if (empty($colorName)) {
-                    continue;
+        // Create Color Variants & Primary Color Handling
+        $primaryColorName = trim((string) $request->input('primary_color_name', ''));
+        $primaryColorHex = trim((string) $request->input('primary_color_hex', '#1A1A1A'));
+        
+        $attributes = $product->attributes_json ?? [];
+        if (!empty($primaryColorName)) {
+            $attributes['primary_color_name'] = $primaryColorName;
+            $attributes['primary_color_hex'] = $primaryColorHex;
+            $product->update(['attributes_json' => $attributes]);
+        }
+
+        if ($request->filled('has_color_variants')) {
+            // Automatically create the primary cover variant as Finish #1 if provided
+            if (!empty($primaryColorName)) {
+                $hasMatchingVar = false;
+                foreach ($request->input('variants', []) as $v) {
+                    if (mb_strtolower(trim($v['title'] ?? '')) === mb_strtolower($primaryColorName)) {
+                        $hasMatchingVar = true;
+                        break;
+                    }
                 }
 
-                $varImgUrl = null;
-                if ($request->hasFile("variants.{$index}.image")) {
-                    $vFile = $request->file("variants.{$index}.image");
-                    $vFilename = 'variant-'.time().'-'.Str::random(8).'.'.$vFile->getClientOriginalExtension();
-                    $vPath = $vFile->storeAs('media', $vFilename, 'public');
-                    $varImgUrl = '/storage/'.$vPath;
+                if (!$hasMatchingVar) {
+                    $slug1 = Str::slug($primaryColorName);
+                    $primaryVarSku = strtoupper($product->sku . '-' . ($slug1 ?: 'MAIN'));
+                    $c = 1;
+                    while (ProductVariant::where('sku', $primaryVarSku)->exists()) {
+                        $primaryVarSku = strtoupper($product->sku . '-' . ($slug1 ?: 'MAIN') . '-' . $c++);
+                    }
 
-                    MediaAsset::create([
-                        'type' => 'image',
-                        'url' => $varImgUrl,
-                        'filename' => $vFilename,
-                        'mime_type' => $vFile->getClientMimeType(),
-                        'size_bytes' => $vFile->getSize(),
+                    $primaryVar = ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $primaryVarSku,
+                        'title' => $primaryColorName,
+                        'attribute_name' => 'Color',
+                        'attribute_value' => $primaryColorName,
+                        'price_override_minor' => null,
+                        'inventory' => (int) $product->inventory,
+                        'image_url' => $product->image_url,
+                        'attributes_json' => [
+                            'color' => $primaryColorName,
+                            'color_hex' => $primaryColorHex,
+                            'image_url' => $product->image_url,
+                            'is_cover_variant' => true,
+                        ],
+                        'status' => 'active',
+                    ]);
+                    if ($coverAssetId) {
+                        $primaryVar->mediaAssets()->attach($coverAssetId, ['group' => 'cover', 'sort_order' => 0]);
+                    }
+                }
+            }
+
+            // Create Additional Color Variants
+            if ($request->filled('variants')) {
+                foreach ($request->input('variants', []) as $index => $varData) {
+                    $colorName = trim((string) ($varData['title'] ?? ''));
+                    if (empty($colorName) || (mb_strtolower($colorName) === mb_strtolower($primaryColorName))) {
+                        continue;
+                    }
+
+                    $varImgUrl = null;
+                    if ($request->hasFile("variants.{$index}.image")) {
+                        $vFile = $request->file("variants.{$index}.image");
+                        $vFilename = 'variant-'.time().'-'.Str::random(8).'.'.$vFile->getClientOriginalExtension();
+                        $vPath = $vFile->storeAs('media', $vFilename, 'public');
+                        $varImgUrl = '/storage/'.$vPath;
+
+                        MediaAsset::create([
+                            'type' => 'image',
+                            'url' => $varImgUrl,
+                            'filename' => $vFilename,
+                            'mime_type' => $vFile->getClientMimeType(),
+                            'size_bytes' => $vFile->getSize(),
+                        ]);
+                    }
+
+                    $colorHex = $varData['color_hex'] ?? '#000000';
+                    $priceOverride = ! empty($varData['price_override']) ? (int) round(((float) $varData['price_override']) * 100) : null;
+                    $varStock = isset($varData['inventory']) && $varData['inventory'] !== '' ? (int) $varData['inventory'] : (int) $product->inventory;
+
+                    $varSlug = Str::slug($colorName);
+                    if (empty($varSlug)) {
+                        $varSlug = 'VAR-'.($index + 1);
+                    }
+                    $baseVarSku = strtoupper($product->sku.'-'.$varSlug);
+                    $varSku = $baseVarSku;
+                    $c = 1;
+                    while (ProductVariant::where('sku', $varSku)->exists()) {
+                        $varSku = $baseVarSku.'-'.$c++;
+                    }
+
+                    ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $varSku,
+                        'title' => $colorName,
+                        'attribute_name' => 'Color',
+                        'attribute_value' => $colorName,
+                        'price_override_minor' => $priceOverride,
+                        'inventory' => $varStock,
+                        'image_url' => $varImgUrl,
+                        'attributes_json' => [
+                            'color' => $colorName,
+                            'color_hex' => $colorHex,
+                            'image_url' => $varImgUrl,
+                        ],
+                        'status' => 'active',
                     ]);
                 }
-
-                $colorHex = $varData['color_hex'] ?? '#000000';
-                $priceOverride = ! empty($varData['price_override']) ? (int) round(((float) $varData['price_override']) * 100) : null;
-                $varStock = isset($varData['inventory']) && $varData['inventory'] !== '' ? (int) $varData['inventory'] : (int) $product->inventory;
-
-                $varSlug = Str::slug($colorName);
-                if (empty($varSlug)) {
-                    $varSlug = 'VAR-'.($index + 1);
-                }
-                $baseVarSku = strtoupper($product->sku.'-'.$varSlug);
-                $varSku = $baseVarSku;
-                $c = 1;
-                while (ProductVariant::where('sku', $varSku)->exists()) {
-                    $varSku = $baseVarSku.'-'.$c++;
-                }
-
-                ProductVariant::create([
-                    'product_id' => $product->id,
-                    'sku' => $varSku,
-                    'title' => $colorName,
-                    'attribute_name' => 'Color',
-                    'attribute_value' => $colorName,
-                    'price_override_minor' => $priceOverride,
-                    'inventory' => $varStock,
-                    'image_url' => $varImgUrl,
-                    'attributes_json' => [
-                        'color' => $colorName,
-                        'color_hex' => $colorHex,
-                        'image_url' => $varImgUrl,
-                    ],
-                    'status' => 'active',
-                ]);
             }
         }
 
@@ -307,6 +361,25 @@ class ProductController extends Controller
         $productAttributes['supplier_product_url'] = $request->input('supplier_product_url');
         if (empty($productAttributes['supplier_product_url'])) {
             unset($productAttributes['supplier_product_url']);
+        }
+
+        if ($request->filled('primary_color_name')) {
+            $pName = trim((string) $request->input('primary_color_name'));
+            $pHex = trim((string) $request->input('primary_color_hex', '#1A1A1A'));
+            $productAttributes['primary_color_name'] = $pName;
+            $productAttributes['primary_color_hex'] = $pHex;
+
+            $coverVariant = $product->variants()->where('attributes_json->is_cover_variant', true)->first();
+            if ($coverVariant) {
+                $vAttrs = $coverVariant->attributes_json ?? [];
+                $vAttrs['color'] = $pName;
+                $vAttrs['color_hex'] = $pHex;
+                $coverVariant->update([
+                    'title' => $pName,
+                    'attribute_value' => $pName,
+                    'attributes_json' => $vAttrs,
+                ]);
+            }
         }
 
         $collectionIds = $request->input('collection_ids', []);

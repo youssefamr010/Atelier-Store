@@ -360,6 +360,48 @@ function productDetailComponent() {
     class="bg-[#F5F5F0] min-h-screen py-5 sm:py-8 lg:py-20"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+
+        {{-- ── ADMIN DIRECT QUICK-EDIT BANNER ── --}}
+        @if(auth()->check() && auth()->user()->isAdmin())
+            <div class="mb-6 bg-neutral-900 border-2 border-amber-400 p-3.5 sm:p-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[6px_6px_0px_0px_rgba(251,191,36,1)] rounded-lg">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-400 text-black text-sm font-black shrink-0">⚡</span>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-black uppercase tracking-wider text-amber-300">Admin Mode Active</span>
+                            <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded font-mono text-gray-300">SKU: {{ $product->sku }}</span>
+                            <span class="text-[10px] font-mono font-bold uppercase {{ $product->status === 'active' ? 'text-emerald-400' : 'text-amber-400' }}">({{ $product->status }})</span>
+                        </div>
+                        <p class="text-[11px] text-gray-300 mt-0.5">
+                            {{ $isArProd ? 'أنت تتصفح هذا المنتج كمسؤول في المتجر. يمكنك التعديل الفوري بالضغط على الزر:' : 'You are viewing this product live as Admin. You can quickly edit this product directly:' }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a 
+                        href="{{ route('admin.products.edit', $product->id) }}" 
+                        class="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-black px-5 py-2.5 font-black uppercase text-xs tracking-wider border-2 border-black transition-all active:translate-y-0.5 shadow-sm rounded"
+                        title="Open product editor in Admin Panel"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                        <span>{{ $isArProd ? 'تعديل هذا المنتج ↗' : 'Edit This Product ↗' }}</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Floating Quick Edit Button (Always Accessible while scrolling) --}}
+            <div class="fixed bottom-20 right-5 sm:bottom-8 sm:right-8 z-50">
+                <a 
+                    href="{{ route('admin.products.edit', $product->id) }}" 
+                    class="flex items-center gap-2 bg-black text-amber-300 border-2 border-amber-400 px-4 py-3 rounded-full shadow-[4px_4px_0px_0px_rgba(251,191,36,1)] hover:bg-neutral-900 hover:scale-105 active:scale-95 transition-all text-xs font-black uppercase tracking-wider group"
+                    title="Quick Edit Product"
+                >
+                    <span class="text-sm group-hover:rotate-12 transition-transform">✏️</span>
+                    <span class="hidden sm:inline">{{ $isArProd ? 'تعديل المنتج' : 'Edit Product' }}</span>
+                </a>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
             <!-- Product Gallery Column -->

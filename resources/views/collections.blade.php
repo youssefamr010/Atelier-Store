@@ -294,6 +294,19 @@
                                     </span>
                                 </div>
                             @endif
+
+                            {{-- Admin Quick Edit Link --}}
+                            @if(auth()->check() && auth()->user()->isAdmin())
+                                <a
+                                    href="{{ route('admin.products.edit', $product->id) }}"
+                                    onclick="event.stopPropagation();"
+                                    class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/90 text-amber-300 border border-amber-400 flex items-center gap-1 text-[9px] font-black uppercase tracking-wider hover:bg-black hover:scale-105 transition-all shadow-md z-20"
+                                    title="Edit product in Admin Panel"
+                                >
+                                    <span>✏️</span>
+                                    <span class="hidden sm:inline">Edit</span>
+                                </a>
+                            @endif
                         </div>
 
                         {{-- Bottom Information Container --}}
