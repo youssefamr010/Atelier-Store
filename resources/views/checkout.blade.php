@@ -84,12 +84,22 @@
         <form action="{{ route('checkout.place') }}" method="POST" id="checkoutForm" @submit="submitting = true">
         @csrf
 
-        @if(!empty($cartItems['direct']['product_id']) || request()->filled('product_id'))
-            <input type="hidden" name="product_id" value="{{ $cartItems['direct']['product_id'] ?? request('product_id') }}">
-            @if(!empty($cartItems['direct']['variant_id']) || request()->filled('variant_id'))
-                <input type="hidden" name="variant_id" value="{{ $cartItems['direct']['variant_id'] ?? request('variant_id') }}">
+        @php
+            $directProdId = $cartItems['direct']['product_id'] ?? request('product_id');
+            $directVarId  = $cartItems['direct']['variant_id'] ?? request('variant_id');
+            $directQty    = $cartItems['direct']['qty'] ?? request('qty', 1);
+
+            $directProdId = (is_numeric($directProdId) && (int)$directProdId > 0) ? (int)$directProdId : null;
+            $directVarId  = (is_numeric($directVarId) && (int)$directVarId > 0) ? (int)$directVarId : null;
+            $directQty    = (is_numeric($directQty) && (int)$directQty > 0) ? (int)$directQty : 1;
+        @endphp
+
+        @if(!empty($directProdId))
+            <input type="hidden" name="product_id" value="{{ $directProdId }}">
+            @if(!empty($directVarId))
+                <input type="hidden" name="variant_id" value="{{ $directVarId }}">
             @endif
-            <input type="hidden" name="qty" value="{{ $cartItems['direct']['qty'] ?? request('qty', 1) }}">
+            <input type="hidden" name="qty" value="{{ $directQty }}">
         @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

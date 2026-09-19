@@ -37,9 +37,17 @@ class CartController extends Controller
         return view('cart', compact('cartItems', 'subtotal', 'settings'));
     }
 
-    // ── POST /cart/add ────────────────────────────────────────────────────────
     public function add(Request $request): RedirectResponse
     {
+        if ($request->has('variant_id')) {
+            $rawVar = $request->input('variant_id');
+            if (empty($rawVar) || !is_numeric($rawVar) || (int)$rawVar <= 0 || $rawVar === 'null' || $rawVar === 'undefined') {
+                $request->merge(['variant_id' => null]);
+            } else {
+                $request->merge(['variant_id' => (int)$rawVar]);
+            }
+        }
+
         $request->validate([
             'product_id' => 'required|integer|exists:products,id',
             'variant_id' => 'nullable|integer',

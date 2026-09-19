@@ -734,7 +734,7 @@ function productDetailComponent() {
                 <form method="POST" action="{{ route('cart.add') }}" class="prod-anim-actions space-y-4">
                     @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
-                    <input type="hidden" name="variant_id" :value="selectedVariantId">
+                    <input type="hidden" name="variant_id" :value="selectedVariantId && selectedVariantId !== 'null' && Number(selectedVariantId) > 0 ? selectedVariantId : ''">
 
                     <!-- Qty + Add to Cart row -->
                     <div class="flex items-stretch gap-3">
@@ -758,7 +758,7 @@ function productDetailComponent() {
                     </div>
 
                     <!-- Secondary CTA: Buy Now -->
-                    <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId ? '&variant_id=' + selectedVariantId : '') + (qty > 1 ? '&qty=' + qty : '')"
+                    <a :href="'{{ route('checkout') }}?product_id={{ $product->id }}' + (selectedVariantId && selectedVariantId !== 'null' && Number(selectedVariantId) > 0 ? '&variant_id=' + selectedVariantId : '') + (qty > 1 ? '&qty=' + qty : '')"
                        class="btn-buy-now"
                        id="product-buy-now-btn"
                     >

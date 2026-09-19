@@ -124,6 +124,24 @@ class WebCheckoutController extends Controller
     {
         $user = Auth::user();
 
+        // Sanitize incoming IDs to prevent 'must be an integer' validation errors
+        if ($request->has('variant_id')) {
+            $rawVar = $request->input('variant_id');
+            if (empty($rawVar) || !is_numeric($rawVar) || (int)$rawVar <= 0 || $rawVar === 'null' || $rawVar === 'undefined') {
+                $request->merge(['variant_id' => null]);
+            } else {
+                $request->merge(['variant_id' => (int)$rawVar]);
+            }
+        }
+        if ($request->has('product_id')) {
+            $rawProd = $request->input('product_id');
+            if (empty($rawProd) || !is_numeric($rawProd) || (int)$rawProd <= 0) {
+                $request->merge(['product_id' => null]);
+            } else {
+                $request->merge(['product_id' => (int)$rawProd]);
+            }
+        }
+
         $validated = $request->validate([
             'saved_address_id'        => 'nullable|integer|exists:addresses,id',
             'full_name'               => 'nullable|required_without:saved_address_id|string|max:150',
@@ -142,7 +160,7 @@ class WebCheckoutController extends Controller
             'delivery_instructions'   => 'nullable|string|max:500',
             'payment_method'          => 'required|in:cod,paymob,stripe',
             'product_id'              => 'nullable|integer|exists:products,id',
-            'variant_id'              => 'nullable|integer|exists:product_variants,id',
+            'variant_id'              => 'nullable|integer',
             'qty'                     => 'nullable|integer|min:1|max:20',
         ]);
 
