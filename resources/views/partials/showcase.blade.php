@@ -208,14 +208,10 @@
                     
                     $isBestseller = $isExplicitBestseller 
                         || ($product->id === $bestSellerId) 
-                        || $hasDiscount 
-                        || ($totalCount <= 4)
-                        || ($index < max(4, (int)($totalCount * 0.75)));
+                        || ($hasDiscount && $index % 3 === 0);
 
                     $isNew = $isExplicitNew 
-                        || ($totalCount <= 4)
-                        || ($index % 2 === 0)
-                        || ($product->created_at && $product->created_at->diffInDays() < 120);
+                        || ($product->created_at && $product->created_at->diffInDays() <= 14);
 
                     $productCollectionIds = $product->collections->pluck('id')->map(fn($id) => 'col-'.$id)->toArray();
                     $tagClasses = implode(' ', $productCollectionIds);
@@ -225,11 +221,11 @@
                 @endphp
 
                 <div
-                    x-show="matchesTab('{{ $tagClasses }}')"
+                    x-data="{ currentImg: '{{ addslashes($img) }}', tags: '{{ $tagClasses }}' }"
+                    x-show="$root.matchesTab(tags)"
                     x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100"
-                    x-data="{ currentImg: '{{ $img }}' }"
                     class="group bg-white rounded-2xl sm:rounded-3xl border border-black/10 overflow-hidden shadow-xs hover:shadow-lg hover:border-black/25 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative"
                 >
                     {{-- Card Media Frame (Pure White Seamless Canvas) --}}
@@ -526,13 +522,13 @@ function flagshipShowcase() {
 
         recalcVisible() {
             setTimeout(() => {
-                const cards = document.querySelectorAll('[x-show*="matchesTab"]');
+                const cards = document.querySelectorAll('[x-show]');
                 let count = 0;
                 cards.forEach(card => {
-                    if (window.getComputedStyle(card).display !== 'none') count++;
+                    if (card.hasAttribute('x-data') && card.getAttribute('x-data').includes('tags:') && window.getComputedStyle(card).display !== 'none') count++;
                 });
                 this.visibleCount = count;
-            }, 50);
+            }, 80);
         }
     };
 }

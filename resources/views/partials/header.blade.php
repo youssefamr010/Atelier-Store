@@ -113,9 +113,9 @@
                 <!-- Brand Logo + Wordmark -->
                 <a href="{{ route('home') }}" class="group flex items-center gap-2 focus:outline-none pl-1" title="{{ $settings['store_name'] ?? 'ATELIER' }}">
                     <img 
-                        src="{{ asset('favicon.png') }}?v=4" 
+                        src="{{ asset('apple-touch-icon.png') }}?v=5" 
                         alt="ATELIER Logo" 
-                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover transition-transform group-hover:scale-110 shadow-md border border-black/10"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover transition-transform group-hover:scale-110 shadow-md border border-black/10"
                         onerror="this.style.display='none'"
                     >
                     <div class="flex flex-col items-start">
